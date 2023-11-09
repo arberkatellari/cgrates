@@ -20,6 +20,7 @@ package services
 import (
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/agents"
@@ -48,7 +49,7 @@ func TestDNSAgentCoverage(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	dns, _ := agents.NewDNSAgent(cfg, &engine.FilterS{}, nil)
+	dns := agents.NewDNSAgent(cfg, &engine.FilterS{}, nil)
 	srv2 := DNSAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
@@ -57,8 +58,8 @@ func TestDNSAgentCoverage(t *testing.T) {
 		connMgr:     nil,
 		srvDep:      srvDep,
 		dns:         dns,
+		shdComplete: make(chan struct{}),
 	}
-
 	if !srv2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
@@ -70,7 +71,13 @@ func TestDNSAgentCoverage(t *testing.T) {
 	if shouldRun != false {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
 	}
-	srv2.Shutdown()
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		close(srv2.shdComplete)
+	}()
+	if err := srv2.Shutdown(); err != nil {
+		t.Error(err)
+	}
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}

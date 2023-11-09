@@ -115,6 +115,12 @@ func (srvMngr *ServiceManager) V1StopService(ctx *context.Context, args ArgStart
 		srvMngr.cfg.SchedulerCfg().Enabled = false
 		srvMngr.Unlock()
 		srvMngr.cfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
+	case utils.MetaDNS:
+		// stop the service using the config
+		srvMngr.Lock()
+		srvMngr.cfg.DNSAgentCfg().Enabled = false
+		srvMngr.Unlock()
+		srvMngr.cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
 	default:
 		err = errors.New(utils.UnsupportedServiceIDCaps)
 	}

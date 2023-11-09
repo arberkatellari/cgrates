@@ -49,7 +49,8 @@ type DNSAgent struct {
 	filterSChan chan *engine.FilterS
 	shdChan     *utils.SyncedChan
 
-	stopChan chan struct{}
+	stopChan    chan struct{} // used as signal to start shutting down all DNS listeners
+	shdComplete chan struct{} // used as signal to indicate all shutting down is completed
 
 	dns     *agents.DNSAgent
 	connMgr *engine.ConnManager
@@ -61,20 +62,16 @@ func (dns *DNSAgent) Start() (err error) {
 	if dns.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-
 	filterS := <-dns.filterSChan
 	dns.filterSChan <- filterS
-
 	dns.Lock()
 	defer dns.Unlock()
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent, error: <%s>", utils.DNSAgent, err.Error()))
-		dns.dns = nil
-		return
-	}
+	dns.dns = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
+
 	dns.stopChan = make(chan struct{})
-	go dns.listenAndServe(dns.stopChan)
+	dns.shdComplete = make(chan struct{})
+	go dns.listenAndServe(dns.stopChan, dns.shdComplete)
+
 	return
 }
 
@@ -86,30 +83,25 @@ func (dns *DNSAgent) Reload() (err error) {
 	dns.Lock()
 	defer dns.Unlock()
 
-	if dns.dns != nil {
-		close(dns.stopChan)
+	if err := dns.Shutdown(); err != nil {
+		return err
 	}
 
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
-		dns.dns = nil
-		return
-	}
+	dns.dns = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
 
-	dns.dns.Lock()
-	defer dns.dns.Unlock()
 	dns.stopChan = make(chan struct{})
-	go dns.listenAndServe(dns.stopChan)
+	dns.shdComplete = make(chan struct{})
+	go dns.listenAndServe(dns.stopChan, dns.shdComplete)
 	return
 }
 
-func (dns *DNSAgent) listenAndServe(stopChan chan struct{}) (err error) {
+func (dns *DNSAgent) listenAndServe(stopChan chan struct{}, shdComplete chan struct{}) (err error) {
 	dns.dns.RLock()
 	defer dns.dns.RUnlock()
-	if err = dns.dns.ListenAndServe(stopChan); err != nil {
+	if err = dns.dns.ListenAndServe(stopChan, shdComplete); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		dns.shdChan.CloseOnce() // stop the engine here
+		// dns.dns = nil // Add after services revamp
 	}
 	return
 }
@@ -119,7 +111,11 @@ func (dns *DNSAgent) Shutdown() (err error) {
 	if dns.dns == nil {
 		return
 	}
-	close(dns.stopChan)
+	if dns.dns.LASisON { // Has to stay to trigger srvMngr.shdWg.Done() in case of error at dns.dns.ListenAndServe
+		close(dns.stopChan) // start shutting all dns servers at the same time
+		<-dns.shdComplete   // wait for all listeners to be shut
+	}
+
 	dns.dns.Lock()
 	defer dns.dns.Unlock()
 	dns.dns = nil
