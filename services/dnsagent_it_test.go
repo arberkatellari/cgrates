@@ -52,7 +52,7 @@ func TestDNSAgentStartReloadShut(t *testing.T) {
 		},
 		{
 			Network: "udp",
-			Address: ":2088",
+			Address: ":2055",
 		},
 	}
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
