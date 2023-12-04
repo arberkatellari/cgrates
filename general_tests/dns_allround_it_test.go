@@ -68,17 +68,17 @@ func TestDNSAllRound1(t *testing.T) {
 	var dnsClnt *dnsConns
 	t.Run("CheckListenersPorts", func(t *testing.T) {
 
-		openUDP := checkPortOpen(2053, "udp")
+		openUDP := checkDNSPortOpen(2053, "udp")
 		if !openUDP {
 			t.Errorf("Port %d is not open with UDP listener", 2053)
 		}
 
-		openTCP := checkPortOpen(2053, "tcp")
+		openTCP := checkDNSPortOpen(2053, "tcp")
 		if !openTCP {
 			t.Errorf("Port %d is not open with TCP listener", 2053)
 		}
 
-		openTLS := checkPortOpen(2054, "tcp-tls")
+		openTLS := checkDNSPortOpen(2054, "tcp-tls")
 		if !openTLS {
 			t.Errorf("Port %d is not open with TCP-TLS listener", 2054)
 		}
@@ -207,17 +207,17 @@ func TestDNSAllRound1(t *testing.T) {
 		}
 	})
 	t.Run("CheckListenersPortsOff", func(t *testing.T) {
-		openUDP := checkPortOpen(2053, "udp")
+		openUDP := checkDNSPortOpen(2053, "udp")
 		if openUDP {
 			t.Errorf("Port %d is open with UDP listener when it should'nt be", 2053)
 		}
 
-		openTCP := checkPortOpen(2053, "tcp")
+		openTCP := checkDNSPortOpen(2053, "tcp")
 		if openTCP {
 			t.Errorf("Port %d is open with TCP listener when it should'nt be", 2053)
 		}
 
-		openTLS := checkPortOpen(2054, "tcp-tls")
+		openTLS := checkDNSPortOpen(2054, "tcp-tls")
 		if openTLS {
 			t.Errorf("Port %d is open with TCP-TLS listener when it should'nt be", 2054)
 		}
@@ -311,17 +311,17 @@ func TestDNSAllRound1(t *testing.T) {
 
 	t.Run("CheckListenersPorts", func(t *testing.T) {
 
-		openUDP := checkPortOpen(2053, "udp")
+		openUDP := checkDNSPortOpen(2053, "udp")
 		if !openUDP {
 			t.Errorf("Port %d is not open with UDP listener", 2053)
 		}
 
-		openTCP := checkPortOpen(2053, "tcp")
+		openTCP := checkDNSPortOpen(2053, "tcp")
 		if !openTCP {
 			t.Errorf("Port %d is not open with TCP listener", 2053)
 		}
 
-		openTLS := checkPortOpen(2054, "tcp-tls")
+		openTLS := checkDNSPortOpen(2054, "tcp-tls")
 		if !openTLS {
 			t.Errorf("Port %d is not open with TCP-TLS listener", 2054)
 		}
@@ -345,19 +345,19 @@ func TestDNSAllRound1(t *testing.T) {
 	t.Run("CheckListenersPortsOff", func(t *testing.T) {
 
 		for _, port := range []int{2055, 2053} {
-			openUDP := checkPortOpen(port, "udp")
+			openUDP := checkDNSPortOpen(port, "udp")
 			if openUDP {
 				t.Errorf("Port %d is open with UDP listener when it should'nt be", port)
 			}
 		}
 		for _, port := range []int{2055, 2053} {
-			openTCP := checkPortOpen(port, "tcp")
+			openTCP := checkDNSPortOpen(port, "tcp")
 			if openTCP {
 				t.Errorf("Port %d is open with TCP listener when it should'nt be", port)
 			}
 		}
 		for _, port := range []int{2056, 2054} {
-			openTLS := checkPortOpen(port, "tcp-tls")
+			openTLS := checkDNSPortOpen(port, "tcp-tls")
 			if openTLS {
 				t.Errorf("Port %d is open with TCP-TLS listener when it should'nt be", port)
 			}
@@ -379,12 +379,12 @@ func TestDNSAllRound2(t *testing.T) {
 	}
 	defer shutdown()
 	t.Run("CheckListenersPorts", func(t *testing.T) {
-		openUDP := checkPortOpen(2053, "udp")
+		openUDP := checkDNSPortOpen(2053, "udp")
 		if !openUDP {
 			t.Errorf("Port %d is not open with UDP listener", 2053)
 		}
 
-		openTCP := checkPortOpen(2054, "tcp")
+		openTCP := checkDNSPortOpen(2054, "tcp")
 		if !openTCP {
 			t.Errorf("Port %d is not open with TCP listener", 2054)
 		}
@@ -483,18 +483,18 @@ func TestDNSAllRound2(t *testing.T) {
 	t.Run("CheckListenersPortsOff", func(t *testing.T) {
 
 		for _, port := range []int{2055, 2053} {
-			openUDP := checkPortOpen(port, "udp")
+			openUDP := checkDNSPortOpen(port, "udp")
 			if openUDP {
 				t.Errorf("Port %d is open with UDP listener when it should'nt be", port)
 			}
 		}
 		for _, port := range []int{2055, 2054} {
-			openTCP := checkPortOpen(port, "tcp")
+			openTCP := checkDNSPortOpen(port, "tcp")
 			if openTCP {
 				t.Errorf("Port %d is open with TCP listener when it should'nt be", port)
 			}
 		}
-		openTLS := checkPortOpen(2056, "tcp-tls")
+		openTLS := checkDNSPortOpen(2056, "tcp-tls")
 		if openTLS {
 			t.Errorf("Port %d is open with TCP-TLS listener when it should'nt be", 2056)
 		}
@@ -503,7 +503,7 @@ func TestDNSAllRound2(t *testing.T) {
 
 }
 
-func checkPortOpen(port int, protocol string) bool {
+func checkDNSPortOpen(port int, protocol string) bool {
 	client := dns.Client{Net: protocol, TLSConfig: &tls.Config{InsecureSkipVerify: true}}
 	msg := new(dns.Msg)
 	msg.SetQuestion("example.com.", dns.TypeA)

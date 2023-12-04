@@ -102,6 +102,12 @@ func (srvMngr *ServiceManager) V1StartService(ctx *context.Context, args ArgStar
 		srvMngr.cfg.DNSAgentCfg().Enabled = true
 		srvMngr.Unlock()
 		srvMngr.cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
+	case utils.MetaRadius:
+		// stop the service using the config
+		srvMngr.Lock()
+		srvMngr.cfg.RadiusAgentCfg().Enabled = true
+		srvMngr.Unlock()
+		srvMngr.cfg.GetReloadChan(config.RA_JSN) <- struct{}{}
 	default:
 		err = errors.New(utils.UnsupportedServiceIDCaps)
 	}
@@ -127,6 +133,12 @@ func (srvMngr *ServiceManager) V1StopService(ctx *context.Context, args ArgStart
 		srvMngr.cfg.DNSAgentCfg().Enabled = false
 		srvMngr.Unlock()
 		srvMngr.cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
+	case utils.MetaRadius:
+		// stop the service using the config
+		srvMngr.Lock()
+		srvMngr.cfg.RadiusAgentCfg().Enabled = false
+		srvMngr.Unlock()
+		srvMngr.cfg.GetReloadChan(config.RA_JSN) <- struct{}{}
 	default:
 		err = errors.New(utils.UnsupportedServiceIDCaps)
 	}

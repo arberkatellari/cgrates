@@ -394,6 +394,7 @@ const (
 	SchedulerNotRunningCaps  = "SCHEDULER_NOT_RUNNING"
 	MetaScheduler            = "*scheduler"
 	MetaDNS                  = "*dns"
+	MetaRadius               = "*radius"
 	MetaSessionsCosts        = "*sessions_costs"
 	MetaRALs                 = "*rals"
 	MetaReplicator           = "*replicator"
