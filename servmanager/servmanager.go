@@ -320,7 +320,7 @@ func (srvMngr *ServiceManager) ShutdownServices() {
 		if srv.IsRunning() {
 			go func(srv Service) {
 				if err := srv.Shutdown(); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<%s> Failed to shutdown subsystem <%s> because: %s",
+					utils.Logger.Err(fmt.Sprintf("<%s> Failed to cleanly shutdown subsystem <%s>, error: <%s>",
 						utils.ServiceManager, srv.ServiceName(), err))
 				}
 				srvMngr.shdWg.Done()

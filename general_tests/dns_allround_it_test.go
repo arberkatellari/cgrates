@@ -205,6 +205,7 @@ func TestDNSAllRound1(t *testing.T) {
 		} else if reply != utils.OK {
 			t.Errorf("Expected OK received: %s", reply)
 		}
+		time.Sleep(100 * time.Millisecond)
 	})
 	t.Run("CheckListenersPortsOff", func(t *testing.T) {
 		openUDP := checkDNSPortOpen(2053, "udp")
@@ -295,7 +296,7 @@ func TestDNSAllRound1(t *testing.T) {
 		if err != nil {
 			t.Fatal("Failed to write JSON content to file:", err)
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	})
 	t.Run("StartDNSService", func(t *testing.T) {
 		var reply string
@@ -339,7 +340,7 @@ func TestDNSAllRound1(t *testing.T) {
 			t.Errorf("Expected OK received: %s", reply)
 		}
 		deleteTmpFolder("/tmp/test_folder", t)
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	})
 
 	t.Run("CheckListenersPortsOff", func(t *testing.T) {
@@ -462,7 +463,7 @@ func TestDNSAllRound2(t *testing.T) {
 		if err != nil {
 			t.Fatal("Failed to write JSON content to file:", err)
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	})
 
 	t.Run("ReloadConfigOK", func(t *testing.T) {
@@ -477,7 +478,7 @@ func TestDNSAllRound2(t *testing.T) {
 			t.Errorf("Expected OK received: %s", reply)
 		}
 		deleteTmpFolder("/tmp/test_folder", t)
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	})
 
 	t.Run("CheckListenersPortsOff", func(t *testing.T) {

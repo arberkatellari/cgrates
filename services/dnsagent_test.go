@@ -20,7 +20,6 @@ package services
 import (
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/agents"
@@ -58,7 +57,6 @@ func TestDNSAgentCoverage(t *testing.T) {
 		connMgr:     nil,
 		srvDep:      srvDep,
 		dns:         dns,
-		shdComplete: make(chan struct{}),
 	}
 	if !srv2.IsRunning() {
 		t.Errorf("Expected service to be running")
@@ -71,10 +69,10 @@ func TestDNSAgentCoverage(t *testing.T) {
 	if shouldRun != false {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
 	}
-	go func() {
-		time.Sleep(50 * time.Millisecond)
-		close(srv2.shdComplete)
-	}()
+	// go func() {
+	// 	time.Sleep(50 * time.Millisecond)
+	// 	close(srv2.shdComplete)
+	// }()
 	if err := srv2.Shutdown(); err != nil {
 		t.Error(err)
 	}
@@ -82,3 +80,99 @@ func TestDNSAgentCoverage(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 }
+
+// func TestDNSAgentShutdownErr(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.SessionSCfg().Enabled = true
+// 	cfg.SessionSCfg().ListenBijson = ""
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	shdChan := utils.NewSyncedChan()
+// 	chS := engine.NewCacheS(cfg, nil, nil)
+// 	cacheSrv, err := engine.NewService(chS)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	cacheSChan := make(chan birpc.ClientConnector, 1)
+// 	cacheSChan <- cacheSrv
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// 	dns := agents.NewDNSAgent(cfg, &engine.FilterS{}, nil)
+// 	srv2 := &DNSAgent{
+// 		cfg:         cfg,
+// 		filterSChan: filterSChan,
+// 		shdChan:     shdChan,
+// 		stopChan:    make(chan struct{}),
+// 		shtdErrChan: make(chan error),
+// 		connMgr:     nil,
+// 		srvDep:      srvDep,
+// 		dns:         dns,
+// 		shdComplete: make(chan struct{}),
+// 	}
+// 	if !srv2.IsRunning() {
+// 		t.Errorf("Expected service to be running")
+// 	}
+// 	exp := fmt.Errorf("Shutdown Err")
+// 	go func() {
+// 		srv2.shtdErrChan <- exp
+// 	}()
+// 	srv2.lasHasErr.Store(1)
+// 	time.Sleep(50 * time.Millisecond)
+// 	if err := srv2.Shutdown(); err == nil || err != exp {
+// 		t.Error(err)
+// 	}
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// }
+
+// func TestDNSAgentReloadErr(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.SessionSCfg().Enabled = true
+// 	cfg.SessionSCfg().ListenBijson = ""
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	shdChan := utils.NewSyncedChan()
+// 	chS := engine.NewCacheS(cfg, nil, nil)
+// 	cacheSrv, err := engine.NewService(chS)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	cacheSChan := make(chan birpc.ClientConnector, 1)
+// 	cacheSChan <- cacheSrv
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// 	dns := agents.NewDNSAgent(cfg, &engine.FilterS{}, nil)
+// 	srv2 := &DNSAgent{
+// 		cfg:         cfg,
+// 		filterSChan: filterSChan,
+// 		shdChan:     shdChan,
+// 		stopChan:    make(chan struct{}),
+// 		shtdErrChan: make(chan error),
+// 		connMgr:     nil,
+// 		srvDep:      srvDep,
+// 		dns:         dns,
+// 		shdComplete: make(chan struct{}),
+// 	}
+// 	if !srv2.IsRunning() {
+// 		t.Errorf("Expected service to be running")
+// 	}
+// 	exp := fmt.Errorf("Shutdown Err")
+// 	go func() {
+// 		srv2.shtdErrChan <- exp
+// 	}()
+// 	srv2.lasHasErr.Store(1)
+// 	time.Sleep(50 * time.Millisecond)
+// 	if err := srv2.Reload(); err == nil || err != exp {
+// 		t.Error(err)
+// 	}
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// }

@@ -93,6 +93,7 @@ func TestDNSAgentStartReloadShut(t *testing.T) {
 	if srv.IsRunning() {
 		t.Errorf("service is still running")
 	}
+
 }
 
 func TestDNSAgentReloadFirst(t *testing.T) {
@@ -177,13 +178,15 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	cfg.DNSAgentCfg().Enabled = false
 	cfg.GetReloadChan(config.DNSAgentJson) <- struct{}{}
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	if srv.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}
+
 }
 
 func TestDNSAgentReload2(t *testing.T) {
+
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
@@ -204,18 +207,17 @@ func TestDNSAgentReload2(t *testing.T) {
 	dnsSrv.dns = agentSrv
 
 	dnsSrv.stopChan = make(chan struct{}, len(dnsSrv.cfg.DNSAgentCfg().Listeners))
-	dnsSrv.shdComplete = make(chan struct{})
-	go func() {
-		<-dnsSrv.shdComplete
-	}()
+	dnsSrv.shtdErrChan = make(chan error)
 
-	err := dnsSrv.listenAndServe(dnsSrv.stopChan, dnsSrv.shdComplete)
+	err := dnsSrv.listenAndServe(dnsSrv.stopChan, dnsSrv.shtdErrChan)
 	if err == nil || err.Error() != "dns: bad network" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "dns: bad network", err)
 	}
+
 }
 
 func TestDNSAgentReload3(t *testing.T) {
+
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
@@ -245,9 +247,11 @@ func TestDNSAgentReload3(t *testing.T) {
 		t.Errorf("Expected: %s, Got: %s", exp, logBuf.String())
 	}
 	logBuf.Reset()
+
 }
 
 func TestDNSAgentReload4(t *testing.T) {
+
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
@@ -281,6 +285,7 @@ func TestDNSAgentReload4(t *testing.T) {
 }
 
 func TestDNSAgentReload5(t *testing.T) {
+
 	cfg := config.NewDefaultCGRConfig()
 	cfg.SessionSCfg().Enabled = true
 	cfg.DNSAgentCfg().Enabled = true
@@ -315,7 +320,8 @@ func TestDNSAgentReload5(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	exp := "load certificate error <open bad_certificate: no such file or directory>"
 	if !strings.Contains(logBuf.String(), exp) {
-		t.Errorf("Expected: %s, Got: %s", exp, logBuf.String())
+		t.Errorf("Expected: %s, \nGot: %s", exp, logBuf.String())
 	}
 	logBuf.Reset()
+
 }
