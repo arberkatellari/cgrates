@@ -31,6 +31,7 @@ var (
 	ErrDSPHostNotFound                  = errors.New("DSP_HOST_NOT_FOUND")
 	ErrDSPProfileNotFound               = errors.New("DSP_PROFILE_NOT_FOUND")
 	ErrTimedOut                         = errors.New("TIMED_OUT")
+	ErrConnectionPoolTimeout            = errors.New("ConnectionPool timeout")
 	ErrServerError                      = errors.New("SERVER_ERROR")
 	ErrMaxRecursionDepth                = errors.New("MAX_RECURSION_DEPTH")
 	ErrMandatoryIeMissing               = errors.New("MANDATORY_IE_MISSING")

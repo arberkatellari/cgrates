@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -101,22 +102,20 @@ func TestCMgetConnNotInternalRPC(t *testing.T) {
 	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
 	cfg.RPCConns()[connID].Conns = []*config.RemoteHost{
 		{
-			ID:      connID,
-			Address: utils.MetaInternal,
+			ID:           connID,
+			Address:      "127.0.0.1:2012",
+			ReplyTimeout: 2 * time.Second,
+			ConnPoolCap:  50,
 		},
 	}
 
 	cc := make(chan birpc.ClientConnector, 1)
 
-	cM := &ConnManager{
-		cfg: cfg,
-		rpcInternal: map[string]chan birpc.ClientConnector{
-			"testString": cc,
-		},
-		connCache: ltcache.NewCache(-1, 0, true, nil),
+	rpcInternal := map[string]chan birpc.ClientConnector{
+		"testString": cc,
 	}
 
-	cM.connCache.Set(connID, nil, nil)
+	cM := NewConnManager(cfg, rpcInternal)
 
 	exp, err := NewRPCPool(context.Background(), "*first",
 		cfg.TLSCfg().ClientKey,

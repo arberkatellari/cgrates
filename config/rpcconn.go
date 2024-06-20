@@ -127,6 +127,7 @@ type RemoteHost struct {
 	MaxReconnectInterval time.Duration
 	ConnectTimeout       time.Duration
 	ReplyTimeout         time.Duration
+	ConnPoolCap          int
 	TLS                  bool
 	ClientKey            string
 	ClientCertificate    string
@@ -177,10 +178,30 @@ func (rh *RemoteHost) loadFromJSONCfg(jsnCfg *RemoteHostJson) (err error) {
 			return err
 		}
 	}
-	if jsnCfg.Reply_timeout != nil {
+	if jsnCfg.Address == utils.StringPointer(utils.MetaInternal) ||
+		jsnCfg.Address == utils.StringPointer(rpcclient.BiRPCInternal) ||
+		jsnCfg.Address == nil {
+		if jsnCfg.Reply_timeout != nil {
+			if rh.ReplyTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.Reply_timeout); err != nil {
+				return err
+			}
+		}
+		if jsnCfg.Conn_Pool_cap != nil {
+			rh.ConnPoolCap = *jsnCfg.Conn_Pool_cap
+		}
+		return
+	}
+	if jsnCfg.Reply_timeout != nil && jsnCfg.Reply_timeout != utils.StringPointer("0s") {
 		if rh.ReplyTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.Reply_timeout); err != nil {
 			return err
 		}
+	} else {
+		rh.ReplyTimeout = 2 * time.Second
+	}
+	if jsnCfg.Conn_Pool_cap != nil && jsnCfg.Conn_Pool_cap != utils.IntPointer(0) {
+		rh.ConnPoolCap = *jsnCfg.Conn_Pool_cap
+	} else {
+		rh.ConnPoolCap = 50
 	}
 	return
 }
@@ -221,6 +242,9 @@ func (rh *RemoteHost) AsMapInterface() (mp map[string]any) {
 	if rh.ReplyTimeout != 0 {
 		mp[utils.ReplyTimeoutCfg] = rh.ReplyTimeout
 	}
+	if rh.ConnPoolCap != 0 {
+		mp[utils.ConnPoolCapCfg] = rh.ConnPoolCap
+	}
 	return
 }
 
@@ -235,6 +259,7 @@ func (rh RemoteHost) Clone() (cln *RemoteHost) {
 		MaxReconnectInterval: rh.MaxReconnectInterval,
 		ConnectTimeout:       rh.ConnectTimeout,
 		ReplyTimeout:         rh.ReplyTimeout,
+		ConnPoolCap:          rh.ConnPoolCap,
 		TLS:                  rh.TLS,
 		ClientKey:            rh.ClientKey,
 		ClientCertificate:    rh.ClientCertificate,
@@ -260,6 +285,7 @@ func UpdateRPCCons(rpcConns RPCConns, newHosts map[string]*RemoteHost) (connIDs 
 			rh.MaxReconnectInterval = newHost.MaxReconnectInterval
 			rh.ConnectTimeout = newHost.ConnectTimeout
 			rh.ReplyTimeout = newHost.ReplyTimeout
+			rh.ConnPoolCap = newHost.ConnPoolCap
 			rh.TLS = newHost.TLS
 			rh.ClientKey = newHost.ClientKey
 			rh.ClientCertificate = newHost.ClientCertificate
@@ -286,6 +312,7 @@ func RemoveRPCCons(rpcConns RPCConns, hosts utils.StringSet) (connIDs utils.Stri
 			rh.MaxReconnectInterval = 0
 			rh.ConnectTimeout = 0
 			rh.ReplyTimeout = 0
+			rh.ConnPoolCap = 0
 			rh.TLS = false
 			rh.ClientKey = ""
 			rh.ClientCertificate = ""

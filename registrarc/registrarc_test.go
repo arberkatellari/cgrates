@@ -40,9 +40,11 @@ func TestDispatcherHostsService(t *testing.T) {
 	cfg.RPCConns()["conn1"] = &config.RPCConn{
 		Strategy: rpcclient.PoolFirst,
 		Conns: []*config.RemoteHost{{
-			Address:   ts.URL,
-			TLS:       false,
-			Transport: rpcclient.HTTPjson,
+			Address:      ts.URL,
+			TLS:          false,
+			Transport:    rpcclient.HTTPjson,
+			ReplyTimeout: 2 * time.Second,
+			ConnPoolCap:  50,
 		}},
 	}
 	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
@@ -166,9 +168,11 @@ func TestRegisterRPCHosts(t *testing.T) {
 		PoolSize: 1,
 		Conns: []*config.RemoteHost{
 			{
-				ID:        "errCon1",
-				Address:   "127.0.0.1:9999",
-				Transport: "*json",
+				ID:           "errCon1",
+				Address:      "127.0.0.1:9999",
+				Transport:    "*json",
+				ReplyTimeout: 2 * time.Second,
+				ConnPoolCap:  50,
 			},
 		},
 	}
@@ -178,11 +182,11 @@ func TestRegisterRPCHosts(t *testing.T) {
 	}
 	registCmp := &RegistrarCService{
 		cfg:     cfg,
-		connMgr: engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{}),
+		connMgr: regist.connMgr,
 	}
 	regist.registerRPCHosts()
 	if !reflect.DeepEqual(regist, registCmp) {
-		t.Errorf("Expected: %+v ,received: %+v", registCmp, regist)
+		t.Errorf("Expected: %+v ,received: %+v", registCmp.connMgr, regist.connMgr)
 	}
 }
 

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -34,13 +35,22 @@ import (
 // NewConnManager returns the Connection Manager
 func NewConnManager(cfg *config.CGRConfig, rpcInternal map[string]chan birpc.ClientConnector) (cM *ConnManager) {
 	cM = &ConnManager{
-		cfg:         cfg,
-		rpcInternal: rpcInternal,
-		connCache:   ltcache.NewCache(-1, 0, true, nil),
-		connLks:     make(map[string]*sync.Mutex),
+		cfg:               cfg,
+		rpcInternal:       rpcInternal,
+		connCache:         ltcache.NewCache(-1, 0, true, nil),
+		connLks:           make(map[string]*sync.Mutex),
+		localConnsCreated: make(map[string]chan struct{}),
+		localConnsPool:    make(map[string]chan birpc.ClientConnector),
 	}
-	for connID := range cfg.RPCConns() {
+	for connID, connCfg := range cfg.RPCConns() {
 		cM.connLks[connID] = new(sync.Mutex)
+		for _, remHost := range connCfg.Conns {
+			cM.localConnsCreated[connID] = make(chan struct{}, remHost.ConnPoolCap)             // unfinished, take capacity from configs
+			cM.localConnsPool[connID] = make(chan context.ClientConnector, remHost.ConnPoolCap) // unfinished, take capacity from configs
+			for i := 0; i < remHost.ConnPoolCap; i++ {                                          // unfinished, take capacity from configs
+				cM.localConnsCreated[connID] <- struct{}{} // fill with connections allowed, will remove 1 item from channel per new connection created
+			}
+		}
 	}
 	SetConnManager(cM)
 	return
@@ -48,10 +58,12 @@ func NewConnManager(cfg *config.CGRConfig, rpcInternal map[string]chan birpc.Cli
 
 // ConnManager handle the RPC connections
 type ConnManager struct {
-	cfg         *config.CGRConfig
-	rpcInternal map[string]chan birpc.ClientConnector
-	connCache   *ltcache.Cache
-	connLks     map[string]*sync.Mutex // control connection initialization and caching
+	cfg               *config.CGRConfig
+	rpcInternal       map[string]chan birpc.ClientConnector
+	connCache         *ltcache.Cache
+	connLks           map[string]*sync.Mutex                // control connection initialization and caching
+	localConnsCreated map[string]chan struct{}              // take out a struct from the channel each time a new conn is created until capacity of channel is reached
+	localConnsPool    map[string]chan birpc.ClientConnector // Keep here reference towards the list of opened connections
 }
 
 // lkConn will lock a connection if preconfigured
@@ -71,7 +83,7 @@ func (cM *ConnManager) unlkConn(connID string) {
 // getConn is used to retrieve a connection from cache
 // in case this doesn't exist create it and cache it
 func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.ClientConnector, err error) {
-	//try to get the connection from cache
+	//try to get the connection from cache (localhost connections not cached)
 	if x, ok := Cache.Get(utils.CacheRPCConnections, connID); ok {
 		if x == nil {
 			return nil, utils.ErrNotFound
@@ -94,6 +106,27 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 				intChan = IntRPC.GetInternalChanel()
 				break
 			}
+		}
+	}
+	if !strings.Contains(connID, utils.Internal) {
+		if len(cM.localConnsPool[connID]) != 0 { // use connection if created already and ready for use
+			conn = <-cM.localConnsPool[connID]
+			return
+		}
+		tm := time.NewTimer(connCfg.Conns[0].ReplyTimeout) // unfinished, deadline time from somewhere else
+		select {                                           // No connection available in the pool, wait for first one showing up
+		case conn = <-cM.localConnsPool[connID]:
+			tm.Stop()
+			return
+		case <-cM.localConnsCreated[connID]: // create new connection if allowed
+			tm.Stop()
+			if conn, err = cM.getConnWithConfig(ctx, connID, connCfg, intChan); err != nil {
+				cM.localConnsCreated[connID] <- struct{}{} // bring back the removed connection since a new connection wasnt created
+				return
+			}
+			return
+		case <-tm.C:
+			return nil, utils.ErrConnectionPoolTimeout
 		}
 	}
 	if conn, err = cM.getConnWithConfig(ctx, connID, connCfg, intChan); err != nil {
@@ -182,6 +215,11 @@ func (cM *ConnManager) Call(ctx *context.Context, connIDs []string, method strin
 		cM.unlkConn(connID)
 		if err != nil {
 			continue
+		}
+		if !strings.Contains(connID, utils.Internal) {
+			defer func() {
+				cM.localConnsPool[connID] <- conn // give the connection back to the pool to be used
+			}()
 		}
 		if err = conn.Call(ctx, method, arg, reply); !rpcclient.IsNetworkError(err) {
 			return

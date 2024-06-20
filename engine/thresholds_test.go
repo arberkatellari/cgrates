@@ -968,7 +968,11 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{
+		{
+			ReplyTimeout: 2 * time.Second,
+			ConnPoolCap:  50,
+		}}}
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
 	config.SetCgrConfig(cfg)
@@ -1684,11 +1688,15 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
 	cfg.ThresholdSCfg().StoreInterval = 1
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
-	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{
+		{
+			ReplyTimeout: 2 * time.Second,
+			ConnPoolCap:  50,
+		}}}
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
 	cfg.DataDbCfg().RmtConns = []string{"test"}
 	cfg.DataDbCfg().Items[utils.CacheThresholds].Remote = true
 	config.SetCgrConfig(cfg)
@@ -2332,7 +2340,11 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
-	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{
+		{
+			ReplyTimeout: 2 * time.Second,
+			ConnPoolCap:  50,
+		}}}
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)

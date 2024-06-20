@@ -77,6 +77,7 @@ const CGRATES_CFG_JSON = `
 				//"max_reconnect_interval": ""
 				//"connect_timeout":"1s",
 				//"reply_timeout":"2s",
+				//"conn_pool_cap":50,
 				//"tls":false,
 				//"client_key":"",
 				//"client_certificate":"",

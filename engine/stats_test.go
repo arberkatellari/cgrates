@@ -3120,7 +3120,7 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheStatQueues].Replicate = true
-	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{ReplyTimeout: 2 * time.Second, ConnPoolCap: 50}}}
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)

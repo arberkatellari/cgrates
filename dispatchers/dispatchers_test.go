@@ -223,10 +223,12 @@ func TestDispatcherAuthorizeError(t *testing.T) {
 		PoolSize: 0,
 		Conns: []*config.RemoteHost{
 			{
-				ID:        "",
-				Address:   "error",
-				Transport: "",
-				TLS:       false,
+				ID:           "",
+				Address:      "error",
+				Transport:    "",
+				TLS:          false,
+				ReplyTimeout: 2 * time.Second,
+				ConnPoolCap:  50,
 			},
 		},
 	}
@@ -247,10 +249,12 @@ func TestDispatcherAuthorizeError2(t *testing.T) {
 		PoolSize: 0,
 		Conns: []*config.RemoteHost{
 			{
-				ID:        "",
-				Address:   "error",
-				Transport: "",
-				TLS:       false,
+				ID:           "",
+				Address:      "error",
+				Transport:    "",
+				TLS:          false,
+				ReplyTimeout: 2 * time.Second,
+				ConnPoolCap:  50,
 			},
 		},
 	}
@@ -294,26 +298,25 @@ func TestDispatcherServiceAuthorizeEventError2(t *testing.T) {
 	newCache := engine.NewCacheS(cfg, dm, nil)
 	engine.Cache = newCache
 	fltr := &engine.FilterS{}
-	connMgr := &engine.ConnManager{}
-	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	cfg.DispatcherSCfg().AttributeSConns = []string{"connID"}
+	cfg.RPCConns()["connID"] = &config.RPCConn{
+		Conns: []*config.RemoteHost{
+			{
+				ID:        "testID",
+				Address:   "",
+				Transport: "",
+				TLS:       false,
+			},
+		},
+	}
+	connMgr := engine.NewConnManager(cfg, nil)
+	dsp := NewDispatcherService(dm, cfg, fltr, connMgr)
 	ev := &utils.CGREvent{
 		APIOpts: make(map[string]any),
 	}
 	reply := &engine.AttrSProcessEventReply{}
-	value := &engine.DispatcherHost{
-		Tenant: "testTenant",
-		RemoteHost: &config.RemoteHost{
-			ID:        "testID",
-			Address:   "",
-			Transport: "",
-			TLS:       false,
-		},
-	}
-	engine.Cache.SetWithoutReplicate(utils.CacheRPCConnections, "connID",
-		value, nil, true, utils.NonTransactional)
 	err := dsp.authorizeEvent(ev, reply)
-	expected := "dial tcp: missing address"
+	expected := "ConnectionPool timeout"
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}

@@ -2036,6 +2036,7 @@ const (
 	MaxReconnectIntervalCfg = "max_reconnect_interval"
 	ConnectTimeoutCfg       = "connect_timeout"
 	ReplyTimeoutCfg         = "reply_timeout"
+	ConnPoolCapCfg          = "conn_pool_cap"
 	LockingTimeoutCfg       = "locking_timeout"
 	DigestSeparatorCfg      = "digest_separator"
 	DigestEqualCfg          = "digest_equal"

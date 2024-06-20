@@ -406,16 +406,20 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
 		Conns: []*RemoteHost{{
-			Address:   "127.0.0.1:2012",
-			Transport: utils.MetaJSON,
+			Address:      "127.0.0.1:2012",
+			Transport:    utils.MetaJSON,
+			ConnPoolCap:  50,
+			ReplyTimeout: 2 * time.Second,
 		}},
 	}
 	cfg.rpcConns[utils.MetaBiJSONLocalHost] = &RPCConn{
 		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
 		Conns: []*RemoteHost{{
-			Address:   "127.0.0.1:2014",
-			Transport: rpcclient.BiRPCJSON,
+			Address:      "127.0.0.1:2014",
+			Transport:    rpcclient.BiRPCJSON,
+			ConnPoolCap:  50,
+			ReplyTimeout: 2 * time.Second,
 		}},
 	}
 	for key, val := range jsnRPCConns {

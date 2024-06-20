@@ -456,6 +456,7 @@ type RemoteHostJson struct {
 	Max_reconnect_interval *string
 	Connect_timeout        *string
 	Reply_timeout          *string
+	Conn_Pool_cap          *int
 }
 
 type AstConnJsonCfg struct {

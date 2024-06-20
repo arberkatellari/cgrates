@@ -69,7 +69,7 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	Cache.Clear(nil)
-	cacheConns := []string{"cacheConn1"}
+	cacheConns := []string{utils.MetaInternal}
 	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -95,7 +95,7 @@ func TestTPReaderCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	client <- ccM
 
 	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		"cacheConn1": client,
+		utils.MetaInternal: client,
 	})
 	caching := utils.MetaReload
 	args := map[string][]string{
@@ -134,7 +134,7 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	Cache.Clear(nil)
-	cacheConns := []string{"cacheConn1"}
+	cacheConns := []string{utils.MetaInternal}
 	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -161,9 +161,8 @@ func TestTPReaderCallCacheReloadCacheSecondCallErr(t *testing.T) {
 		},
 	}
 	client <- ccM
-
 	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		"cacheConn1": client,
+		utils.MetaInternal: client,
 	})
 	caching := utils.MetaReload
 	args := map[string][]string{
@@ -214,7 +213,7 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	Cache.Clear(nil)
-	cacheConns := []string{"cacheConn1"}
+	cacheConns := []string{utils.MetaInternal}
 	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -257,8 +256,9 @@ func TestTPReaderCallCacheLoadCache(t *testing.T) {
 	client <- ccM
 
 	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		"cacheConn1": client,
-	})
+		utils.MetaInternal: client,
+	},
+	)
 	caching := utils.MetaLoad
 	args := map[string][]string{
 		utils.CacheFilters: {"cgrates.org:FLTR_ID1", "cgrates.org:FLTR_ID2"},
@@ -283,7 +283,7 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	Cache.Clear(nil)
-	cacheConns := []string{"cacheConn1"}
+	cacheConns := []string{utils.MetaInternal}
 	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -326,7 +326,7 @@ func TestTPReaderCallCacheRemoveItems(t *testing.T) {
 	client <- ccM
 
 	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		"cacheConn1": client,
+		utils.MetaInternal: client,
 	})
 	caching := utils.MetaRemove
 	args := map[string][]string{
@@ -352,7 +352,7 @@ func TestTPReaderCallCacheClear(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	Cache.Clear(nil)
-	cacheConns := []string{"cacheConn1"}
+	cacheConns := []string{utils.MetaInternal}
 	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -375,9 +375,9 @@ func TestTPReaderCallCacheClear(t *testing.T) {
 		},
 	}
 	client <- ccM
-
+	cfg.RPCConns()
 	cM := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		"cacheConn1": client,
+		utils.MetaInternal: client,
 	})
 	caching := utils.MetaClear
 	args := map[string][]string{

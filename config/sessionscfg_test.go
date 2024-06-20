@@ -737,7 +737,9 @@ func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 		Synchronous: utils.BoolPointer(true),
 	}
 	expected = RemoteHost{
-		Address: "127.0.0.1:8448",
+		Address:      "127.0.0.1:8448",
+		ReplyTimeout: 2 * time.Second,
+		ConnPoolCap:  50,
 	}
 	hpoolcfg.loadFromJSONCfg(json)
 	if !reflect.DeepEqual(expected, hpoolcfg) {

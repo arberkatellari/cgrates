@@ -671,10 +671,12 @@ func TestLibDispatcherLoadDispatcherCacheError7(t *testing.T) {
 		PoolSize: 0,
 		Conns: []*config.RemoteHost{
 			{
-				ID:        "testID",
-				Address:   "",
-				Transport: "",
-				TLS:       false,
+				ID:           "testID",
+				Address:      "",
+				Transport:    "",
+				TLS:          false,
+				ReplyTimeout: 2 * time.Second,
+				ConnPoolCap:  50,
 			},
 		},
 	}
@@ -683,10 +685,12 @@ func TestLibDispatcherLoadDispatcherCacheError7(t *testing.T) {
 		PoolSize: 0,
 		Conns: []*config.RemoteHost{
 			{
-				ID:        "conn_internal",
-				Address:   "*internal",
-				Transport: "",
-				TLS:       false,
+				ID:           "conn_internal",
+				Address:      "*internal",
+				Transport:    "",
+				TLS:          false,
+				ReplyTimeout: 2 * time.Second,
+				ConnPoolCap:  50,
 			},
 		},
 	}
@@ -871,10 +875,12 @@ func TestLibDispatcherSingleResultDispatcherCase3(t *testing.T) {
 		PoolSize: 0,
 		Conns: []*config.RemoteHost{
 			{
-				ID:        "testID",
-				Address:   "",
-				Transport: "",
-				TLS:       false,
+				ID:           "testID",
+				Address:      "",
+				Transport:    "",
+				TLS:          false,
+				ReplyTimeout: 2 * time.Second,
+				ConnPoolCap:  50,
 			},
 		},
 	}

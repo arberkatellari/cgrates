@@ -1,8 +1,8 @@
 name: Integration Tests
 
 on:
-  # push:
-  #   branches: [master]
+  push:
+    branches: [master]
   pull_request:
     branches: [master]
 
@@ -52,11 +52,10 @@ jobs:
       #   uses: mxschmitt/action-tmate@v3
 
       - name: Run flaky tests
-        continue-on-error: true 
+        continue-on-error: true
         run: |
           sudo env "PATH=$PATH" ./flaky_test.sh
-          
+
       - name: Run integration tests
         run: |
           sudo env "PATH=$PATH" ./integration_test.sh
-

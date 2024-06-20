@@ -2816,7 +2816,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheResources].Replicate = true
-	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{ReplyTimeout: 2 * time.Second, ConnPoolCap: 50}}}
 	config.SetCgrConfig(cfg)
 	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
 	rS := NewResourceService(dm, cfg, nil, nil)
@@ -5411,7 +5411,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().StoreInterval = -1
 	cfg.RPCConns()["test"] = &config.RPCConn{
-		Conns: []*config.RemoteHost{{}},
+		Conns: []*config.RemoteHost{{ReplyTimeout: 2 * time.Second, ConnPoolCap: 50}},
 	}
 	cfg.DataDbCfg().RplConns = []string{"test"}
 	dft := config.CgrConfig()
@@ -6025,7 +6025,9 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
-	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	cfg.RPCConns()["test"] = &config.RPCConn{
+		Conns: []*config.RemoteHost{{ReplyTimeout: 2 * time.Second, ConnPoolCap: 50}},
+	}
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
@@ -6065,7 +6067,9 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
-	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
+	cfg.RPCConns()["test"] = &config.RPCConn{
+		Conns: []*config.RemoteHost{{ReplyTimeout: 2 * time.Second, ConnPoolCap: 50}},
+	}
 	config.SetCgrConfig(cfg)
 	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)

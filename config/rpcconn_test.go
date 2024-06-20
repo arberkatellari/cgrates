@@ -52,8 +52,11 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 			Strategy: rpcclient.PoolFirst,
 			PoolSize: 0,
 			Conns: []*RemoteHost{{
-				Address:   "127.0.0.1:2014",
-				Transport: rpcclient.BiRPCJSON}},
+				Address:      "127.0.0.1:2014",
+				Transport:    rpcclient.BiRPCJSON,
+				ReplyTimeout: 2 * time.Second,
+				ConnPoolCap:  50,
+			}},
 		},
 		utils.MetaInternal: {
 			Strategy: utils.MetaFirst,
@@ -88,6 +91,7 @@ func TestRPCConnsloadFromJsonCfgCase1(t *testing.T) {
 					Reconnects:           2,
 					ConnectTimeout:       1 * time.Minute,
 					ReplyTimeout:         1 * time.Minute,
+					ConnPoolCap:          50,
 					TLS:                  false,
 					ClientKey:            "key_path",
 					ClientCertificate:    "cert_path",
@@ -127,8 +131,10 @@ func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
 			Strategy: rpcclient.PoolFirst,
 			PoolSize: 0,
 			Conns: []*RemoteHost{{
-				Address:   "127.0.0.1:2014",
-				Transport: rpcclient.BiRPCJSON,
+				Address:      "127.0.0.1:2014",
+				Transport:    rpcclient.BiRPCJSON,
+				ReplyTimeout: 2 * time.Second,
+				ConnPoolCap:  50,
 			}},
 		},
 		utils.MetaInternal: {
@@ -163,7 +169,8 @@ func TestRPCConnsloadFromJsonCfgCase2(t *testing.T) {
 					ConnectAttempts:   0,
 					Reconnects:        0,
 					ConnectTimeout:    0 * time.Minute,
-					ReplyTimeout:      0 * time.Minute,
+					ReplyTimeout:      2 * time.Second,
+					ConnPoolCap:       50,
 					TLS:               false,
 					ClientKey:         "",
 					ClientCertificate: "",
@@ -209,8 +216,10 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 			utils.StrategyCfg: utils.MetaFirst,
 			utils.Conns: []map[string]any{
 				{
-					utils.AddressCfg:   "127.0.0.1:2014",
-					utils.TransportCfg: rpcclient.BiRPCJSON,
+					utils.AddressCfg:      "127.0.0.1:2014",
+					utils.TransportCfg:    rpcclient.BiRPCJSON,
+					utils.ReplyTimeoutCfg: 2 * time.Second,
+					utils.ConnPoolCapCfg:  50,
 				},
 			},
 		},
@@ -230,6 +239,7 @@ func TestRPCConnsAsMapInterface(t *testing.T) {
 					utils.ReconnectsCfg:           3,
 					utils.ConnectTimeoutCfg:       1 * time.Minute,
 					utils.ReplyTimeoutCfg:         1 * time.Minute,
+					utils.ConnPoolCapCfg:          50,
 					utils.MaxReconnectIntervalCfg: 1 * time.Minute,
 				},
 			},
@@ -278,8 +288,10 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 		utils.MetaBiJSONLocalHost: map[string]any{
 			utils.Conns: []map[string]any{
 				{
-					utils.AddressCfg:   "127.0.0.1:2014",
-					utils.TransportCfg: rpcclient.BiRPCJSON,
+					utils.AddressCfg:      "127.0.0.1:2014",
+					utils.TransportCfg:    rpcclient.BiRPCJSON,
+					utils.ReplyTimeoutCfg: 2 * time.Second,
+					utils.ConnPoolCapCfg:  50,
 				},
 			},
 			utils.PoolSize:    0,
@@ -308,9 +320,11 @@ func TestRpcConnAsMapInterface1(t *testing.T) {
 		utils.MetaLocalHost: map[string]any{
 			utils.Conns: []map[string]any{
 				{
-					utils.TLSNoCaps:    true,
-					utils.AddressCfg:   "127.0.0.1:2018",
-					utils.TransportCfg: "*json",
+					utils.TLSNoCaps:       true,
+					utils.AddressCfg:      "127.0.0.1:2018",
+					utils.TransportCfg:    "*json",
+					utils.ReplyTimeoutCfg: 2 * time.Second,
+					utils.ConnPoolCapCfg:  50,
 				},
 			},
 			utils.PoolSize:    2,
