@@ -1998,17 +1998,109 @@ func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) erro
 	})
 }
 
+type mongoStoredSession struct {
+	primitive.ObjectID `bson:"_id,omitempty"`
+	nodeID             string `bson:"nodeID,omitempty"`
+	CGRID              string
+	Tenant             string
+	ResourceID         string
+	ClientConnID       string
+	EventStart         MapEvent
+	DebitInterval      time.Duration
+	Chargeable         bool
+	SRuns              []*StoredSRun
+	OptsStart          MapEvent
+	UpdatedAt          time.Time
+}
+
+func (storS StoredSession) asMongoStruct(nodeID string) mongoStoredSession {
+	return mongoStoredSession{
+		ObjectID:      primitive.NewObjectID(),
+		nodeID:        nodeID,
+		CGRID:         storS.CGRID,
+		Tenant:        storS.Tenant,
+		ResourceID:    storS.ResourceID,
+		ClientConnID:  storS.ClientConnID,
+		EventStart:    storS.EventStart,
+		DebitInterval: storS.DebitInterval,
+		Chargeable:    storS.Chargeable,
+		SRuns:         storS.SRuns,
+		OptsStart:     storS.OptsStart,
+		UpdatedAt:     storS.UpdatedAt,
+	}
+}
+
 // Will backup active sessions in DataDB
 func (ms *MongoStorage) SetBackupSessionsDrv(nodeID, tnt string, storedSessions []*StoredSession) error {
-	return utils.ErrNotImplemented
+	return ms.query(func(sctx mongo.SessionContext) error {
+		for i := 0; i < len(storedSessions); i += 1000 {
+			end := i + 1000
+			if end > len(storedSessions) {
+				end = len(storedSessions)
+			}
+			// split sessions into batches of 1001 sessons
+			batch := storedSessions[i:end] //  if sessions < 1001, puts all sessions in 1 batch
+			var models []mongo.WriteModel
+			for _, sess := range batch {
+				doc := sess.asMongoStruct(nodeID)
+				model := mongo.NewInsertOneModel().SetDocument(doc)
+				models = append(models, model)
+			}
+			if len(models) != 0 {
+				_, err := ms.getCol(ColBkup).BulkWrite(sctx, models)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
 }
 
 // Will restore sessions that were active from dataDB backup
 func (ms *MongoStorage) GetSessionsBackupDrv(nodeID, tnt string) ([]*StoredSession, error) {
-	return nil, utils.ErrNotImplemented
+	type session struct {
+		Session *StoredSession
+	}
+	var storeSessions []*StoredSession
+	if err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
+		cur, qryErr := ms.getCol(ColBkup).Find(sctx, bson.M{"nodeID": nodeID})
+		if qryErr != nil {
+			return qryErr
+		}
+		defer func() {
+			closeErr := cur.Close(sctx)
+			if closeErr != nil && qryErr == nil {
+				qryErr = closeErr
+			}
+		}()
+		for cur.Next(sctx) {
+			var result session
+			qryErr := cur.Decode(&result)
+			if errors.Is(qryErr, mongo.ErrNoDocuments) {
+				return utils.ErrNoBackupFound
+			} else if qryErr != nil {
+				return qryErr
+			}
+			storeSessions = append(storeSessions, result.Session)
+		}
+		return
+	}); err != nil {
+		return nil, err
+	}
+	return storeSessions, nil
 }
 
 // Will remove one or all sessions from dataDB Backup
 func (ms *MongoStorage) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error {
-	return utils.ErrNotImplemented
+	if cgrid == utils.EmptyString {
+		return ms.query(func(sctx mongo.SessionContext) error {
+			_, err := ms.getCol(ColBkup).DeleteMany(sctx, bson.M{"nodeID": nodeID})
+			return err
+		})
+	}
+	return ms.query(func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColBkup).DeleteOne(sctx, bson.M{"nodeID": nodeID, "cgrid": cgrid})
+		return err
+	})
 }

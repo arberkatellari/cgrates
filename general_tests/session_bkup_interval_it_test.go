@@ -73,8 +73,6 @@ func TestSessionsBkupIntrvl(t *testing.T) {
 	case utils.MetaMySQL:
 		sBkupCfgDIR = "sessions_backup_interval_mysql"
 	case utils.MetaMongo:
-		// mongo is unfinished
-		t.Skip()
 		sBkupCfgDIR = "sessions_backup_interval_mongo"
 	case utils.MetaPostgres:
 		sBkupCfgDIR = "sessions_backup_interval_postgres"
@@ -105,7 +103,7 @@ func testSessionSBkupIntrvlResetDB(t *testing.T) {
 
 // Start CGR Engine
 func testSessionSBkupIntrvlStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(sBkupCfgPath, *utils.WaitRater); err != nil {
+	if _, err := engine.StopStartEngine(sBkupCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
 }
