@@ -2048,3 +2048,38 @@ func (apierSv1 *APIerSv1) ExportCDRs(ctx *context.Context, args *utils.ArgExport
 	}
 	return
 }
+
+// DumpDataDB will dump all of datadb from memory to a file
+func (apierSv1 *APIerSv1) DumpDataDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = apierSv1.DataManager.DataDB().DumpDataDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// DumpStorDB will dump all of datadb from memory to a file
+func (apierSv1 *APIerSv1) DumpStorDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = apierSv1.StorDb.DumpStorDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// RecoverDataDB will recover the datadb from a dump file to memory
+// func (apierSv1 *APIerSv1) RecoverDataDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+// 	tcCfg := make(map[string]*ltcache.CacheConfig, len(apierSv1.Config.DataDbCfg().Items))
+// 	for k, cPcfg := range itmsCfg {
+// 		tcCfg[k] = &ltcache.CacheConfig{
+// 			MaxItems:  cPcfg.Limit,
+// 			TTL:       cPcfg.TTL,
+// 			StaticTTL: cPcfg.StaticTTL,
+// 		}
+// 	}
+// 	if err = engine.RecoverDB(tcCfg, apierSv1.Config.DataDbCfg().DumpPath); err != nil {
+// 		return
+// 	}
+// 	*reply = utils.OK
+// 	return
+// }

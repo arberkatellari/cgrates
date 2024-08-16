@@ -142,6 +142,8 @@ type DbJsonCfg struct {
 	Db_name               *string
 	Db_user               *string
 	Db_password           *string
+	Db_dump_interval      *string
+	Db_dump_path          *string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Remote_conns          *[]string

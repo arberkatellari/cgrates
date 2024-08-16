@@ -19,14 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"encoding/gob"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/ltcache"
+	"golang.org/x/exp/mmap"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -56,14 +60,67 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB b
 		}
 	}
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
+	return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
+		ltcache.NewTransCache(tcCfg))
+}
+
+// newInternalDB constructs an InternalDB struct with a recovered or new TransCache
+func newInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool, ms Marshaler, db *ltcache.TransCache) *InternalDB {
 	return &InternalDB{
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
 		ms:                  ms,
-		db:                  ltcache.NewTransCache(tcCfg),
+		db:                  db,
 		isDataDB:            isDataDB,
 	}
+}
+
+// Will recover a database from a dump file to memory
+func RecoverDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
+	itmsCfg map[string]*config.ItemOpt, filename string) (*InternalDB, error) {
+	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
+	for k, cPcfg := range itmsCfg {
+		tcCfg[k] = &ltcache.CacheConfig{
+			MaxItems:  cPcfg.Limit,
+			TTL:       cPcfg.TTL,
+			StaticTTL: cPcfg.StaticTTL,
+		}
+	}
+	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
+	utils.Logger.Debug("before readall")
+	startRead := time.Now()
+	r, err := mmap.Open(filename)
+	if err != nil && strings.HasSuffix(err.Error(), "no such file or directory") {
+		utils.Logger.Info("Couldnt recover DB: <" + err.Error() + ">, creating new DB")
+		return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
+			ltcache.NewTransCache(tcCfg)), nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+	p := make([]byte, r.Len())
+	_, err = r.ReadAt(p, 0)
+	if err != nil {
+		return nil, err
+	}
+	decoder := gob.NewDecoder(bytes.NewReader(p))
+	// var tc *ltcache.TransCache
+	tc, err := ltcache.ReadAll(decoder, tcCfg)
+	if err != nil && err.Error() == "EOF" {
+		utils.Logger.Info("Couldnt recover DB: <" + err.Error() + ">, creating new DB")
+		return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
+			ltcache.NewTransCache(tcCfg)), nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	readTime := time.Since(startRead)
+	utils.Logger.Debug("after readall, readTime: " + fmt.Sprintln(readTime))
+
+	return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
+		tc), nil
 }
 
 // SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)
@@ -128,7 +185,10 @@ func (iDB *InternalDB) GetVersions(itm string) (vrs Versions, err error) {
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	provVrs := x.(Versions)
+	provVrs, canCast := x.(Versions)
+	if !canCast {
+		provVrs = *x.(*Versions)
+	}
 	if itm != "" {
 		if _, has := provVrs[itm]; !has {
 			return nil, utils.ErrNotFound
@@ -321,7 +381,11 @@ func (iDB *InternalDB) GetReverseDestinationDrv(prefix, transactionID string) (i
 
 func (iDB *InternalDB) GetActionsDrv(id string) (acts Actions, err error) {
 	if x, ok := iDB.db.Get(utils.CacheActions, id); ok && x != nil {
-		return x.(Actions), err
+		acts, canCast := x.(Actions)
+		if !canCast {
+			acts = *x.(*Actions)
+		}
+		return acts, err
 	}
 	return nil, utils.ErrNotFound
 }
@@ -359,7 +423,11 @@ func (iDB *InternalDB) RemoveSharedGroupDrv(id string) (err error) {
 
 func (iDB *InternalDB) GetActionTriggersDrv(id string) (at ActionTriggers, err error) {
 	if x, ok := iDB.db.Get(utils.CacheActionTriggers, id); ok && x != nil {
-		return x.(ActionTriggers).Clone(), err
+		atO, canCast := x.(ActionTriggers)
+		if !canCast {
+			atO = *x.(*ActionTriggers)
+		}
+		return atO.Clone(), err
 	}
 	return nil, utils.ErrNotFound
 }
@@ -803,7 +871,11 @@ func (iDB *InternalDB) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[strin
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	loadIDs = x.(map[string]int64)
+
+	loadIDs, canCast := x.(map[string]int64)
+	if !canCast {
+		loadIDs = *x.(*map[string]int64)
+	}
 	if itemIDPrefix != utils.EmptyString {
 		return map[string]int64{itemIDPrefix: loadIDs[itemIDPrefix]}, nil
 	}
@@ -849,7 +921,11 @@ func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes
 				continue
 			}
 			dbKey = strings.TrimPrefix(dbKey, tntCtx+utils.ConcatenatedKeySep)
-			indexes[dbKey] = x.(utils.StringSet).Clone()
+			val, canCast := x.(utils.StringSet)
+			if !canCast {
+				val = *x.(*utils.StringSet)
+			}
+			indexes[dbKey] = val.Clone()
 		}
 		if len(indexes) == 0 {
 			return nil, utils.ErrNotFound
@@ -861,8 +937,12 @@ func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
+	val, canCast := x.(utils.StringSet)
+	if !canCast {
+		val = *x.(*utils.StringSet)
+	}
 	return map[string]utils.StringSet{
-		idxKey: x.(utils.StringSet).Clone(),
+		idxKey: val.Clone(),
 	}, nil
 }
 
@@ -943,4 +1023,23 @@ func (iDB *InternalDB) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error 
 	}
 	iDB.db.Remove(utils.CacheSessionsBackup, cgrid, true, utils.NonTransactional)
 	return nil
+}
+
+// Will dump everything inside datadb to a file
+func (iDB *InternalDB) DumpDataDB() (err error) {
+	utils.Logger.Debug("before writeall")
+	file, err := os.Create(config.CgrConfig().DataDbCfg().DumpPath)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %w", err)
+	}
+	defer file.Close()
+	var buf bytes.Buffer
+	encoder := gob.NewEncoder(&buf)
+	if err := iDB.db.WriteAll(file, encoder, &buf); err != nil {
+		utils.Logger.Debug(fmt.Sprintln(err))
+	}
+	encoder = nil
+	buf = bytes.Buffer{}
+	utils.Logger.Debug("after writeall")
+	return
 }

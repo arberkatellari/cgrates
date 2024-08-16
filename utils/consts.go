@@ -2138,6 +2138,8 @@ const (
 	DataDbNameCfg              = "db_name"
 	DataDbUserCfg              = "db_user"
 	DataDbPassCfg              = "db_password"
+	DataDbDumpIntervalCfg      = "db_dump_interval"
+	DataDbDumpPathCfg          = "db_dump_path"
 	RedisMaxConnsCfg           = "redisMaxConns"
 	RedisConnectAttemptsCfg    = "redisConnectAttempts"
 	RedisSentinelNameCfg       = "redisSentinel"

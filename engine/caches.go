@@ -96,6 +96,17 @@ func init() {
 	gob.Register(url.Values{})
 	gob.Register(json.RawMessage{})
 	gob.Register(BalanceSummaries{})
+	gob.Register(new(map[string]int64))
+
+	gob.Register(new(Account))
+	gob.Register(new(utils.TPTiming))
+	gob.Register(new(ChargerProfile))
+	gob.Register(new(RatingPlan))
+	gob.Register(new(RatingProfile))
+	gob.Register(new(ActionPlan))
+	gob.Register(new(Versions))
+	gob.Register(new(Destination))
+	gob.Register(new(Actions))
 
 	gob.Register(new(utils.ArgCacheReplicateSet))
 	gob.Register(new(utils.ArgCacheReplicateRemove))

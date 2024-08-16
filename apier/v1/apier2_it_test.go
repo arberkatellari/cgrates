@@ -79,7 +79,7 @@ var (
 )
 
 // Test start here
-func TestApierIT2(t *testing.T) {
+func TestApierIfT2(t *testing.T) {
 	// no need for a new config with *gob transport in this case
 	switch *utils.DBType {
 	case utils.MetaInternal:

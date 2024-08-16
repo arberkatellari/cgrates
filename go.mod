@@ -12,6 +12,8 @@ go 1.22.5
 
 // replace github.com/cgrates/aringo => ../aringo
 
+replace github.com/cgrates/ltcache => ../ltcache
+
 require (
 	github.com/Azure/go-amqp v1.0.2
 	github.com/antchfx/xmlquery v1.3.18
@@ -48,7 +50,7 @@ require (
 	github.com/ugorji/go/codec v1.2.12
 	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/crypto v0.26.0
-	golang.org/x/net v0.25.0
+	golang.org/x/net v0.28.0
 	golang.org/x/oauth2 v0.19.0
 	google.golang.org/api v0.169.0
 	gorm.io/driver/mysql v1.5.2
@@ -66,6 +68,7 @@ require (
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
+	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa // indirect
 )
 
 require (
@@ -135,11 +138,11 @@ require (
 	go.opentelemetry.io/otel v1.24.0 // indirect
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
-	golang.org/x/mod v0.17.0 // indirect
+	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.23.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
-	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
+	golang.org/x/tools v0.24.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240304161311-37d4d3c04a78 // indirect
 	google.golang.org/grpc v1.62.1 // indirect

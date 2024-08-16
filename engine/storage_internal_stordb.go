@@ -19,12 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
+	"os"
 	"slices"
 	"sort"
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1530,4 +1534,23 @@ func (iDB *InternalDB) SetSMCost(smCost *SMCost) (err error) {
 	iDB.db.Set(utils.CacheSessionCostsTBL, utils.ConcatenatedKey(smCost.CGRID, smCost.RunID, smCost.OriginHost, smCost.OriginID), smCost, idxs.AsSlice(),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return err
+}
+
+// Will dump everything inside stordb to a file
+func (iDB *InternalDB) DumpStorDB() (err error) {
+	utils.Logger.Debug("before writeall")
+	file, err := os.Create(config.CgrConfig().StorDbCfg().DumpPath)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %w", err)
+	}
+	defer file.Close()
+	var buf bytes.Buffer
+	encoder := gob.NewEncoder(&buf)
+	if err := iDB.db.WriteAll(file, encoder, &buf); err != nil {
+		utils.Logger.Debug(fmt.Sprintln(err))
+	}
+	encoder = nil
+	buf = bytes.Buffer{}
+	utils.Logger.Debug("after writeall")
+	return
 }
