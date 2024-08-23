@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"os"
 	"slices"
@@ -28,7 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1537,20 +1534,18 @@ func (iDB *InternalDB) SetSMCost(smCost *SMCost) (err error) {
 }
 
 // Will dump everything inside stordb to a file
-func (iDB *InternalDB) DumpStorDB() (err error) {
+func (iDB *InternalDB) DumpStorDB(fldrPath string) (err error) {
 	utils.Logger.Debug("before writeall")
-	file, err := os.Create(config.CgrConfig().StorDbCfg().DumpPath)
-	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
+	if _, err = os.Stat(fldrPath); os.IsNotExist(err) {
+		// Folder does not exist, create it
+		err = os.MkdirAll(fldrPath, 0755)
+		if err != nil {
+			return
+		}
 	}
-	defer file.Close()
-	var buf bytes.Buffer
-	encoder := gob.NewEncoder(&buf)
-	if err := iDB.db.WriteAll(file, encoder, &buf); err != nil {
+	if err := iDB.db.WriteAll(fldrPath); err != nil {
 		utils.Logger.Debug(fmt.Sprintln(err))
 	}
-	encoder = nil
-	buf = bytes.Buffer{}
 	utils.Logger.Debug("after writeall")
 	return
 }

@@ -1383,6 +1383,6 @@ func (rs *RedisStorage) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error
 }
 
 // DumpDataDB will dump all of datadb from memory to a file, only for InternalDB
-func (rs *RedisStorage) DumpDataDB() error {
+func (rs *RedisStorage) DumpDataDB(string) error {
 	return utils.ErrNotImplemented
 }

@@ -349,6 +349,7 @@ func main() {
 	if *singleCPU {
 		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
 	}
+	runtime.MemProfileRate = 1
 
 	shdWg := new(sync.WaitGroup)
 	shdChan := utils.NewSyncedChan()

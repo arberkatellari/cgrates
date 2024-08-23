@@ -1724,6 +1724,6 @@ func (ms *MongoStorage) GetStorageType() string {
 }
 
 // Will dump everything inside stordb to a file
-func (ms *MongoStorage) DumpStorDB() (err error) {
+func (ms *MongoStorage) DumpStorDB(string) (err error) {
 	return utils.ErrNotImplemented
 }

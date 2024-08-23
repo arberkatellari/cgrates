@@ -2051,7 +2051,7 @@ func (apierSv1 *APIerSv1) ExportCDRs(ctx *context.Context, args *utils.ArgExport
 
 // DumpDataDB will dump all of datadb from memory to a file
 func (apierSv1 *APIerSv1) DumpDataDB(ctx *context.Context, ignr *string, reply *string) (err error) {
-	if err = apierSv1.DataManager.DataDB().DumpDataDB(); err != nil {
+	if err = apierSv1.DataManager.DataDB().DumpDataDB(config.CgrConfig().DataDbCfg().DumpPath); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -2060,7 +2060,7 @@ func (apierSv1 *APIerSv1) DumpDataDB(ctx *context.Context, ignr *string, reply *
 
 // DumpStorDB will dump all of datadb from memory to a file
 func (apierSv1 *APIerSv1) DumpStorDB(ctx *context.Context, ignr *string, reply *string) (err error) {
-	if err = apierSv1.StorDb.DumpStorDB(); err != nil {
+	if err = apierSv1.StorDb.DumpStorDB(config.CgrConfig().StorDbCfg().DumpPath); err != nil {
 		return
 	}
 	*reply = utils.OK

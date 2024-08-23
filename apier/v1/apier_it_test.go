@@ -242,31 +242,209 @@ func testApierRpcConn(t *testing.T) {
 	var totalStored int
 	dataMap := make(map[string]string)
 	pattern := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	data := make([]byte, 512*1024)    // 512 kb
-	for totalStored < 512*1024*1024 { // 512 mb total data size to generate
+	data := make([]byte, 512*1024)       // 16 kb
+	for totalStored < 1*1024*1024*1024 { // 512 mb total data size to generate
 		for i := range data {
 			data[i] = pattern[i%len(pattern)]
 		}
 		dataMap[fmt.Sprintf("%s%d", "testdata-", totalStored)] = string(data)
 		totalStored += len(data)
 	}
-
+	// var wg sync.WaitGroup
 	for key, value := range dataMap {
-		act1 := &V1TPAction{Identifier: utils.MetaTopUpReset, BalanceType: utils.MetaMonetary, Units: 75.0, ExpiryTime: utils.MetaUnlimited, Weight: 20.0, Categories: value}
-		attrs1 := &V1AttrSetActions{ActionsId: "ACTS_1" + key, Actions: []*V1TPAction{act1}}
-		reply1 := utils.EmptyString
-		if err := rater.Call(context.Background(), utils.APIerSv1SetActions, &attrs1, &reply1); err != nil {
-			t.Error("Got error on APIerSv1.SetActions: ", err.Error())
-		} else if reply1 != utils.OK {
-			t.Errorf("Calling APIerSv1.SetActions received: %s", reply1)
+		// wg.Add(1)
+		// go func() {
+		// defer wg.Done()
+		// act1 := &V1TPAction{Identifier: utils.MetaTopUpReset, BalanceType: utils.MetaMonetary, Units: 75.0, ExpiryTime: utils.MetaUnlimited, Weight: 20.0, Categories: value}
+		// attrs1 := &V1AttrSetActions{ActionsId: "ACTS_1" + key, Actions: []*V1TPAction{act1}}
+		// reply1 := utils.EmptyString
+		// if err := rater.Call(context.Background(), utils.APIerSv1SetActions, &attrs1, &reply1); err != nil {
+		// 	t.Error("Got error on APIerSv1.SetActions: ", err.Error())
+		// } else if reply1 != utils.OK {
+		// 	t.Errorf("Calling APIerSv1.SetActions received: %s", reply1)
+		// }
+		statConfig := &engine.StatQueueProfileWithAPIOpts{
+			StatQueueProfile: &engine.StatQueueProfile{
+				Tenant: tenant,
+				ID:     "TEST_PROFILE2" + key,
+				ActivationInterval: &utils.ActivationInterval{
+					ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				},
+				QueueLength: 10,
+				TTL:         10 * time.Second,
+				Metrics: []*engine.MetricWithFilters{
+					{
+						MetricID: "*sum",
+					},
+					{
+						MetricID: utils.MetaACD,
+					},
+				},
+				ThresholdIDs: []string{value},
+				Blocker:      true,
+				Stored:       true,
+				Weight:       20,
+				MinItems:     1,
+			},
 		}
-		time.Sleep(20 * time.Millisecond)
+		reply1 := utils.EmptyString
+		if err := rater.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, &statConfig, &reply1); err != nil {
+			t.Error("Got error on APIerSv1SetStatQueueProfile: ", err.Error())
+		} else if reply1 != utils.OK {
+			t.Errorf("Calling APIerSv1SetStatQueueProfile received: %s", reply1)
+		}
+		// time.Sleep(20 * time.Millisecond)
 		// _, err := fmt.Fprintf(file, "%s:%s\n", key, value)
 		// if err != nil {
 		// 	t.Error("Error writing to file:", err)
 		// }
-		delete(dataMap, key)
+		// delete(dataMap, key)
+		// }()
 	}
+	// wg.Wait()
+
+	// for key, value := range dataMap {
+	// 	// wg.Add(1)
+	// 	// go func() {
+	// 	// defer wg.Done()
+	// 	statConfig = &engine.StatQueueProfileWithAPIOpts{
+	// 		StatQueueProfile: &engine.StatQueueProfile{
+	// 			Tenant: tenant,
+	// 			ID:     "TEST_PROFILE2" + key,
+	// 			ActivationInterval: &utils.ActivationInterval{
+	// 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	// 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	// 			},
+	// 			QueueLength: 10,
+	// 			TTL:         10 * time.Second,
+	// 			Metrics: []*engine.MetricWithFilters{
+	// 				{
+	// 					MetricID: "*sum",
+	// 				},
+	// 				{
+	// 					MetricID: utils.MetaACD,
+	// 				},
+	// 			},
+	// 			ThresholdIDs: []string{value},
+	// 			Blocker:      true,
+	// 			Stored:       true,
+	// 			Weight:       20,
+	// 			MinItems:     1,
+	// 		},
+	// 	}
+	// 	reply1 := utils.EmptyString
+	// 	if err := rater.Call(context.Background(), utils.APIerSv1SetStatQueueProfile, &statConfig, &reply1); err != nil {
+	// 		t.Error("Got error on APIerSv1SetStatQueueProfile: ", err.Error())
+	// 	} else if reply1 != utils.OK {
+	// 		t.Errorf("Calling APIerSv1SetStatQueueProfile received: %s", reply1)
+	// 	}
+	// 	// time.Sleep(20 * time.Millisecond)
+	// 	// _, err := fmt.Fprintf(file, "%s:%s\n", key, value)
+	// 	// if err != nil {
+	// 	// 	t.Error("Error writing to file:", err)
+	// 	// }
+	// 	// delete(dataMap, key)
+	// 	// }()
+	// }
+	// wg.Wait()
+
+	// for key, value := range dataMap {
+	// 	wg.Add(1)
+	// 	go func() {
+	// 		defer wg.Done()
+	// 		filter = &engine.FilterWithAPIOpts{
+	// 			Filter: &engine.Filter{
+	// 				Tenant: tenant,
+	// 				ID:     "TestFilter" + key,
+	// 				Rules: []*engine.FilterRule{{
+	// 					Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.AccountField,
+	// 					Type:    utils.MetaString,
+	// 					Values:  []string{"1001", value},
+	// 				}},
+	// 			},
+	// 		}
+	// 		reply1 := utils.EmptyString
+	// 		if err := rater.Call(context.Background(), utils.APIerSv1SetFilter, &filter, &reply1); err != nil {
+	// 			t.Error("Got error on APIerSv1SetFilter: ", err.Error())
+	// 		} else if reply1 != utils.OK {
+	// 			t.Errorf("Calling APIerSv1SetFilter received: %s", reply1)
+	// 		}
+	// 		// time.Sleep(20 * time.Millisecond)
+	// 		// _, err := fmt.Fprintf(file, "%s:%s\n", key, value)
+	// 		// if err != nil {
+	// 		// 	t.Error("Error writing to file:", err)
+	// 		// }
+	// 		// delete(dataMap, key)
+	// 	}()
+	// }
+	// wg.Wait()
+	// for key, value := range dataMap {
+	// 	wg.Add(1)
+	// 	go func() {
+	// 		defer wg.Done()
+	// 		tpStat := &utils.TPStatProfile{
+	// 			Tenant: "cgrates.org",
+	// 			TPid:   "TPS1",
+	// 			ID:     "Stat1" + key,
+	// 			ActivationInterval: &utils.TPActivationInterval{
+	// 				ActivationTime: "2014-07-29T15:00:00Z",
+	// 				ExpiryTime:     "",
+	// 			},
+	// 			TTL: "1",
+	// 			Metrics: []*utils.MetricWithFilters{
+	// 				{
+	// 					MetricID: value,
+	// 				},
+	// 			},
+	// 			Blocker:  false,
+	// 			Stored:   false,
+	// 			Weight:   20,
+	// 			MinItems: 1,
+	// 		}
+	// 		reply1 := utils.EmptyString
+	// 		if err := rater.Call(context.Background(), utils.APIerSv1SetTPStat, &tpStat, &reply1); err != nil {
+	// 			t.Error("Got error on utils.APIerSv1SetTPStat: ", err.Error())
+	// 		} else if reply1 != utils.OK {
+	// 			t.Errorf("Calling utils.APIerSv1SetTPStat received: %s", reply1)
+	// 		}
+	// 		// time.Sleep(20 * time.Millisecond)
+	// 		// _, err := fmt.Fprintf(file, "%s:%s\n", key, value)
+	// 		// if err != nil {
+	// 		// 	t.Error("Error writing to file:", err)
+	// 		// }
+	// 		// delete(dataMap, key)
+	// 	}()
+	// }
+	// wg.Wait()
+	// for key, value := range dataMap {
+	// 	wg.Add(1)
+	// 	go func() {
+	// 		defer wg.Done()
+	// 		chargerProfile := &ChargerWithAPIOpts{
+	// 			ChargerProfile: &engine.ChargerProfile{
+	// 				Tenant:       "cgrates.org",
+	// 				ID:           "Default" + key,
+	// 				RunID:        utils.MetaDefault,
+	// 				AttributeIDs: []string{value},
+	// 				Weight:       20,
+	// 			},
+	// 		}
+	// 		reply1 := utils.EmptyString
+	// 		if err := rater.Call(context.Background(), utils.APIerSv1SetChargerProfile, &chargerProfile, &reply1); err != nil {
+	// 			t.Error("Got error on APIerSv1SetChargerProfile: ", err.Error())
+	// 		} else if reply1 != utils.OK {
+	// 			t.Errorf("Calling APIerSv1SetChargerProfile received: %s", reply1)
+	// 		}
+	// 		// time.Sleep(20 * time.Millisecond)
+	// 		// _, err := fmt.Fprintf(file, "%s:%s\n", key, value)
+	// 		// if err != nil {
+	// 		// 	t.Error("Error writing to file:", err)
+	// 		// }
+	// 		// delete(dataMap, key)
+	// 	}()
+	// }
+	// wg.Wait()
 }
 
 // Test here TPTiming APIs

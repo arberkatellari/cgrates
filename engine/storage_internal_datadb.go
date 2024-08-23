@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"bytes"
-	"encoding/gob"
 	"errors"
 	"fmt"
 	"os"
@@ -30,7 +28,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/ltcache"
-	"golang.org/x/exp/mmap"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -78,7 +75,7 @@ func newInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB b
 
 // Will recover a database from a dump file to memory
 func RecoverDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
-	itmsCfg map[string]*config.ItemOpt, filename string) (*InternalDB, error) {
+	itmsCfg map[string]*config.ItemOpt, fldrPath string) (*InternalDB, error) {
 	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
 	for k, cPcfg := range itmsCfg {
 		tcCfg[k] = &ltcache.CacheConfig{
@@ -90,25 +87,9 @@ func RecoverDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
 	utils.Logger.Debug("before readall")
 	startRead := time.Now()
-	r, err := mmap.Open(filename)
-	if err != nil && strings.HasSuffix(err.Error(), "no such file or directory") {
-		utils.Logger.Info("Couldnt recover DB: <" + err.Error() + ">, creating new DB")
-		return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
-			ltcache.NewTransCache(tcCfg)), nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	defer r.Close()
-	p := make([]byte, r.Len())
-	_, err = r.ReadAt(p, 0)
-	if err != nil {
-		return nil, err
-	}
-	decoder := gob.NewDecoder(bytes.NewReader(p))
-	// var tc *ltcache.TransCache
-	tc, err := ltcache.ReadAll(decoder, tcCfg)
-	if err != nil && err.Error() == "EOF" {
+
+	tc, err := ltcache.ReadAll(fldrPath, tcCfg)
+	if (err != nil && err.Error() == "EOF") || (err != nil && strings.HasSuffix(err.Error(), "no such file or directory")) {
 		utils.Logger.Info("Couldnt recover DB: <" + err.Error() + ">, creating new DB")
 		return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
 			ltcache.NewTransCache(tcCfg)), nil
@@ -118,9 +99,27 @@ func RecoverDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
 	}
 	readTime := time.Since(startRead)
 	utils.Logger.Debug("after readall, readTime: " + fmt.Sprintln(readTime))
-
-	return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
-		tc), nil
+	iDB := newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms, tc)
+	if isDataDB { // if its DataDB set reverse destinations
+		startRead = time.Now()
+		destinations, err := iDB.GetKeysForPrefixUnsafe(utils.DestinationPrefix)
+		if err != nil {
+			return nil, err
+		}
+		for _, destID := range destinations {
+			// utils.Logger.Debug(destID)
+			dest, err := iDB.GetDestinationDrvUnsafe(destID[len(utils.DestinationPrefix):], utils.EmptyString)
+			if err != nil {
+				return nil, err
+			}
+			if err := iDB.SetReverseDestinationDrvUnsafe(dest.Id, dest.Prefixes, utils.NonTransactional); err != nil {
+				return nil, err
+			}
+		}
+		readTime := time.Since(startRead)
+		utils.Logger.Debug("after reverse destinations, readTime: " + fmt.Sprintln(readTime))
+	}
+	return iDB, nil
 }
 
 // SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)
@@ -167,6 +166,22 @@ func (iDB *InternalDB) GetKeysForPrefix(prefix string) (ids []string, err error)
 	return
 }
 
+// GetKeysForPrefix returns the keys from cache that have the given prefix, NOT THREAD SAFE
+func (iDB *InternalDB) GetKeysForPrefixUnsafe(prefix string) (ids []string, err error) {
+	keyLen := len(utils.DestinationPrefix)
+	if len(prefix) < keyLen {
+		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
+		return
+	}
+	category := prefix[:keyLen] // prefix length
+	queryPrefix := prefix[keyLen:]
+	ids = iDB.db.GetItemIDsUnsafe(utils.CachePrefixToInstance[category], queryPrefix)
+	for i := range ids {
+		ids[i] = category + ids[i]
+	}
+	return
+}
+
 func (iDB *InternalDB) RemoveKeysForPrefix(prefix string) (err error) {
 	keyLen := len(utils.DestinationPrefix)
 	if len(prefix) < keyLen {
@@ -185,9 +200,19 @@ func (iDB *InternalDB) GetVersions(itm string) (vrs Versions, err error) {
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
+	var provVrsPtr *Versions
 	provVrs, canCast := x.(Versions)
 	if !canCast {
-		provVrs = *x.(*Versions)
+		provVrsPtr, canCast = x.(*Versions)
+		if !canCast {
+			provVrsMI := x.(map[string]any)
+			provVrs = make(Versions)
+			for key, val := range provVrsMI {
+				provVrs[key] = int64(val.(float64))
+			}
+		} else {
+			provVrs = *provVrsPtr
+		}
 	}
 	if itm != "" {
 		if _, has := provVrs[itm]; !has {
@@ -320,6 +345,13 @@ func (iDB *InternalDB) GetDestinationDrv(key, _ string) (dest *Destination, err 
 	return nil, utils.ErrNotFound
 }
 
+func (iDB *InternalDB) GetDestinationDrvUnsafe(key, _ string) (dest *Destination, err error) {
+	if x, ok := iDB.db.GetUnsafe(utils.CacheDestinations, key); ok && x != nil {
+		return x.(*Destination), nil
+	}
+	return nil, utils.ErrNotFound
+}
+
 func (iDB *InternalDB) SetDestinationDrv(dest *Destination, transactionID string) (err error) {
 	iDB.db.Set(utils.CacheDestinations, dest.Id, dest, nil,
 		true, utils.NonTransactional)
@@ -365,6 +397,23 @@ func (iDB *InternalDB) SetReverseDestinationDrv(destID string, prefixes []string
 		mpRevDst.Add(destID)
 		// for ReverseDestination we will use Groups
 		iDB.db.Set(utils.CacheReverseDestinations, p, mpRevDst.AsSlice(), nil,
+			true, utils.NonTransactional)
+	}
+	return
+}
+
+func (iDB *InternalDB) SetReverseDestinationDrvUnsafe(destID string, prefixes []string, transactionID string) (err error) {
+	for _, p := range prefixes {
+		var revDst []string
+		if iDB.db.HasItemUnsafe(utils.CacheReverseDestinations, p) {
+			if x, ok := iDB.db.GetUnsafe(utils.CacheReverseDestinations, p); ok && x != nil {
+				revDst = x.([]string)
+			}
+		}
+		mpRevDst := utils.NewStringSet(revDst)
+		mpRevDst.Add(destID)
+		// for ReverseDestination we will use Groups
+		iDB.db.SetUnsafe(utils.CacheReverseDestinations, p, mpRevDst.AsSlice(), nil,
 			true, utils.NonTransactional)
 	}
 	return
@@ -1026,20 +1075,45 @@ func (iDB *InternalDB) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error 
 }
 
 // Will dump everything inside datadb to a file
-func (iDB *InternalDB) DumpDataDB() (err error) {
+func (iDB *InternalDB) DumpDataDB(fldrPath string) (err error) {
 	utils.Logger.Debug("before writeall")
-	file, err := os.Create(config.CgrConfig().DataDbCfg().DumpPath)
-	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
+	if _, err = os.Stat(fldrPath); os.IsNotExist(err) {
+		// Folder does not exist, create it
+		err = os.MkdirAll(fldrPath, 0755)
+		if err != nil {
+			return
+		}
 	}
-	defer file.Close()
-	var buf bytes.Buffer
-	encoder := gob.NewEncoder(&buf)
-	if err := iDB.db.WriteAll(file, encoder, &buf); err != nil {
-		utils.Logger.Debug(fmt.Sprintln(err))
+	// f, err := os.Create("/tmp/cpuprof/manual.pprof")
+	// if err != nil {
+	// 	return fmt.Errorf("could not create CPU profile: %v", err)
+	// }
+	// if err := pprof.StartCPUProfile(f); err != nil {
+	// 	if err := f.Close(); err != nil {
+	// 		utils.Logger.Warning(fmt.Sprintf("<%s> %v", utils.CoreS, err))
+	// 	}
+	// 	return fmt.Errorf("could not start CPU profile: %v", err)
+	// }
+	if err := iDB.db.WriteAll(fldrPath); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("Failed to dump DataDB to file, error: <%v>", err))
 	}
-	encoder = nil
-	buf = bytes.Buffer{}
+	// pprof.StopCPUProfile()
+	// if err := f.Close(); err != nil {
+	// 	utils.Logger.Warning(fmt.Sprintf("<%s> %v", utils.CoreS, err))
+	// }
+	// f, err = os.Create("/tmp/memprof/manual.pprof")
+	// if err != nil {
+	// 	fmt.Printf("could not create memory profile: %v\n", err)
+	// }
+	// utils.Logger.Info(fmt.Sprintf("<%s> writing heap profile to %q", utils.CoreS, "/tmp/memprof/manual.pprof"))
+	// // runtime.GC() // get up-to-date statistics
+	// if err := pprof.WriteHeapProfile(f); err != nil {
+	// 	fmt.Printf("could not write memory profile: %v\n", err)
+	// }
+	// if err := f.Close(); err != nil {
+	// 	utils.Logger.Warning(fmt.Sprintf(
+	// 		"<%s> could not close file %q: %v", utils.CoreS, f.Name(), err))
+	// }
 	utils.Logger.Debug("after writeall")
 	return
 }

@@ -140,7 +140,7 @@ type DataDB interface {
 	SetBackupSessionsDrv(nodeID string, tenant string, sessions []*StoredSession) error
 	GetSessionsBackupDrv(nodeID string, tenant string) ([]*StoredSession, error)
 	RemoveSessionsBackupDrv(nodeID, tenant, cgrid string) error
-	DumpDataDB() error
+	DumpDataDB(string) error
 }
 
 type StorDB interface {
@@ -218,7 +218,7 @@ type LoadWriter interface {
 	SetTPChargers([]*utils.TPChargerProfile) error
 	SetTPDispatcherProfiles([]*utils.TPDispatcherProfile) error
 	SetTPDispatcherHosts([]*utils.TPDispatcherHost) error
-	DumpStorDB() error
+	DumpStorDB(string) error
 }
 
 // NewMarshaler returns the marshaler type selected by mrshlerStr

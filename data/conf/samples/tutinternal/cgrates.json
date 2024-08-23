@@ -2,6 +2,7 @@
 
 
 "general": {
+	"node_id":"offlineWithBackup",
 	"log_level": 7,
 	"reply_timeout": "50s"
 },
@@ -134,7 +135,8 @@
 	"attributes_conns": ["*internal"],
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
-	"chargers_conns": ["*internal"]
+	"chargers_conns": ["*internal"],
+	"backup_interval": "-1",
 },
 
 
