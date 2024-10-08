@@ -1722,3 +1722,8 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) error {
 func (ms *MongoStorage) GetStorageType() string {
 	return utils.MetaMongo
 }
+
+// Will dump everything inside stordb to a file
+func (ms *MongoStorage) DumpStorDB(string) (err error) {
+	return utils.ErrNotImplemented
+}

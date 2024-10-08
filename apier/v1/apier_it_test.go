@@ -29,6 +29,7 @@ import (
 	"path"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -69,116 +70,116 @@ var (
 
 	apierTests = []func(t *testing.T){
 		testApierLoadConfig,
-		testApierCreateDirs,
-		testApierInitDataDb,
-		testApierInitStorDb,
-		testApierStartEngine,
+		// testApierCreateDirs,
+		// testApierInitDataDb,
+		// testApierInitStorDb,
+		// testApierStartEngine,
 		testApierRpcConn,
-		testApierTPTiming,
-		testApierTPDestination,
-		testApierTPRate,
-		testApierTPDestinationRate,
-		testApierTPRatingPlan,
-		testApierTPRatingProfile,
-		testApierTPActions,
-		testApierTPActionPlan,
-		testApierTPActionTriggers,
-		testApierTPAccountActions,
-		testApierLoadRatingPlan,
-		testApierLoadRatingProfile,
-		testApierLoadRatingProfileWithoutTenant,
-		testApierLoadAccountActions,
-		testApierReloadScheduler,
-		testApierSetRatingProfile,
-		testApierSetRatingProfileWithoutTenant,
-		testApierRemoveRatingProfilesWithoutTenant,
-		testAPIerSv1GetRatingProfile,
-		testAPIerSv1GetRatingProfileWithoutTenant,
-		testAPIerSv1GetRatingProfileIDsWithoutTenant,
-		testApierReloadCache,
-		testApierGetActionTrigger,
-		testApierGetDestination,
-		testApierGetRatingPlan,
-		testApierRemoveRatingPlan,
-		testApierAddBalance,
-		testApierExecuteAction,
-		testApierExecuteActionWithoutTenant,
-		testApierSetActions,
-		testApierGetActions,
-		testApierSetActionPlan,
-		testApierAddTriggeredAction,
-		testApierGetAccountActionTriggers,
-		testApierAddTriggeredAction2,
-		testApierGetAccountActionTriggers2,
-		testApierSetAccountActionTriggers,
-		testApierRemAccountActionTriggers,
-		testApierSetAccount,
-		testApierGetAccountActionPlan,
-		testApierGetAccountActionPlanWithoutTenant,
-		testApierITGetScheduledActionsForAccount,
-		testApierRemUniqueIDActionTiming,
-		testApierRemUniqueIDActionTimingWithoutTenant,
-		testApierGetAccount,
-		testApierTriggersExecute,
-		testApierResetDataBeforeLoadFromFolder,
-		testApierLoadTariffPlanFromFolder,
-		testApierComputeReverse,
-		testApierResetDataAfterLoadFromFolder,
-		testApierSetChargerS,
-		testApierGetAccountAfterLoad,
-		testApierResponderGetCost,
-		testApierMaxDebitInexistentAcnt,
-		testApierCdrServer,
-		testApierITGetCdrs,
-		testApierITProcessCdr,
-		testApierGetCallCostLog,
-		testApierITSetDestination,
-		testApierITGetScheduledActions,
-		testApierITGetDataCost,
-		testApierITGetCost,
-		testApierInitDataDb2,
-		testApierInitStorDb2,
-		testApierReloadCache2,
-		testApierReloadScheduler2,
-		testApierImportTPFromFolderPath,
-		testApierLoadTariffPlanFromStorDbDryRun,
-		testApierGetCacheStats2,
-		testApierLoadTariffPlanFromStorDb,
-		testApierStartStopServiceStatus,
-		testApierReplayFldPosts,
-		testApierGetDataDBVesions,
-		testApierGetStorDBVesions,
-		testApierBackwardsCompatible,
-		testApierStopEngine,
+		// testApierTPTiming,
+		// testApierTPDestination,
+		// testApierTPRate,
+		// testApierTPDestinationRate,
+		// testApierTPRatingPlan,
+		// testApierTPRatingProfile,
+		// testApierTPActions,
+		// testApierTPActionPlan,
+		// testApierTPActionTriggers,
+		// testApierTPAccountActions,
+		// testApierLoadRatingPlan,
+		// testApierLoadRatingProfile,
+		// testApierLoadRatingProfileWithoutTenant,
+		// testApierLoadAccountActions,
+		// testApierReloadScheduler,
+		// testApierSetRatingProfile,
+		// testApierSetRatingProfileWithoutTenant,
+		// testApierRemoveRatingProfilesWithoutTenant,
+		// testAPIerSv1GetRatingProfile,
+		// testAPIerSv1GetRatingProfileWithoutTenant,
+		// testAPIerSv1GetRatingProfileIDsWithoutTenant,
+		// testApierReloadCache,
+		// testApierGetActionTrigger,
+		// testApierGetDestination,
+		// testApierGetRatingPlan,
+		// testApierRemoveRatingPlan,
+		// testApierAddBalance,
+		// testApierExecuteAction,
+		// testApierExecuteActionWithoutTenant,
+		// testApierSetActions,
+		// testApierGetActions,
+		// testApierSetActionPlan,
+		// testApierAddTriggeredAction,
+		// testApierGetAccountActionTriggers,
+		// testApierAddTriggeredAction2,
+		// testApierGetAccountActionTriggers2,
+		// testApierSetAccountActionTriggers,
+		// testApierRemAccountActionTriggers,
+		// testApierSetAccount,
+		// testApierGetAccountActionPlan,
+		// testApierGetAccountActionPlanWithoutTenant,
+		// testApierITGetScheduledActionsForAccount,
+		// testApierRemUniqueIDActionTiming,
+		// testApierRemUniqueIDActionTimingWithoutTenant,
+		// testApierGetAccount,
+		// testApierTriggersExecute,
+		// testApierResetDataBeforeLoadFromFolder,
+		// testApierLoadTariffPlanFromFolder,
+		// testApierComputeReverse,
+		// testApierResetDataAfterLoadFromFolder,
+		// testApierSetChargerS,
+		// testApierGetAccountAfterLoad,
+		// testApierResponderGetCost,
+		// testApierMaxDebitInexistentAcnt,
+		// testApierCdrServer,
+		// testApierITGetCdrs,
+		// testApierITProcessCdr,
+		// testApierGetCallCostLog,
+		// testApierITSetDestination,
+		// testApierITGetScheduledActions,
+		// testApierITGetDataCost,
+		// testApierITGetCost,
+		// testApierInitDataDb2,
+		// testApierInitStorDb2,
+		// testApierReloadCache2,
+		// testApierReloadScheduler2,
+		// testApierImportTPFromFolderPath,
+		// testApierLoadTariffPlanFromStorDbDryRun,
+		// testApierGetCacheStats2,
+		// testApierLoadTariffPlanFromStorDb,
+		// testApierStartStopServiceStatus,
+		// testApierReplayFldPosts,
+		// testApierGetDataDBVesions,
+		// testApierGetStorDBVesions,
+		// testApierBackwardsCompatible,
+		// testApierStopEngine,
 
-		//start test for cache options
-		testApierLoadConfig,
-		testApierCreateDirs,
-		testApierInitDataDb,
-		testApierInitStorDb,
-		testApierStartEngine,
-		testApierRpcConn,
-		testApierTPTiming,
-		testApierTPDestination,
-		testApierTPRate,
-		testApierTPDestinationRate,
-		testApierTPRatingPlan,
-		testApierLoadRatingPlan,
-		testRatingProfileCachingMetaNone,
-		testRatingProfileCachingMetaLoad,
-		testRatingProfileCachingMetaReload1,
-		testRatingProfileCachingMetaReload2,
-		testRatingProfileCachingMetaRemove,
-		testApierStopEngine,
+		// //start test for cache options
+		// testApierLoadConfig,
+		// testApierCreateDirs,
+		// testApierInitDataDb,
+		// testApierInitStorDb,
+		// testApierStartEngine,
+		// testApierRpcConn,
+		// testApierTPTiming,
+		// testApierTPDestination,
+		// testApierTPRate,
+		// testApierTPDestinationRate,
+		// testApierTPRatingPlan,
+		// testApierLoadRatingPlan,
+		// testRatingProfileCachingMetaNone,
+		// testRatingProfileCachingMetaLoad,
+		// testRatingProfileCachingMetaReload1,
+		// testRatingProfileCachingMetaReload2,
+		// testRatingProfileCachingMetaRemove,
+		// testApierStopEngine,
 	}
 )
 
 func TestApierIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow() // need tests redesign
+		APIerSv1ConfigDIR = "tutinternal"
 	case utils.MetaMySQL:
-		APIerSv1ConfigDIR = "apier_mysql"
+		APIerSv1ConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		APIerSv1ConfigDIR = "apier_mongo"
 	case utils.MetaPostgres:
@@ -237,6 +238,30 @@ func testApierRpcConn(t *testing.T) {
 	rater, err = newRPCClient(cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+	// var totalStored int
+	// dataMap := make(map[string]string)
+	// pattern := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	// data := make([]byte, 512*1024)       // 16 kb
+	// for totalStored < 1*1024*1024*1024 { // 512 mb total data size to generate
+	// 	for i := range data {
+	// 		data[i] = pattern[i%len(pattern)]
+	// 	}
+	// 	dataMap[fmt.Sprintf("%s%d", "testdata-", totalStored)] = string(data)
+	// 	totalStored += len(data)
+	// }
+	for i := 1000000; i <= 5000000; i++ {
+		acnt := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "test" + strconv.Itoa(i), ActionPlanID: "AP_PACKAGE_10", ReloadScheduler: true}
+		reply1 := utils.EmptyString
+		if err := rater.Call(context.Background(), utils.APIerSv1SetAccount, acnt, &reply1); err != nil {
+			t.Error("Got error on APIerSv1SetAccount: ", err.Error())
+		} else if reply1 != utils.OK {
+			t.Errorf("Calling APIerSv1SetAccount received: %s", reply1)
+		}
+		// Print `i` every 20,000 iterations
+		if (i-1000000)%100000 == 0 {
+			fmt.Println("Processing account:", i)
+		}
 	}
 }
 

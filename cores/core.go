@@ -24,7 +24,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
 	"runtime/pprof"
 	"sync"
 	"time"
@@ -249,7 +248,7 @@ func writeHeapProfile(path string) error {
 		}
 	}()
 	utils.Logger.Info(fmt.Sprintf("<%s> writing heap profile to %q", utils.CoreS, path))
-	runtime.GC() // get up-to-date statistics
+	// runtime.GC() // get up-to-date statistics
 	if err := pprof.WriteHeapProfile(f); err != nil {
 		return fmt.Errorf("could not write memory profile: %v", err)
 	}

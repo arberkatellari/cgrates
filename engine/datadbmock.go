@@ -553,3 +553,7 @@ func (dbM *DataDBMock) GetSessionsBackupDrv(nodeID string, tnt string) ([]*Store
 func (dbM *DataDBMock) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error {
 	return utils.ErrNotImplemented
 }
+
+func (dbM *DataDBMock) DumpDataDB(string) error {
+	return utils.ErrNotImplemented
+}

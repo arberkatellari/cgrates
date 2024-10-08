@@ -94,7 +94,7 @@ func (d *testDispatcher) startEngine(t *testing.T) {
 
 func (d *testDispatcher) stopEngine(t *testing.T) {
 	pid := strconv.Itoa(d.cmd.Process.Pid)
-	if err := exec.Command("kill", "-9", pid).Run(); err != nil {
+	if err := exec.Command("kill", "-9", pid).WaitDelay.Abs() err != nil {
 		t.Fatalf("Error at stop engine:%v\n", err)
 	}
 	// // if err := d.cmd.Process.Kill(); err != nil {
