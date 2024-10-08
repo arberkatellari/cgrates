@@ -69,6 +69,7 @@ func init() {
 	gob.Register(new(DispatcherHost))
 	gob.Register(new(DispatcherHostProfile))
 	gob.Register(new(DispatcherHostWithAPIOpts))
+	gob.Register(new(DispatcherProfile))
 
 	// CDRs
 	gob.Register(new(EventCost))
@@ -96,6 +97,22 @@ func init() {
 	gob.Register(url.Values{})
 	gob.Register(json.RawMessage{})
 	gob.Register(BalanceSummaries{})
+	gob.Register(new(map[string]int64))
+
+	gob.Register(new(Account))
+	gob.Register(new(utils.TPTiming))
+	gob.Register(new(ChargerProfile))
+	gob.Register(new(RatingPlan))
+	gob.Register(new(RatingProfile))
+	gob.Register(new(ActionPlan))
+	gob.Register(new(Versions))
+	gob.Register(new(Destination))
+	gob.Register(new(Actions))
+	gob.Register(new(StoredSession))
+	gob.Register(new(Trend))
+	gob.Register(new(TrendProfile))
+	gob.Register(new(ActionTriggers))
+	gob.Register(new(SharedGroup))
 
 	gob.Register(new(utils.ArgCacheReplicateSet))
 	gob.Register(new(utils.ArgCacheReplicateRemove))

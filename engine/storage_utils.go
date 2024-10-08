@@ -55,6 +55,10 @@ func NewDataDBConn(dbType, host, port, name, user,
 	case utils.MetaMongo:
 		d, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
 	case utils.MetaInternal:
+		if config.CgrConfig().DataDbCfg().DumpInterval != 0 {
+			d, err = RecoverDB(nil, nil, true, itmsCfg, config.CgrConfig().DataDbCfg().DumpPath)
+			return
+		}
 		d = NewInternalDB(nil, nil, true, itmsCfg)
 	default:
 		err = fmt.Errorf("unsupported db_type <%s>", dbType)
@@ -77,6 +81,10 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 		db, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,
 			opts.SQLConnMaxLifetime, opts.MySQLLocation, opts.MySQLDSNParams)
 	case utils.MetaInternal:
+		if config.CgrConfig().StorDbCfg().DumpInterval != 0 {
+			db, err = RecoverDB(stringIndexedFields, prefixIndexedFields, false, itmsCfg, config.CgrConfig().StorDbCfg().DumpPath)
+			return
+		}
 		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false, itmsCfg)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",

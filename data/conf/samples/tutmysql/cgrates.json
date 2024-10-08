@@ -19,6 +19,45 @@
 	"db_type": "redis",						// data_db type: <redis|mongo>
 	"db_port": 6379, 						// data_db port to reach the database
 	"db_name": "10", 						// data_db database name to connect to
+	"items":{
+		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*charger_profiles": {"limit": 111, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*sessions_backup": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}
+	}
 },
 
 "stor_db": {
@@ -36,7 +75,7 @@
 "schedulers": {
 	"enabled": true,
 	"cdrs_conns": ["*internal"],
-	"stats_conns": ["*localhost"],
+	"stats_conns": ["*internal"],
 },
 
 
@@ -48,9 +87,9 @@
 
 "attributes": {
 	"enabled": true,
-	"stats_conns": ["*localhost"],
-	"resources_conns": ["*localhost"],
-	"apiers_conns": ["*localhost"]
+	"stats_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"apiers_conns": ["*internal"]
 },
 
 
@@ -95,7 +134,7 @@
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
 	"rals_conns": ["*internal"],
-	"cdrs_conns": ["*localhost"],
+	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
 },
 
@@ -113,7 +152,7 @@
 
 
 "filters": {
-	"stats_conns": ["*localhost"],
+	"stats_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"apiers_conns": ["*internal"],
 },

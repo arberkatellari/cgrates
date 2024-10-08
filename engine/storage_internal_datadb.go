@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -56,14 +57,49 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB b
 		}
 	}
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
+	return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
+		ltcache.NewTransCache(tcCfg))
+}
+
+// newInternalDB constructs an InternalDB struct with a recovered or new TransCache
+func newInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool, ms Marshaler, db *ltcache.TransCache) *InternalDB {
 	return &InternalDB{
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
 		ms:                  ms,
-		db:                  ltcache.NewTransCache(tcCfg),
+		db:                  db,
 		isDataDB:            isDataDB,
 	}
+}
+
+// Will recover a database from a dump file to memory
+func RecoverDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
+	itmsCfg map[string]*config.ItemOpt, fldrPath string) (*InternalDB, error) {
+	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
+	for k, cPcfg := range itmsCfg {
+		tcCfg[k] = &ltcache.CacheConfig{
+			MaxItems:  cPcfg.Limit,
+			TTL:       cPcfg.TTL,
+			StaticTTL: cPcfg.StaticTTL,
+		}
+	}
+	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
+	utils.Logger.Debug("before readall")
+	startRead := time.Now()
+
+	tc, err := ltcache.ReadAll(fldrPath, tcCfg)
+	if err != nil && err.Error() != "EOF" && !strings.HasSuffix(err.Error(), "no such file or directory") {
+		return nil, err
+	} else if err != nil {
+		utils.Logger.Info("Couldnt recover DB: <" + err.Error() + ">, creating new DB")
+		// return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
+		// 	ltcache.NewTransCache(tcCfg)), nil
+	}
+	readTime := time.Since(startRead)
+	utils.Logger.Debug("after readall, readTime: " + fmt.Sprintln(readTime))
+	iDB := newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms, tc)
+	return iDB, nil
 }
 
 // SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)
@@ -128,7 +164,10 @@ func (iDB *InternalDB) GetVersions(itm string) (vrs Versions, err error) {
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	provVrs := x.(Versions)
+	provVrs, canCast := x.(Versions)
+	if !canCast {
+		provVrs = *x.(*Versions)
+	}
 	if itm != "" {
 		if _, has := provVrs[itm]; !has {
 			return nil, utils.ErrNotFound
@@ -943,4 +982,22 @@ func (iDB *InternalDB) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error 
 	}
 	iDB.db.Remove(utils.CacheSessionsBackup, cgrid, true, utils.NonTransactional)
 	return nil
+}
+
+// Will dump everything inside datadb to files
+func (iDB *InternalDB) DumpDataDB(fldrPath string) (err error) {
+	utils.Logger.Debug("before writeall")
+	if _, err = os.Stat(fldrPath); os.IsNotExist(err) {
+		err = os.MkdirAll(fldrPath, 0755)
+		if err != nil {
+			return
+		}
+	}
+	todmpTime1 := time.Now()
+	if err := iDB.db.Collector.WriteAll(); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("Failed to dump DataDB to file, error: <%v>", err))
+	}
+	wTime := time.Since(todmpTime1)
+	utils.Logger.Debug(fmt.Sprintln("datadb after writeall: ", wTime))
+	return
 }

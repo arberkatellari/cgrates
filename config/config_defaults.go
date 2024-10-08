@@ -87,18 +87,20 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"data_db": {					// database used to store runtime data (eg: accounts)
-	"db_type": "*redis",			// data_db type: <*redis|*mongo>
-	"db_host": "127.0.0.1",			// data_db host address
-	"db_port": 6379, 			// data_db port to reach the database
-	"db_name": "10", 			// data_db database name to connect to
-	"db_user": "cgrates", 			// username to use when connecting to data_db
-	"db_password": "", 			// password to use when connecting to data_db
-	"remote_conns":[],			// the conns that are queried when the items are not found in local DB 
-	"remote_conn_id": "",			// the ID to be sent to remote_conns to identify the connection
-	"replication_conns":[],			// the conns the items are replicated
-	"replication_filtered": false, 		// if this is enabled the replication will be made only to the conns that received a get
-	"replication_cache": "", 		// the caching action that is executed on the replication_conns when the items are replicated 
+"data_db": {								// database used to store runtime data (eg: accounts)
+	"db_type": "*redis",					// data_db type: <*redis|*mongo>
+	"db_host": "127.0.0.1",					// data_db host address
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+	"db_user": "cgrates", 					// username to use when connecting to data_db
+	"db_password": "", 						// password to use when connecting to data_db
+	"db_dump_interval": "0s",				// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
+	"db_dump_path": "/tmp/datadb_dump",		// the path where datadb will be dumped
+	"remote_conns":[],						// the conns that are queried when the items are not found in local DB 
+	"remote_conn_id": "",					// the ID to be sent to remote_conns to identify the connection
+	"replication_conns":[],					// the conns the items are replicated
+	"replication_filtered": false, 			// if this is enabled the replication will be made only to the conns that received a get
+	"replication_cache": "", 				// the caching action that is executed on the replication_conns when the items are replicated 
 	"items":{
 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
@@ -139,51 +141,53 @@ const CGRATES_CFG_JSON = `
 		"*sessions_backup": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 	},
 	"opts":{
-		"redisMaxConns": 10,			// the connection pool size
-		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
-		"redisSentinel": "",			// the name of sentinel when used
-		"redisCluster": false,			// if enabled the datadb will try to connect to the redis cluster
-		"redisClusterSync": "5s",		// the sync interval for the redis cluster
+		"redisMaxConns": 10,				// the connection pool size
+		"redisConnectAttempts": 20,			// the maximum amount of dial attempts
+		"redisSentinel": "",				// the name of sentinel when used
+		"redisCluster": false,				// if enabled the datadb will try to connect to the redis cluster
+		"redisClusterSync": "5s",			// the sync interval for the redis cluster
 		"redisClusterOndownDelay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-		"redisConnectTimeout": "0",		// the amount of wait time until timeout for a connection attempt
-		"redisReadTimeout": "0",		// the amount of wait time until timeout for reading operations
+		"redisConnectTimeout": "0",			// the amount of wait time until timeout for a connection attempt
+		"redisReadTimeout": "0",			// the amount of wait time until timeout for reading operations
 		"redisWriteTimeout": "0",   		// the amount of wait time until timeout for writing operations
 		"redisPoolPipelineWindow": "150µs",	// duration after which internal pipelines are flushed (0 disables implicit pipelining)
-		"redisPoolPipelineLimit": 0,        	// maximum number of commands that can be pipelined before flushing (0 means no limit)
-		"redisTLS": false,			// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
+		"redisPoolPipelineLimit": 0,       	// maximum number of commands that can be pipelined before flushing (0 means no limit)
+		"redisTLS": false,					// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
 		"redisClientCertificate":"",		// path to client certificate
-		"redisClientKey":"",			// path to client key
-		"redisCACertificate":"",		// path to CA certificate (populate for self-signed certificate otherwise let it empty)
-		"mongoQueryTimeout":"10s",		// timeout for query when mongo is used
+		"redisClientKey":"",				// path to client key
+		"redisCACertificate":"",			// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used
 		"mongoConnScheme": "mongodb"		// scheme for MongoDB connection <mongodb|mongodb+srv>
 	}
 },
 
 
-"stor_db": {					// database used to store offline tariff plans and CDRs
-	"db_type": "*mysql",			// stor database type to use: <*mongo|*mysql|*postgres|*internal>
-	"db_host": "127.0.0.1",			// the host to connect to
-	"db_port": 3306,			// the port to reach the stor_db
-	"db_name": "cgrates",			// stor database name
-	"db_user": "cgrates",			// username to use when connecting to stor_db
-	"db_password": "CGRateS.org",		// password to use when connecting to stor_db
-	"string_indexed_fields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
-	"prefix_indexed_fields":[],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_type": "*mysql",					// stor database type to use: <*mongo|*mysql|*postgres|*internal>
+	"db_host": "127.0.0.1",					// the host to connect to
+	"db_port": 3306,						// the port to reach the stor_db
+	"db_name": "cgrates",					// stor database name
+	"db_user": "cgrates",					// username to use when connecting to stor_db
+	"db_password": "CGRateS.org",			// password to use when connecting to stor_db
+	"db_dump_interval": "0s",				// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
+	"db_dump_path": "/tmp/stordb_dump",		// the path where datadb will be dumped
+	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
+	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
 	"opts": {
-		"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
-		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
-		"sqlConnMaxLifetime": "0", 	// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
-		"mysqlDSNParams": {},           // DSN extra paramss
-		"mongoQueryTimeout": "10s",	// timeout for query when mongo is used
-		"mongoConnScheme": "mongodb",	// scheme for MongoDB connection <mongodb|mongodb+srv>
-		"mysqlLocation": "Local",	// the location the time from mysql is retrieved
-		"pgSSLMode": "disable",		// determines whether or with what priority a secure SSL TCP/IP connection will be negotiated with the server
-		//"pgSSLCert": "",		// file name of the client SSL certificate, replacing the default ~/.postgresql/postgresql.crt
-		//"pgSSLKey": "",		// location for the secret key used for the client certificate
-		//"pgSSLPassword": "",		// specifies the password for the secret key specified in pgSSLKey
-		//"pgSSLCertMode": "allow",	// determines whether a client certificate may be sent to the server, and whether the server is required to request one
-		//"pgSSLRootCert": "",		// name of a file containing SSL certificate authority (CA) certificate(s)
-		"pgSchema": ""			// postgres schema to use
+		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo
+		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo
+		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
+		"mysqlDSNParams": {},         		// DSN extra paramsss
+		"mongoQueryTimeout": "10s",			// timeout for query when mongo is used
+		"mongoConnScheme": "mongodb",		// scheme for MongoDB connection <mongodb|mongodb+srv>
+		"mysqlLocation": "Local",			// the location the time from mysql is retrieved
+		"pgSSLMode": "disable",				// determines whether or with what priority a secure SSL TCP/IP connection will be negotiated with the server
+		//"pgSSLCert": "",					// file name of the client SSL certificate, replacing the default ~/.postgresql/postgresql.crt
+		//"pgSSLKey": "",					// location for the secret key used for the client certificate
+		//"pgSSLPassword": "",				// specifies the password for the secret key specified in pgSSLKey
+		//"pgSSLCertMode": "allow",			// determines whether a client certificate may be sent to the server, and whether the server is required to request one
+		//"pgSSLRootCert": "",				// name of a file containing SSL certificate authority (CA) certificate(s)
+		"pgSchema": ""						// postgres schema to use
 	},
 	"items":{
 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},

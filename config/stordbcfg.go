@@ -46,12 +46,14 @@ type StorDBOpts struct {
 
 // StorDbCfg StroreDb config
 type StorDbCfg struct {
-	Type                string // Should reflect the database type used to store logs
-	Host                string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	Port                string // The port to bind to.
-	Name                string // The name of the database to connect to.
-	User                string // The user to sign in as.
-	Password            string // The user's password.
+	Type                string        // Should reflect the database type used to store logs
+	Host                string        // The host to connect to. Values that start with / are for UNIX domain sockets.
+	Port                string        // The port to bind to.
+	Name                string        // The name of the database to connect to.
+	User                string        // The user to sign in as.
+	Password            string        // The user's password.
+	DumpInterval        time.Duration // Regurarly dump database to file
+	DumpPath            string        // Path to the dump file
 	StringIndexedFields []string
 	PrefixIndexedFields []string
 	RmtConns            []string // Remote DataDB  connIDs
@@ -145,6 +147,14 @@ func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Db_password != nil {
 		dbcfg.Password = *jsnDbCfg.Db_password
 	}
+	if jsnDbCfg.Db_dump_interval != nil {
+		if dbcfg.DumpInterval, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Db_dump_interval); err != nil {
+			return err
+		}
+	}
+	if jsnDbCfg.Db_dump_path != nil {
+		dbcfg.DumpPath = *jsnDbCfg.Db_dump_path
+	}
 	if jsnDbCfg.String_indexed_fields != nil {
 		dbcfg.StringIndexedFields = *jsnDbCfg.String_indexed_fields
 	}
@@ -206,12 +216,14 @@ func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
 // Clone returns the cloned object
 func (dbcfg *StorDbCfg) Clone() (cln *StorDbCfg) {
 	cln = &StorDbCfg{
-		Type:     dbcfg.Type,
-		Host:     dbcfg.Host,
-		Port:     dbcfg.Port,
-		Name:     dbcfg.Name,
-		User:     dbcfg.User,
-		Password: dbcfg.Password,
+		Type:         dbcfg.Type,
+		Host:         dbcfg.Host,
+		Port:         dbcfg.Port,
+		Name:         dbcfg.Name,
+		User:         dbcfg.User,
+		Password:     dbcfg.Password,
+		DumpInterval: dbcfg.DumpInterval,
+		DumpPath:     dbcfg.DumpPath,
 
 		Items: make(map[string]*ItemOpt),
 		Opts:  dbcfg.Opts.Clone(),
@@ -272,6 +284,8 @@ func (dbcfg *StorDbCfg) AsMapInterface() (mp map[string]any) {
 		utils.DataDbNameCfg:          dbcfg.Name,
 		utils.DataDbUserCfg:          dbcfg.User,
 		utils.DataDbPassCfg:          dbcfg.Password,
+		utils.DataDbDumpIntervalCfg:  dbcfg.DumpInterval,
+		utils.DataDbDumpPathCfg:      dbcfg.DumpPath,
 		utils.StringIndexedFieldsCfg: dbcfg.StringIndexedFields,
 		utils.PrefixIndexedFieldsCfg: dbcfg.PrefixIndexedFields,
 		utils.RemoteConnsCfg:         dbcfg.RmtConns,

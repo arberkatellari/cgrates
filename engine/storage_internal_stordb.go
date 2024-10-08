@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"os"
 	"slices"
 	"sort"
 	"strings"
@@ -1530,4 +1531,22 @@ func (iDB *InternalDB) SetSMCost(smCost *SMCost) (err error) {
 	iDB.db.Set(utils.CacheSessionCostsTBL, utils.ConcatenatedKey(smCost.CGRID, smCost.RunID, smCost.OriginHost, smCost.OriginID), smCost, idxs.AsSlice(),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return err
+}
+
+// Will dump everything inside stordb to files
+func (iDB *InternalDB) DumpStorDB(fldrPath string) (err error) {
+	utils.Logger.Debug("before writeall")
+	if _, err = os.Stat(fldrPath); os.IsNotExist(err) {
+		err = os.MkdirAll(fldrPath, 0755)
+		if err != nil {
+			return
+		}
+	}
+	todmpTime1 := time.Now()
+	if err := iDB.db.Collector.WriteAll(); err != nil {
+		utils.Logger.Debug(fmt.Sprintln(err))
+	}
+	wTime := time.Since(todmpTime1)
+	utils.Logger.Debug(fmt.Sprintln("stordb after writeall: ", wTime))
+	return
 }

@@ -49,19 +49,21 @@ type DataDBOpts struct {
 
 // DataDbCfg Database config
 type DataDbCfg struct {
-	Type        string
-	Host        string   // The host to connect to. Values that start with / are for UNIX domain sockets.
-	Port        string   // The port to bind to.
-	Name        string   // The name of the database to connect to.
-	User        string   // The user to sign in as.
-	Password    string   // The user's password.
-	RmtConns    []string // Remote DataDB  connIDs
-	RmtConnID   string
-	RplConns    []string // Replication connIDs
-	RplFiltered bool
-	RplCache    string
-	Items       map[string]*ItemOpt
-	Opts        *DataDBOpts
+	Type         string
+	Host         string        // The host to connect to. Values that start with / are for UNIX domain sockets.
+	Port         string        // The port to bind to.
+	Name         string        // The name of the database to connect to.
+	User         string        // The user to sign in as.
+	Password     string        // The user's password.
+	DumpInterval time.Duration // Regurarly dump database to file
+	DumpPath     string        // Path to the dump file
+	RmtConns     []string      // Remote DataDB  connIDs
+	RmtConnID    string
+	RplConns     []string // Replication connIDs
+	RplFiltered  bool
+	RplCache     string
+	Items        map[string]*ItemOpt
+	Opts         *DataDBOpts
 }
 
 func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
@@ -167,6 +169,14 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Db_password != nil {
 		dbcfg.Password = *jsnDbCfg.Db_password
 	}
+	if jsnDbCfg.Db_dump_interval != nil {
+		if dbcfg.DumpInterval, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Db_dump_interval); err != nil {
+			return err
+		}
+	}
+	if jsnDbCfg.Db_dump_path != nil {
+		dbcfg.DumpPath = *jsnDbCfg.Db_dump_path
+	}
 	if jsnDbCfg.Remote_conns != nil {
 		dbcfg.RmtConns = make([]string, len(*jsnDbCfg.Remote_conns))
 		for idx, rmtConn := range *jsnDbCfg.Remote_conns {
@@ -239,17 +249,19 @@ func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 // Clone returns the cloned object
 func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
 	cln = &DataDbCfg{
-		Type:        dbcfg.Type,
-		Host:        dbcfg.Host,
-		Port:        dbcfg.Port,
-		Name:        dbcfg.Name,
-		User:        dbcfg.User,
-		Password:    dbcfg.Password,
-		RplFiltered: dbcfg.RplFiltered,
-		RplCache:    dbcfg.RplCache,
-		RmtConnID:   dbcfg.RmtConnID,
-		Items:       make(map[string]*ItemOpt),
-		Opts:        dbcfg.Opts.Clone(),
+		Type:         dbcfg.Type,
+		Host:         dbcfg.Host,
+		Port:         dbcfg.Port,
+		Name:         dbcfg.Name,
+		User:         dbcfg.User,
+		Password:     dbcfg.Password,
+		DumpInterval: dbcfg.DumpInterval,
+		DumpPath:     dbcfg.DumpPath,
+		RplFiltered:  dbcfg.RplFiltered,
+		RplCache:     dbcfg.RplCache,
+		RmtConnID:    dbcfg.RmtConnID,
+		Items:        make(map[string]*ItemOpt),
+		Opts:         dbcfg.Opts.Clone(),
 	}
 	for k, itm := range dbcfg.Items {
 		cln.Items[k] = itm.Clone()
@@ -292,6 +304,8 @@ func (dbcfg *DataDbCfg) AsMapInterface() (mp map[string]any) {
 		utils.DataDbNameCfg:          dbcfg.Name,
 		utils.DataDbUserCfg:          dbcfg.User,
 		utils.DataDbPassCfg:          dbcfg.Password,
+		utils.DataDbDumpIntervalCfg:  dbcfg.DumpInterval,
+		utils.DataDbDumpPathCfg:      dbcfg.DumpPath,
 		utils.RemoteConnsCfg:         dbcfg.RmtConns,
 		utils.RemoteConnIDCfg:        dbcfg.RmtConnID,
 		utils.ReplicationConnsCfg:    dbcfg.RplConns,
