@@ -5,15 +5,15 @@ permissions: {}
 on:
   push:
     branches:
-      - master
+      - ActExecFix
     paths-ignore:
-      - 'docs/**'
+      - "docs/**"
       - README.md
   pull_request:
     branches:
       - master
     paths-ignore:
-      - 'docs/**'
+      - "docs/**"
       - README.md
   workflow_dispatch:
 

@@ -257,8 +257,12 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 							act.ActionType, err))
 					partialyExecuted = true
 					transactionFailed = true
+					*acc = Account{}
 					break
 				}
+				defer func() {
+					*acc = Account{}
+				}()
 				if act.ActionType == utils.MetaRemoveAccount {
 					removeAccountActionFound = true
 				}
