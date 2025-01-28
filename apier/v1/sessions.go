@@ -21,6 +21,7 @@ package v1
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/dispatchers"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -170,4 +171,9 @@ func (ssv1 *SessionSv1) RegisterInternalBiJSONConn(ctx *context.Context, args st
 // BackupActiveSessions stores all active sessions in dataDB and replies with the amount of sessions it stored
 func (ssv1 *SessionSv1) BackupActiveSessions(ctx *context.Context, args string, rply *int) (err error) {
 	return ssv1.sS.BiRPCv1BackupActiveSessions(ctx, args, rply)
+}
+
+// BackupActiveSessions stores all active sessions in dataDB and replies with the amount of sessions it stored
+func (ssv1 *SessionSv1) GetBackupSessions(ctx *context.Context, args string, rply *[]*engine.StoredSession) (err error) {
+	return ssv1.sS.BiRPCv1GetBackupSessions(ctx, args, rply)
 }

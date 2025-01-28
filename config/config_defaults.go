@@ -140,6 +140,10 @@ const CGRATES_CFG_JSON = `
 		"*sessions_backup": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
 	},
 	"opts":{
+		"internalDBDumpPath": "/var/lib/cgrates/internal_db/datadb",		// the path where datadb will be dumped
+		"internalDBDumpInterval": "0s",		// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
+		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
+		"internalDBWriteLimit": -1,		// maximum size in MiB that can be written in a singular dump file
 		"redisMaxConns": 10,			// the connection pool size
 		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
 		"redisSentinel": "",			// the name of sentinel when used
@@ -171,20 +175,24 @@ const CGRATES_CFG_JSON = `
 	"string_indexed_fields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
 	"prefix_indexed_fields":[],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
 	"opts": {
-		"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
-		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
-		"sqlConnMaxLifetime": "0", 	// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
-		"mysqlDSNParams": {},           // DSN extra paramss
-		"mongoQueryTimeout": "10s",	// timeout for query when mongo is used
-		"mongoConnScheme": "mongodb",	// scheme for MongoDB connection <mongodb|mongodb+srv>
-		"mysqlLocation": "Local",	// the location the time from mysql is retrieved
-		"pgSSLMode": "disable",		// determines whether or with what priority a secure SSL TCP/IP connection will be negotiated with the server
-		//"pgSSLCert": "",		// file name of the client SSL certificate, replacing the default ~/.postgresql/postgresql.crt
-		//"pgSSLKey": "",		// location for the secret key used for the client certificate
-		//"pgSSLPassword": "",		// specifies the password for the secret key specified in pgSSLKey
-		//"pgSSLCertMode": "allow",	// determines whether a client certificate may be sent to the server, and whether the server is required to request one
-		//"pgSSLRootCert": "",		// name of a file containing SSL certificate authority (CA) certificate(s)
-		"pgSchema": ""			// postgres schema to use
+		"internalDBDumpPath": "/var/lib/cgrates/internal_db/stordb",		// the path where stordb will be dumped
+		"internalDBDumpInterval": "0s",		// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
+		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
+		"internalDBWriteLimit": -1,		// maximum size in MiB that can be written in a singular dump file
+		"sqlMaxOpenConns": 100,			// maximum database connections opened, not applying for mongo
+		"sqlMaxIdleConns": 10,			// maximum database connections idle, not applying for mongo
+		"sqlConnMaxLifetime": "0", 		// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
+		"mysqlDSNParams": {},           	// DSN extra paramss
+		"mongoQueryTimeout": "10s",		// timeout for query when mongo is used
+		"mongoConnScheme": "mongodb",		// scheme for MongoDB connection <mongodb|mongodb+srv>
+		"mysqlLocation": "Local",		// the location the time from mysql is retrieved
+		"pgSSLMode": "disable",			// determines whether or with what priority a secure SSL TCP/IP connection will be negotiated with the server
+		//"pgSSLCert": "",			// file name of the client SSL certificate, replacing the default ~/.postgresql/postgresql.crt
+		//"pgSSLKey": "",			// location for the secret key used for the client certificate
+		//"pgSSLPassword": "",			// specifies the password for the secret key specified in pgSSLKey
+		//"pgSSLCertMode": "allow",		// determines whether a client certificate may be sent to the server, and whether the server is required to request one
+		//"pgSSLRootCert": "",			// name of a file containing SSL certificate authority (CA) certificate(s)
+		"pgSchema": ""				// postgres schema to use
 	},
 	"items":{
 		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
