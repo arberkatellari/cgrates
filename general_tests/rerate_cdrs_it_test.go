@@ -22,6 +22,7 @@ package general_tests
 
 import (
 	"math"
+	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -37,6 +38,7 @@ func TestRerateCDRs(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		cfgDir = "rerate_cdrs_internal"
+		defer os.RemoveAll("/tmp/internal_db")
 	case utils.MetaMySQL:
 		cfgDir = "rerate_cdrs_mysql"
 	case utils.MetaMongo:
@@ -318,6 +320,7 @@ func TestRerateCDRsNoRefund(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		cfgDir = "rerate_cdrs_internal"
+		defer os.RemoveAll("/tmp/internal_db")
 	case utils.MetaMySQL:
 		cfgDir = "rerate_cdrs_mysql"
 	case utils.MetaMongo:
