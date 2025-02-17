@@ -25,20 +25,21 @@ import (
 
 // DiameterAgentCfg the config section that describes the Diameter Agent
 type DiameterAgentCfg struct {
-	Enabled           bool   // enables the diameter agent: <true|false>
-	ListenNet         string // sctp or tcp
-	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
-	DictionariesPath  string
-	SessionSConns     []string
-	OriginHost        string
-	OriginRealm       string
-	VendorID          int
-	ProductName       string
-	SyncedConnReqs    bool
-	ASRTemplate       string
-	RARTemplate       string
-	ForcedDisconnect  string
-	RequestProcessors []*RequestProcessor
+	Enabled            bool   // enables the diameter agent: <true|false>
+	ListenNet          string // sctp or tcp
+	Listen             string // address where to listen for diameter requests <x.y.z.y:1234>
+	DictionaryDefaults bool
+	DictionariesPath   string
+	SessionSConns      []string
+	OriginHost         string
+	OriginRealm        string
+	VendorID           int
+	ProductName        string
+	SyncedConnReqs     bool
+	ASRTemplate        string
+	RARTemplate        string
+	ForcedDisconnect   string
+	RequestProcessors  []*RequestProcessor
 }
 
 func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separator string) (err error) {
@@ -53,6 +54,9 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	}
 	if jsnCfg.Listen_net != nil {
 		da.ListenNet = *jsnCfg.Listen_net
+	}
+	if jsnCfg.Dictionary_defaults != nil {
+		da.DictionaryDefaults = *jsnCfg.Dictionary_defaults
 	}
 	if jsnCfg.Dictionaries_path != nil {
 		da.DictionariesPath = *jsnCfg.Dictionaries_path
@@ -117,18 +121,19 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 // AsMapInterface returns the config as a map[string]any
 func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg:          da.Enabled,
-		utils.ListenNetCfg:        da.ListenNet,
-		utils.ListenCfg:           da.Listen,
-		utils.DictionariesPathCfg: da.DictionariesPath,
-		utils.OriginHostCfg:       da.OriginHost,
-		utils.OriginRealmCfg:      da.OriginRealm,
-		utils.VendorIDCfg:         da.VendorID,
-		utils.ProductNameCfg:      da.ProductName,
-		utils.SyncedConnReqsCfg:   da.SyncedConnReqs,
-		utils.ASRTemplateCfg:      da.ASRTemplate,
-		utils.RARTemplateCfg:      da.RARTemplate,
-		utils.ForcedDisconnectCfg: da.ForcedDisconnect,
+		utils.EnabledCfg:            da.Enabled,
+		utils.ListenNetCfg:          da.ListenNet,
+		utils.ListenCfg:             da.Listen,
+		utils.DictionaryDefaultsCfg: da.DictionaryDefaults,
+		utils.DictionariesPathCfg:   da.DictionariesPath,
+		utils.OriginHostCfg:         da.OriginHost,
+		utils.OriginRealmCfg:        da.OriginRealm,
+		utils.VendorIDCfg:           da.VendorID,
+		utils.ProductNameCfg:        da.ProductName,
+		utils.SyncedConnReqsCfg:     da.SyncedConnReqs,
+		utils.ASRTemplateCfg:        da.ASRTemplate,
+		utils.RARTemplateCfg:        da.RARTemplate,
+		utils.ForcedDisconnectCfg:   da.ForcedDisconnect,
 	}
 
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
@@ -155,18 +160,19 @@ func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[stri
 // Clone returns a deep copy of DiameterAgentCfg
 func (da DiameterAgentCfg) Clone() (cln *DiameterAgentCfg) {
 	cln = &DiameterAgentCfg{
-		Enabled:          da.Enabled,
-		ListenNet:        da.ListenNet,
-		Listen:           da.Listen,
-		DictionariesPath: da.DictionariesPath,
-		OriginHost:       da.OriginHost,
-		OriginRealm:      da.OriginRealm,
-		VendorID:         da.VendorID,
-		ProductName:      da.ProductName,
-		SyncedConnReqs:   da.SyncedConnReqs,
-		ASRTemplate:      da.ASRTemplate,
-		RARTemplate:      da.RARTemplate,
-		ForcedDisconnect: da.ForcedDisconnect,
+		Enabled:            da.Enabled,
+		ListenNet:          da.ListenNet,
+		Listen:             da.Listen,
+		DictionaryDefaults: da.DictionaryDefaults,
+		DictionariesPath:   da.DictionariesPath,
+		OriginHost:         da.OriginHost,
+		OriginRealm:        da.OriginRealm,
+		VendorID:           da.VendorID,
+		ProductName:        da.ProductName,
+		SyncedConnReqs:     da.SyncedConnReqs,
+		ASRTemplate:        da.ASRTemplate,
+		RARTemplate:        da.RARTemplate,
+		ForcedDisconnect:   da.ForcedDisconnect,
 	}
 	if da.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(da.SessionSConns))

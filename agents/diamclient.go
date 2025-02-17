@@ -29,13 +29,14 @@ import (
 	"github.com/fiorix/go-diameter/v4/diam"
 	"github.com/fiorix/go-diameter/v4/diam/avp"
 	"github.com/fiorix/go-diameter/v4/diam/datatype"
+	"github.com/fiorix/go-diameter/v4/diam/dict"
 	"github.com/fiorix/go-diameter/v4/diam/sm"
 )
 
 var dictOnce sync.Once
 
 func NewDiameterClient(addr, originHost, originRealm string, vendorId int, productName string,
-	firmwareRev int, dictsDir string, network string) (dc *DiameterClient, err error) {
+	firmwareRev int, dictDflts bool, dictsDir string, network string) (dc *DiameterClient, err error) {
 	cfg := &sm.Settings{
 		OriginHost:       datatype.DiameterIdentity(originHost),
 		OriginRealm:      datatype.DiameterIdentity(originRealm),
@@ -77,9 +78,17 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 		},
 	}
 	if len(dictsDir) != 0 {
-		dictOnce.Do(func() { err = loadDictionaries(dictsDir, "DiameterClient") })
-		if err != nil {
-			return nil, err
+		utils.Logger.Debug("client loadDictionaries")
+		if dictDflts {
+			dictOnce.Do(func() { err = loadDictionaries(dictsDir, "DiameterClient", dict.Default) })
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			dictOnce.Do(func() { err = loadDictionaries(dictsDir, "DiameterClient", &dict.Parser{}) })
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	conn, err := cli.DialNetwork(network, addr)

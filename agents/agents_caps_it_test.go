@@ -87,7 +87,7 @@ func TestAgentCapsIT(t *testing.T) {
 	t.Run("DiameterAgent", func(t *testing.T) {
 		diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listen, "localhost",
 			cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
-			cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
+			cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision, cfg.DiameterAgentCfg().DictionaryDefaults,
 			cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().ListenNet)
 		if err != nil {
 			t.Fatal(err)

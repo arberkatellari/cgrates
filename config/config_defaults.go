@@ -728,6 +728,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",					// address where to listen for diameter requests <x.y.z.y/x1.y1.z1.y1:1234>
 	"listen_net": "tcp",						// transport type for diameter <tcp|sctp>
+	"dictionary_defaults": true,					// true to load the default go-diameter dictionaries
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	"sessions_conns": ["*birpc_internal"],
 	"origin_host": "CGR-DA",					// diameter Origin-Host AVP used in replies

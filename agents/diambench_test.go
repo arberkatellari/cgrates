@@ -90,7 +90,7 @@ cgrates.org,DEFAULT,,,*default,*none,0`,
 	time.Sleep(10 * time.Millisecond) // wait for DiameterAgent service to start
 	diamClient, err := NewDiameterClient(cfg.DiameterAgentCfg().Listen, "localhost",
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
-		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
+		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision, daCfg.DiameterAgentCfg().DictionaryDefaults,
 		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().ListenNet)
 	if err != nil {
 		b.Fatal(err)
