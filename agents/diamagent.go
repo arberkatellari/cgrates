@@ -22,6 +22,8 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -65,12 +67,6 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		return nil, err
 	}
 	da.ctx = context.WithClient(context.TODO(), srv)
-	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
-	if len(dictsPath) != 0 {
-		if err := loadDictionaries(dictsPath, utils.DiameterAgent); err != nil {
-			return nil, err
-		}
-	}
 	msgTemplates := da.cgrCfg.TemplatesCfg()
 	// Inflate *template field types
 	for _, procsr := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
@@ -107,12 +103,42 @@ type DiameterAgent struct {
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
 func (da *DiameterAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
+	var dictionary *dict.Parser // holds dictionaries to be used
+	if !da.cgrCfg.DiameterAgentCfg().DictionaryDefaults &&
+		len(da.cgrCfg.DiameterAgentCfg().DictionariesPath) != 0 {
+		utils.Logger.Debug("1 enter")
+		var filePaths []string
+		err = filepath.Walk(da.cgrCfg.DiameterAgentCfg().DictionariesPath, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if !info.IsDir() {
+				filePaths = append(filePaths, path)
+			}
+			return nil
+		})
+		if err != nil {
+			return
+		}
+		utils.Logger.Debug("server 1 loadDictionaries")
+		dictionary, err = dict.NewParser(filePaths...)
+		if err != nil {
+			return
+		}
+	}
+	// if no dictionary was loaded (dictionary == nil) load Dictionaries from DictionariesPath into dict.Default
+	if dictionary == nil && len(da.cgrCfg.DiameterAgentCfg().DictionariesPath) != 0 {
+		utils.Logger.Debug("server 2 loadDictionaries")
+		if err := loadDictionaries(da.cgrCfg.DiameterAgentCfg().DictionariesPath, utils.DiameterAgent, dict.Default); err != nil {
+			return err
+		}
+	}
 	utils.Logger.Info(fmt.Sprintf("<%s> Start listening on <%s>", utils.DiameterAgent, da.cgrCfg.DiameterAgentCfg().Listen))
 	srv := &diam.Server{
 		Network: da.cgrCfg.DiameterAgentCfg().ListenNet,
 		Addr:    da.cgrCfg.DiameterAgentCfg().Listen,
 		Handler: da.handlers(),
-		Dict:    nil,
+		Dict:    dictionary,
 	}
 	// used to control the server state
 	var lsn net.Listener

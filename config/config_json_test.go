@@ -1024,6 +1024,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Enabled:              utils.BoolPointer(false),
 		Listen:               utils.StringPointer("127.0.0.1:3868"),
 		Listen_net:           utils.StringPointer(utils.TCP),
+		Dictionary_defaults:  utils.BoolPointer(true),
 		Dictionaries_path:    utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
 		Sessions_conns:       &[]string{rpcclient.BiRPCInternal},
 		Origin_host:          utils.StringPointer("CGR-DA"),

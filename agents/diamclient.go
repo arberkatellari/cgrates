@@ -35,7 +35,7 @@ import (
 var dictOnce sync.Once
 
 func NewDiameterClient(addr, originHost, originRealm string, vendorId int, productName string,
-	firmwareRev int, dictsDir string, network string) (dc *DiameterClient, err error) {
+	firmwareRev int, dictDflts bool, dictsDir string, network string) (dc *DiameterClient, err error) {
 	cfg := &sm.Settings{
 		OriginHost:       datatype.DiameterIdentity(originHost),
 		OriginRealm:      datatype.DiameterIdentity(originRealm),
@@ -75,12 +75,6 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 			// Advertise support for credit control application
 			diam.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4)), // RFC 4006
 		},
-	}
-	if len(dictsDir) != 0 {
-		dictOnce.Do(func() { err = loadDictionaries(dictsDir, "DiameterClient") })
-		if err != nil {
-			return nil, err
-		}
 	}
 	conn, err := cli.DialNetwork(network, addr)
 	if err != nil {

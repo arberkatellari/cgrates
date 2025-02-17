@@ -533,6 +533,7 @@ type DiameterAgentJsonCfg struct {
 	Enabled              *bool
 	Listen               *string
 	Listen_net           *string
+	Dictionary_defaults  *bool
 	Dictionaries_path    *string
 	Sessions_conns       *[]string
 	Origin_host          *string
