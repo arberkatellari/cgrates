@@ -107,7 +107,9 @@ func (iDB *InternalDB) SetPrefixIndexedFields(prefixIndexedFields []string) {
 
 // Close only to implement Storage interface
 func (iDB *InternalDB) Close() {
-	iDB.db.Shutdown()
+	if err := iDB.db.Shutdown(); err != nil {
+		utils.Logger.Warning("Error <" + err.Error() + "> on InternalDB shutdown")
+	}
 }
 
 // Flush clears the cache
@@ -994,12 +996,10 @@ func (iDB *InternalDB) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error 
 
 // Will dump everything inside datadb to files
 func (iDB *InternalDB) DumpDataDB() (err error) {
-	iDB.db.DumpAll()
-	return
+	return iDB.db.DumpAll()
 }
 
 // Will rewrite every dump file of DataDB
 func (iDB *InternalDB) RewriteDataDB() (err error) {
-	iDB.db.RewriteAll()
-	return
+	return iDB.db.RewriteAll()
 }

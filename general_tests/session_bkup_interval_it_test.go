@@ -106,6 +106,12 @@ func testSessionSBkupIntrvlResetDB(t *testing.T) {
 		if err := engine.PreInitStorDb(sBkupCfg); err != nil {
 			t.Fatal(err)
 		}
+		if err := os.MkdirAll(sBkupCfg.DataDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+			t.Fatal("Error creating folder: ", sBkupCfg.DataDbCfg().Opts.InternalDBDumpPath, err)
+		}
+		if err := os.MkdirAll(sBkupCfg.StorDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+			t.Fatal("Error creating folder: ", sBkupCfg.StorDbCfg().Opts.InternalDBDumpPath, err)
+		}
 	}
 	if err := engine.InitDataDb(sBkupCfg); err != nil {
 		t.Fatal(err)
