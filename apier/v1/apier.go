@@ -2076,3 +2076,39 @@ func (apierSv1 *APIerSv1) TimingIsActiveAt(ctx *context.Context, params TimePara
 	}
 	return
 }
+
+// DumpDataDB will dump all of datadb from memory to a file
+func (apierSv1 *APIerSv1) DumpDataDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = apierSv1.DataManager.DataDB().DumpDataDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// Will rewrite every dump file of DataDB
+func (apierSv1 *APIerSv1) RewriteDataDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = apierSv1.DataManager.DataDB().RewriteDataDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// DumpStorDB will dump all of datadb from memory to a file
+func (apierSv1 *APIerSv1) DumpStorDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = apierSv1.StorDb.DumpStorDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// Will rewrite every dump file of StorDB
+func (apierSv1 *APIerSv1) RewriteStorDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = apierSv1.StorDb.RewriteStorDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}

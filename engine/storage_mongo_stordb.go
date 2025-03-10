@@ -1745,3 +1745,13 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) error {
 func (ms *MongoStorage) GetStorageType() string {
 	return utils.MetaMongo
 }
+
+// Will dump everything inside stordb to a file, only for InternalDB
+func (ms *MongoStorage) DumpStorDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Will rewrite every dump file of StorDB, only for InternalDB
+func (ms *MongoStorage) RewriteStorDB() (err error) {
+	return utils.ErrNotImplemented
+}

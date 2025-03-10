@@ -1405,3 +1405,13 @@ func (rs *RedisStorage) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error
 	}
 	return rs.Cmd(nil, redis_HDEL, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt, nodeID), cgrid)
 }
+
+// DumpDataDB will dump all of datadb from memory to a file, only for InternalDB
+func (rs *RedisStorage) DumpDataDB() error {
+	return utils.ErrNotImplemented
+}
+
+// Will rewrite every dump file of DataDB,  only for InternalDB
+func (rs *RedisStorage) RewriteDataDB() (err error) {
+	return utils.ErrNotImplemented
+}

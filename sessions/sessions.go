@@ -4501,3 +4501,16 @@ func (sS *SessionS) BiRPCv1BackupActiveSessions(ctx *context.Context,
 	}
 	return nil
 }
+
+// BiRPCv1GetBackupSessions will get sessions backed up in dataDB and return them
+func (sS *SessionS) BiRPCv1GetBackupSessions(ctx *context.Context,
+	args string, reply *[]*engine.StoredSession) error {
+	storedSessions, err := sS.dm.GetSessionsBackup(sS.cgrCfg.GeneralCfg().NodeID,
+		sS.cgrCfg.GeneralCfg().DefaultTenant)
+	if err != nil {
+		return err
+	} else {
+		*reply = storedSessions
+	}
+	return nil
+}
