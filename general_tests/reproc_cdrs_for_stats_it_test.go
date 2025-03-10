@@ -74,7 +74,9 @@ var (
 func TestReProcCDRs(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		rpcdrsConfDIR1 = "rerate_cdrs_internal"
+		rpcdrsConfDIR2 = "reprocess_cdrs_stats_ees_internal"
+		defer os.RemoveAll("/tmp/internal_db")
 	case utils.MetaMySQL:
 		rpcdrsConfDIR1 = "rerate_cdrs_mysql"
 		rpcdrsConfDIR2 = "reprocess_cdrs_stats_ees_mysql"
@@ -392,7 +394,24 @@ func testRpcdrsReprocessCDRs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if utils.ToJSON(cdrs) != utils.ToJSON(cdrsRerated) {
+	for _, cdr := range cdrsRerated {
+		for _, timing := range cdr.CostDetails.Timings {
+			if timing.Years == nil {
+				timing.Years = utils.Years{}
+			}
+			if timing.MonthDays == nil {
+				timing.MonthDays = utils.MonthDays{}
+			}
+			if timing.Months == nil {
+				timing.Months = utils.Months{}
+			}
+			if timing.WeekDays == nil {
+				timing.WeekDays = utils.WeekDays{}
+			}
+		}
+	}
+
+	if !reflect.DeepEqual(cdrs, cdrsRerated) {
 		t.Errorf("expected <%v>, \nreceived\n<%v>", utils.ToJSON(cdrs), utils.ToJSON(cdrsRerated))
 	}
 }

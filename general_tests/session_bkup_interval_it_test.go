@@ -23,6 +23,7 @@ package general_tests
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"testing"
 	"time"
@@ -40,7 +41,6 @@ var (
 	sBkupCfgDIR  string
 	sBkupCfg     *config.CGRConfig
 	sBkupRPC     *birpc.Client
-	dDB          engine.DataDB
 
 	SessionsBkupIntrvlTests = []func(t *testing.T){
 		testSessionSBkupIntrvlInitCfg,
@@ -69,7 +69,7 @@ var (
 func TestSessionsBkupIntrvl(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		sBkupCfgDIR = "sessions_backup_interval_internal"
 	case utils.MetaMySQL:
 		sBkupCfgDIR = "sessions_backup_interval_mysql"
 	case utils.MetaMongo:
@@ -81,6 +81,11 @@ func TestSessionsBkupIntrvl(t *testing.T) {
 	}
 	for _, stest := range SessionsBkupIntrvlTests {
 		t.Run(*utils.DBType, stest)
+	}
+	if *utils.DBType == utils.MetaInternal {
+		if err := os.RemoveAll("/tmp/internal_db"); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
@@ -94,6 +99,14 @@ func testSessionSBkupIntrvlInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessionSBkupIntrvlResetDB(t *testing.T) {
+	if *utils.DBType == utils.MetaInternal {
+		if err := engine.PreInitDataDb(sBkupCfg); err != nil {
+			t.Fatal(err)
+		}
+		if err := engine.PreInitStorDb(sBkupCfg); err != nil {
+			t.Fatal(err)
+		}
+	}
 	if err := engine.InitDataDb(sBkupCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -222,32 +235,11 @@ func testSessionSBkupIntrvlConcurrentAPIWithInterval(t *testing.T) {
 }
 
 func testSessionSBkupIntrvlGetBackedupSessions1(t *testing.T) {
-	var err error
-	if *utils.DBType == utils.MetaMySQL || *utils.DBType == utils.MetaPostgres {
-		dDB, err = engine.NewRedisStorage(
-			fmt.Sprintf("%s:%s", sBkupCfg.DataDbCfg().Host, sBkupCfg.DataDbCfg().Port),
-			10, sBkupCfg.DataDbCfg().User, sBkupCfg.DataDbCfg().Password, sBkupCfg.GeneralCfg().DBDataEncoding,
-			10, 20, "", false, 5*time.Second, 0, 0, 0, 0, 150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString)
-		if err != nil {
-			t.Fatal("Could not connect to Redis", err.Error())
-		}
-	}
-	if *utils.DBType == utils.MetaMongo {
-		dDB, err = engine.NewMongoStorage("mongodb", sBkupCfg.DataDbCfg().Host,
-			sBkupCfg.DataDbCfg().Port, sBkupCfg.DataDbCfg().Name,
-			sBkupCfg.DataDbCfg().User, sBkupCfg.DataDbCfg().Password,
-			sBkupCfg.GeneralCfg().DBDataEncoding,
-			utils.DataDB, nil, 10*time.Second)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-
 	// wait for all sessions to be backedup, 2 intervals to make sure all sessions had time to be stored
 	time.Sleep(1000 * time.Millisecond)
-	storedSessions, err := dDB.GetSessionsBackupDrv(sBkupCfg.GeneralCfg().NodeID,
-		sBkupCfg.GeneralCfg().DefaultTenant)
-	if err != nil {
+	var storedSessions []*engine.StoredSession
+	if err := sBkupRPC.Call(context.Background(), utils.SessionSv1GetBackupSessions,
+		utils.EmptyString, &storedSessions); err != nil {
 		t.Error(err)
 	}
 
@@ -326,9 +318,9 @@ func testSessionSBkupIntrvlGetActiveSessionsTerminate(t *testing.T) {
 	time.Sleep(1 * time.Second) // Wait for 2 500ms intervals so we are sure it removed all terminated sessions from dataDB
 }
 func testSessionSBkupIntrvlGetBackedupSessions2(t *testing.T) {
-	storedSessions, err := dDB.GetSessionsBackupDrv(sBkupCfg.GeneralCfg().NodeID,
-		sBkupCfg.GeneralCfg().DefaultTenant)
-	if err != utils.ErrNoBackupFound {
+	var storedSessions []*engine.StoredSession
+	if err := sBkupRPC.Call(context.Background(), utils.SessionSv1GetBackupSessions,
+		utils.EmptyString, &storedSessions); err.Error() != utils.ErrNoBackupFound.Error() {
 		t.Error(err)
 	}
 	if len(storedSessions) != 0 { // Sessions terminated should instantly be removed from the backup
@@ -341,6 +333,9 @@ func testSessionSBkupIntrvlGetActiveSessions0(t *testing.T) {
 	if err := sBkupRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+	if len(aSessions) != 0 {
+		t.Errorf("Expected 0 sessions active, received <%v>", len(aSessions))
 	}
 }
 
