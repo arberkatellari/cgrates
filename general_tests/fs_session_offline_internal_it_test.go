@@ -55,6 +55,12 @@ func TestFsSessionOfflineInternal(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	if err = os.MkdirAll(tutorialCallsCfg.DataDbCfg().Opts.InternalDBDumpPath, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.MkdirAll(tutorialCallsCfg.StorDbCfg().Opts.InternalDBDumpPath, 0700); err != nil {
+		t.Fatal(err)
+	}
 
 	tutorialCallsCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tutorialCallsCfg)
@@ -72,7 +78,7 @@ func TestFsSessionOfflineInternal(t *testing.T) {
 		t.Fatal(err)
 	}
 	time.Sleep(500 * time.Millisecond)
-	tutorialCallsRpc, err = jsonrpc.Dial(utils.TCP, tutorialCallsCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tutorialCallsRpc, err = jsonrpc.Dial(utils.TCP, tutorialCallsCfg.ListenCfg().RPCJSONListen)
 	if err != nil {
 		t.Fatal(err)
 	}

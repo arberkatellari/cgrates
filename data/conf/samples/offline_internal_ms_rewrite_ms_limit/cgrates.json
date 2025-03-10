@@ -14,11 +14,6 @@
         "http": ":2080"
     },
     
-    // "cores": {
-    //     "shutdown_timeout": "10s"
-    // },
-    
-    
     "data_db": {
         "db_type": "*internal",
         "items":{
@@ -30,7 +25,6 @@
             "internalDBWriteLimit": 1	
         }
     },
-    
     
     "stor_db": {
         "db_type": "*internal",
