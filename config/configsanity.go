@@ -999,6 +999,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> unsupported pgSSLCertMode (sslcertmode) in storDB configuration", utils.StorDB)
 		}
 	}
+	if cfg.storDbCfg.Type == utils.MetaInternal {
+		if cfg.storDbCfg.Opts.InternalDBDumpInterval == 0 &&
+			cfg.storDbCfg.Opts.InternalDBRewriteInterval != 0 {
+			return fmt.Errorf("<%s> internalDBDumpInterval field cannot be 0 when internalDBRewriteInterval is non-zero. Current values - \"internalDBDumpInterval\": <%v>, \"internalDBRewriteInterval\": <%v>", utils.StorDB, cfg.storDbCfg.Opts.InternalDBDumpInterval, cfg.storDbCfg.Opts.InternalDBRewriteInterval)
+		}
+	}
 	// DataDB sanity checks
 	if cfg.dataDbCfg.Type == utils.MetaInternal {
 		for key, config := range cfg.cacheCfg.Partitions {
@@ -1006,18 +1012,10 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> %s needs to be 0 when DataBD is *internal, received : %d", utils.CacheS, key, config.Limit)
 			}
 		}
-		if cfg.resourceSCfg.Enabled && cfg.resourceSCfg.StoreInterval != -1 {
-			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.ResourceS, cfg.resourceSCfg.StoreInterval)
+		if cfg.dataDbCfg.Opts.InternalDBDumpInterval == 0 &&
+			cfg.dataDbCfg.Opts.InternalDBRewriteInterval != 0 {
+			return fmt.Errorf("<%s> internalDBDumpInterval field cannot be 0 when internalDBRewriteInterval is non-zero. Current values - \"internalDBDumpInterval\": <%v>, \"internalDBRewriteInterval\": <%v>", utils.DataDB, cfg.dataDbCfg.Opts.InternalDBDumpInterval, cfg.dataDbCfg.Opts.InternalDBRewriteInterval)
 		}
-		if cfg.statsCfg.Enabled && cfg.statsCfg.StoreInterval != -1 {
-			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.StatS, cfg.statsCfg.StoreInterval)
-		}
-		if cfg.thresholdSCfg.Enabled && cfg.thresholdSCfg.StoreInterval != -1 {
-			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.ThresholdS, cfg.thresholdSCfg.StoreInterval)
-		}
-		// if cfg.sessionSCfg.Enabled && cfg.sessionSCfg.BackupInterval != -1 {
-		// 	return fmt.Errorf("<%s> the BackupInterval field needs to be -1 when DataBD is *internal, received : %d", utils.SessionS, cfg.sessionSCfg.BackupInterval)
-		// }
 	}
 	for item, val := range cfg.dataDbCfg.Items {
 		if val.Remote && len(cfg.dataDbCfg.RmtConns) == 0 {

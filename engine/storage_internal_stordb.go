@@ -1531,3 +1531,15 @@ func (iDB *InternalDB) SetSMCost(smCost *SMCost) (err error) {
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return err
 }
+
+// Will dump everything inside stordb to files
+func (iDB *InternalDB) DumpStorDB() (err error) {
+	iDB.db.DumpAll()
+	return
+}
+
+// Will rewrite every dump file of StorDB
+func (iDB *InternalDB) RewriteStorDB() (err error) {
+	iDB.db.RewriteAll()
+	return
+}
