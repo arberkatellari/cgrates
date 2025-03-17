@@ -747,7 +747,7 @@ func setddestinations(ub *Account, a *Action, _ Actions, _ *FilterS, _ any, _ Sh
 			return err
 		}
 
-		if err == nil && oldDest != nil {
+		if oldDest != nil {
 			if err = dm.UpdateReverseDestination(oldDest, newDest, utils.NonTransactional); err != nil {
 				return err
 			}
@@ -1141,6 +1141,12 @@ func (a Actions) Clone() (any, error) {
 		cln[i] = action.Clone()
 	}
 	return cln, nil
+}
+
+// CacheValClone returns a clone of Actions used by ltcache CacheValCloner
+func (a Actions) CacheValClone() any {
+	act, _ := a.Clone()
+	return act
 }
 
 // HasAction checks if the action list contains an action of the given type.

@@ -159,11 +159,12 @@ type DbJsonCfg struct {
 }
 
 type ItemOptJson struct {
-	Limit      *int
-	Ttl        *string
-	Static_ttl *bool
-	Remote     *bool
-	Replicate  *bool
+	Limit       *int
+	Ttl         *string
+	Static_ttl  *bool
+	Remote      *bool
+	Replicate   *bool
+	Clone_items *bool
 	// used for ArgDispatcher in case we send this to a dispatcher engine
 	Route_id *string
 	Api_key  *string
@@ -498,12 +499,13 @@ type AsteriskAgentJsonCfg struct {
 }
 
 type CacheParamJsonCfg struct {
-	Limit      *int
-	Ttl        *string
-	Static_ttl *bool
-	Precache   *bool
-	Remote     *bool
-	Replicate  *bool
+	Limit       *int
+	Ttl         *string
+	Static_ttl  *bool
+	Precache    *bool
+	Remote      *bool
+	Replicate   *bool
+	Clone_items *bool
 }
 
 type CacheJsonCfg struct {

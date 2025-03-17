@@ -99,6 +99,14 @@ func testRpcdrsLoadConfig1(t *testing.T) {
 	if rpcdrsCfg, err = config.NewCGRConfigFromPath(rpcdrsCfgPath); err != nil {
 		t.Error(err)
 	}
+	if *utils.DBType == utils.MetaInternal {
+		if err = os.MkdirAll(rpcdrsCfg.DataDbCfg().Opts.InternalDBDumpPath, 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err = os.MkdirAll(rpcdrsCfg.StorDbCfg().Opts.InternalDBDumpPath, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
 }
 
 func testRpcdrsInitDataDb(t *testing.T) {

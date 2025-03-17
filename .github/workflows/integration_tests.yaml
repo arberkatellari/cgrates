@@ -5,13 +5,13 @@ on:
     branches:
       - master
     paths-ignore:
-      - 'docs/**'
+      - "docs/**"
       - README.md
   pull_request:
     branches:
       - master
     paths-ignore:
-      - 'docs/**'
+      - "docs/**"
       - README.md
   workflow_dispatch:
 
@@ -61,10 +61,10 @@ jobs:
       #   uses: mxschmitt/action-tmate@v3
 
       - name: Run flaky tests
-        continue-on-error: true 
+        continue-on-error: true
         run: |
           sudo env "PATH=$PATH" ./flaky_test.sh
-          
+
       - name: Run integration tests
         run: |
           sudo env "PATH=$PATH" ./integration_test.sh

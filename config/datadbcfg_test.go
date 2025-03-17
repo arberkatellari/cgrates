@@ -550,8 +550,8 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 		utils.RemoteConnsCfg:      []string{},
 		utils.ReplicationConnsCfg: []string{},
 		utils.ItemsCfg: map[string]any{
-			utils.MetaAccounts:            map[string]any{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false, utils.TTLCfg: "1ns"},
-			utils.MetaReverseDestinations: map[string]any{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false, utils.TTLCfg: "1ns"},
+			utils.MetaAccounts:            map[string]any{utils.RemoteCfg: true, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false, utils.TTLCfg: "1ns", utils.CloneItemsCfg: false},
+			utils.MetaReverseDestinations: map[string]any{utils.RemoteCfg: false, utils.ReplicateCfg: false, utils.APIKeyCfg: "randomVal", utils.RouteIDCfg: "randomVal", utils.LimitCfg: -1, utils.StaticTTLCfg: false, utils.TTLCfg: "1ns", utils.CloneItemsCfg: false},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

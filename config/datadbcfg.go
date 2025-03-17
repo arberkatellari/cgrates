@@ -342,11 +342,12 @@ func (dbcfg *DataDbCfg) AsMapInterface() (mp map[string]any) {
 
 // ItemOpt the options for the stored items
 type ItemOpt struct {
-	Limit     int
-	TTL       time.Duration
-	StaticTTL bool
-	Remote    bool
-	Replicate bool
+	Limit      int
+	TTL        time.Duration
+	StaticTTL  bool
+	Remote     bool
+	Replicate  bool
+	CloneItems bool
 	// used for ArgDispatcher in case we send this to a dispatcher engine
 	RouteID string
 	APIKey  string
@@ -355,10 +356,11 @@ type ItemOpt struct {
 // AsMapInterface returns the config as a map[string]any
 func (itm *ItemOpt) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.RemoteCfg:    itm.Remote,
-		utils.ReplicateCfg: itm.Replicate,
-		utils.LimitCfg:     itm.Limit,
-		utils.StaticTTLCfg: itm.StaticTTL,
+		utils.RemoteCfg:     itm.Remote,
+		utils.ReplicateCfg:  itm.Replicate,
+		utils.LimitCfg:      itm.Limit,
+		utils.StaticTTLCfg:  itm.StaticTTL,
+		utils.CloneItemsCfg: itm.CloneItems,
 	}
 	if itm.APIKey != utils.EmptyString {
 		initialMP[utils.APIKeyCfg] = itm.APIKey
@@ -388,6 +390,9 @@ func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) (err error) {
 	if jsonItm.Replicate != nil {
 		itm.Replicate = *jsonItm.Replicate
 	}
+	if jsonItm.Clone_items != nil {
+		itm.CloneItems = *jsonItm.Clone_items
+	}
 	if jsonItm.Route_id != nil {
 		itm.RouteID = *jsonItm.Route_id
 	}
@@ -403,12 +408,13 @@ func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) (err error) {
 // Clone returns a deep copy of ItemOpt
 func (itm *ItemOpt) Clone() *ItemOpt {
 	return &ItemOpt{
-		Limit:     itm.Limit,
-		TTL:       itm.TTL,
-		StaticTTL: itm.StaticTTL,
-		Remote:    itm.Remote,
-		Replicate: itm.Replicate,
-		APIKey:    itm.APIKey,
-		RouteID:   itm.RouteID,
+		Limit:      itm.Limit,
+		TTL:        itm.TTL,
+		StaticTTL:  itm.StaticTTL,
+		Remote:     itm.Remote,
+		Replicate:  itm.Replicate,
+		CloneItems: itm.CloneItems,
+		APIKey:     itm.APIKey,
+		RouteID:    itm.RouteID,
 	}
 }

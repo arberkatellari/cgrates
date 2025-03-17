@@ -203,6 +203,25 @@ type Filter struct {
 	ActivationInterval *utils.ActivationInterval
 }
 
+// Clone method for Filter
+func (fltr *Filter) Clone() *Filter {
+	clone := &Filter{
+		Tenant:             fltr.Tenant,
+		ID:                 fltr.ID,
+		ActivationInterval: fltr.ActivationInterval.Clone(),
+	}
+	clone.Rules = make([]*FilterRule, len(fltr.Rules))
+	for i, rule := range fltr.Rules {
+		clone.Rules[i] = rule.Clone()
+	}
+	return clone
+}
+
+// CacheValClone returns a clone of Filter used by ltcache CacheValCloner
+func (fltr *Filter) CacheValClone() any {
+	return fltr.Clone()
+}
+
 // FilterWithOpts the arguments for the replication
 type FilterWithAPIOpts struct {
 	*Filter
@@ -287,6 +306,31 @@ type FilterRule struct {
 	rsrFilters  utils.RSRFilters  // Cache here the RSRFilter Values
 	regexValues []*regexp.Regexp
 	negative    *bool
+}
+
+// Clone method for FilterRule
+func (fltr *FilterRule) Clone() *FilterRule {
+	clone := &FilterRule{
+		Type:       fltr.Type,
+		Element:    fltr.Element,
+		Values:     make([]string, len(fltr.Values)),
+		rsrValues:  make(config.RSRParsers, len(fltr.rsrValues)),
+		rsrFilters: make(utils.RSRFilters, len(fltr.rsrFilters)),
+	}
+	if fltr.negative != nil {
+		clone.negative = new(bool)
+		*clone.negative = *fltr.negative
+	}
+	copy(clone.Values, fltr.Values)
+	copy(clone.rsrValues, fltr.rsrValues)
+	for i, filter := range fltr.rsrFilters {
+		clone.rsrFilters[i] = filter.Clone()
+	}
+	clone.regexValues = make([]*regexp.Regexp, len(fltr.regexValues))
+	for i, regex := range fltr.regexValues {
+		clone.regexValues[i] = regex.Copy()
+	}
+	return clone
 }
 
 // CompileValues compiles RSR fields

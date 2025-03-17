@@ -38,6 +38,26 @@ type Destination struct {
 	Prefixes []string
 }
 
+// Clone returns a clone of Destination
+func (d *Destination) Clone() *Destination {
+	if d == nil {
+		return nil
+	}
+	result := &Destination{
+		Id: d.Id,
+	}
+	if d.Prefixes != nil {
+		result.Prefixes = make([]string, len(d.Prefixes))
+		copy(result.Prefixes, d.Prefixes)
+	}
+	return result
+}
+
+// CacheValClone returns a clone of Destination used by ltcache CacheValCloner
+func (d *Destination) CacheValClone() any {
+	return d.Clone()
+}
+
 type DestinationWithAPIOpts struct {
 	*Destination
 	Tenant  string

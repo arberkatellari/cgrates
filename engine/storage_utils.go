@@ -134,6 +134,27 @@ type SMCost struct {
 	CostDetails *EventCost
 }
 
+// Clone clones SMCost
+func (s *SMCost) Clone() *SMCost {
+	clone := &SMCost{
+		CGRID:      s.CGRID,
+		RunID:      s.RunID,
+		OriginHost: s.OriginHost,
+		OriginID:   s.OriginID,
+		CostSource: s.CostSource,
+		Usage:      s.Usage,
+	}
+	if s.CostDetails != nil {
+		clone.CostDetails = s.CostDetails.Clone()
+	}
+	return clone
+}
+
+// CacheValClone returns a clone of SMCost used by ltcache CacheValCloner
+func (s *SMCost) CacheValClone() any {
+	return s.Clone()
+}
+
 type AttrCDRSStoreSMCost struct {
 	Cost           *SMCost
 	CheckDuplicate bool

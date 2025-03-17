@@ -61,7 +61,8 @@ func NewERService(cfg *config.CGRConfig, datadb *engine.DataManager, filterS *en
 		filterS:          filterS,
 		connMgr:          connMgr,
 	}
-	ers.partialCache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().PartialCacheTTL, false, ers.onEvicted)
+	// todo UNFINISHED ADDED FALSE HERE BUT NOT SURE
+	ers.partialCache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().PartialCacheTTL, false, false, ers.onEvicted)
 	return
 }
 

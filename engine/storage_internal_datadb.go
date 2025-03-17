@@ -53,6 +53,7 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB b
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
+			Clone:     cPcfg.CloneItems,
 		}
 	}
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
@@ -81,6 +82,7 @@ func RecoverDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
+			Clone:     cPcfg.CloneItems,
 		}
 	}
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)

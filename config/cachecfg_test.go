@@ -54,18 +54,19 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 	jsonCfg := &CacheJsonCfg{
 		Partitions: &map[string]*CacheParamJsonCfg{
 			utils.MetaDestinations: {
-				Limit:      utils.IntPointer(10),
-				Ttl:        utils.StringPointer("2"),
-				Static_ttl: utils.BoolPointer(true),
-				Precache:   utils.BoolPointer(true),
-				Replicate:  utils.BoolPointer(true),
+				Limit:       utils.IntPointer(10),
+				Ttl:         utils.StringPointer("2"),
+				Static_ttl:  utils.BoolPointer(true),
+				Precache:    utils.BoolPointer(true),
+				Replicate:   utils.BoolPointer(true),
+				Clone_items: utils.BoolPointer(true),
 			},
 		},
 		Replication_conns: &[]string{"conn1", "conn2"},
 	}
 	expected := &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
-			utils.MetaDestinations: {Limit: 10, TTL: 2, StaticTTL: true, Precache: true, Replicate: true},
+			utils.MetaDestinations: {Limit: 10, TTL: 2, StaticTTL: true, Precache: true, Replicate: true, CloneItems: true},
 		},
 		ReplicationConns: []string{"conn1", "conn2"},
 	}
@@ -160,13 +161,13 @@ func TestCachesCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 		"caches":{
 			"partitions": {
-				"*destinations": {"limit": 10000, "static_ttl": false, "precache": true, "remote": true, "replicate": true},
+				"*destinations": {"limit": 10000, "static_ttl": false, "precache": true, "remote": true, "replicate": true, "clone_items": true},
 				},
 			},
 		}`
 	eMap := map[string]any{
 		utils.PartitionsCfg: map[string]any{
-			utils.MetaDestinations: map[string]any{"limit": 10000, "static_ttl": false, "precache": true, "remote": true, "replicate": true},
+			utils.MetaDestinations: map[string]any{"limit": 10000, "static_ttl": false, "precache": true, "remote": true, "replicate": true, utils.CloneItemsCfg: true},
 		},
 		utils.ReplicationConnsCfg: []string{},
 	}

@@ -72,6 +72,12 @@ type ActionPlan struct {
 	ActionTimings []*ActionTiming
 }
 
+// CacheValClone returns a clone of ActionPlan used by ltcache CacheValCloner
+func (apl *ActionPlan) CacheValClone() any {
+	actPlm, _ := apl.Clone()
+	return actPlm
+}
+
 func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
 	if _, found = apl.AccountIDs[accID]; found {
 		delete(apl.AccountIDs, accID)

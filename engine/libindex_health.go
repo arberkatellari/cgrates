@@ -32,24 +32,29 @@ type IndexHealthArgsWith2Ch struct {
 	IndexCacheLimit     int
 	IndexCacheTTL       time.Duration
 	IndexCacheStaticTTL bool
+	IndexCacheClone     bool
 
 	ObjectCacheLimit     int
 	ObjectCacheTTL       time.Duration
 	ObjectCacheStaticTTL bool
+	ObjectCacheClone     bool
 }
 
 type IndexHealthArgsWith3Ch struct {
 	IndexCacheLimit     int
 	IndexCacheTTL       time.Duration
 	IndexCacheStaticTTL bool
+	IndexCacheClone     bool
 
 	ObjectCacheLimit     int
 	ObjectCacheTTL       time.Duration
 	ObjectCacheStaticTTL bool
+	ObjectCacheClone     bool
 
 	FilterCacheLimit     int
 	FilterCacheTTL       time.Duration
 	FilterCacheStaticTTL bool
+	FilterCacheClone     bool
 }
 
 type AccountActionPlanIHReply struct {
@@ -58,14 +63,14 @@ type AccountActionPlanIHReply struct {
 }
 
 // add cache in args API
-func GetAccountActionPlansIndexHealth(dm *DataManager, objLimit, indexLimit int, objTTL, indexTTL time.Duration, objStaticTTL, indexStaticTTL bool) (rply *AccountActionPlanIHReply, err error) {
+func GetAccountActionPlansIndexHealth(dm *DataManager, objLimit, indexLimit int, objTTL, indexTTL time.Duration, objStaticTTL, indexStaticTTL, objClone, indexClone bool) (rply *AccountActionPlanIHReply, err error) {
 	// posible errors
 	brokenRef := map[string][]string{}    // the actionPlans match the index but they are missing the account // broken reference
 	missingIndex := map[string][]string{} // the indexes are not present but the action plans points to that account // misingAccounts
 
 	// local cache
-	indexesCache := ltcache.NewCache(objLimit, objTTL, objStaticTTL, nil)
-	objectsCache := ltcache.NewCache(indexLimit, indexTTL, indexStaticTTL, nil)
+	indexesCache := ltcache.NewCache(objLimit, objTTL, objStaticTTL, objClone, nil)
+	objectsCache := ltcache.NewCache(indexLimit, indexTTL, indexStaticTTL, indexClone, nil)
 
 	getCachedIndex := func(acntID string) (apIDs []string, err error) {
 		if x, ok := indexesCache.Get(acntID); ok {
@@ -175,14 +180,14 @@ type ReverseDestinationsIHReply struct {
 }
 
 // add cache in args API
-func GetReverseDestinationsIndexHealth(dm *DataManager, objLimit, indexLimit int, objTTL, indexTTL time.Duration, objStaticTTL, indexStaticTTL bool) (rply *ReverseDestinationsIHReply, err error) {
+func GetReverseDestinationsIndexHealth(dm *DataManager, objLimit, indexLimit int, objTTL, indexTTL time.Duration, objStaticTTL, indexStaticTTL, objClone, indexClone bool) (rply *ReverseDestinationsIHReply, err error) {
 	// posible errors
 	brokenRef := map[string][]string{}    // the actionPlans match the index but they are missing the account // broken reference
 	missingIndex := map[string][]string{} // the indexes are not present but the action plans points to that account // misingAccounts
 
 	// local cache
-	indexesCache := ltcache.NewCache(objLimit, objTTL, objStaticTTL, nil)
-	objectsCache := ltcache.NewCache(indexLimit, indexTTL, indexStaticTTL, nil)
+	indexesCache := ltcache.NewCache(objLimit, objTTL, objStaticTTL, objClone, nil)
+	objectsCache := ltcache.NewCache(indexLimit, indexTTL, indexStaticTTL, indexClone, nil)
 
 	getCachedIndex := func(prefix string) (dstIDs []string, err error) {
 		if x, ok := indexesCache.Get(prefix); ok {

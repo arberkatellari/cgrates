@@ -36,8 +36,9 @@ func NewConnManager(cfg *config.CGRConfig, rpcInternal map[string]chan birpc.Cli
 	cM = &ConnManager{
 		cfg:         cfg,
 		rpcInternal: rpcInternal,
-		connCache:   ltcache.NewCache(-1, 0, true, nil),
-		connLks:     make(map[string]*sync.Mutex),
+		// todo UNFINISHED ADDED FALSE HERE BUT NOT SURE
+		connCache: ltcache.NewCache(-1, 0, true, false, nil),
+		connLks:   make(map[string]*sync.Mutex),
 	}
 	for connID := range cfg.RPCConns() {
 		cM.connLks[connID] = new(sync.Mutex)

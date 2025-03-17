@@ -84,7 +84,7 @@ func (eeS *EventExporterS) SetupExporterCache() error {
 			continue // skip if caching is disabled
 		}
 
-		expCache[chID] = ltcache.NewCache(chCfg.Limit, chCfg.TTL, chCfg.StaticTTL, onCacheEvicted)
+		expCache[chID] = ltcache.NewCache(chCfg.Limit, chCfg.TTL, chCfg.StaticTTL, chCfg.CloneItems, onCacheEvicted)
 
 		// Precache exporters if required.
 		if chCfg.Precache {

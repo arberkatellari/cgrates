@@ -54,6 +54,34 @@ type ThresholdProfile struct {
 	lkID string // holds the reference towards guardian lock key
 }
 
+// Clone clones *ThresholdProfile
+func (tp *ThresholdProfile) Clone() *ThresholdProfile {
+	clone := &ThresholdProfile{
+		Tenant:   tp.Tenant,
+		ID:       tp.ID,
+		MaxHits:  tp.MaxHits,
+		MinHits:  tp.MinHits,
+		MinSleep: tp.MinSleep,
+		Blocker:  tp.Blocker,
+		Weight:   tp.Weight,
+		Async:    tp.Async,
+		lkID:     tp.lkID,
+	}
+	clone.FilterIDs = make([]string, len(tp.FilterIDs))
+	copy(clone.FilterIDs, tp.FilterIDs)
+	clone.ActionIDs = make([]string, len(tp.ActionIDs))
+	copy(clone.ActionIDs, tp.ActionIDs)
+	if tp.ActivationInterval != nil {
+		clone.ActivationInterval = tp.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheValClone returns a clone of ThresholdProfile used by ltcache CacheValCloner
+func (tp *ThresholdProfile) CacheValClone() any {
+	return tp.Clone()
+}
+
 // TenantID returns the concatenated key beteen tenant and ID
 func (tp *ThresholdProfile) TenantID() string {
 	return utils.ConcatenatedKey(tp.Tenant, tp.ID)
@@ -105,6 +133,30 @@ type Threshold struct {
 	lkID  string // ID of the lock used when matching the threshold
 	tPrfl *ThresholdProfile
 	dirty *bool // needs save
+}
+
+// Clone clones *Threshold
+func (t *Threshold) Clone() *Threshold {
+	clone := &Threshold{
+		Tenant: t.Tenant,
+		ID:     t.ID,
+		Hits:   t.Hits,
+		Snooze: t.Snooze,
+		lkID:   t.lkID,
+	}
+	if t.tPrfl != nil {
+		clone.tPrfl = t.tPrfl.Clone()
+	}
+	if t.dirty != nil {
+		clone.dirty = new(bool)
+		*clone.dirty = *t.dirty
+	}
+	return clone
+}
+
+// CacheValClone returns a clone of Threshold used by ltcache CacheValCloner
+func (t *Threshold) CacheValClone() any {
+	return t.Clone()
 }
 
 // TenantID returns the concatenated key beteen tenant and ID

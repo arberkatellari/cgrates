@@ -48,6 +48,41 @@ type ResourceProfile struct {
 	lkID string // holds the reference towards guardian lock key
 }
 
+// Clone clones *ResourceProfile
+func (rp *ResourceProfile) Clone() *ResourceProfile {
+	if rp == nil {
+		return nil
+	}
+	result := &ResourceProfile{
+		Tenant:            rp.Tenant,
+		ID:                rp.ID,
+		UsageTTL:          rp.UsageTTL,
+		Limit:             rp.Limit,
+		AllocationMessage: rp.AllocationMessage,
+		Blocker:           rp.Blocker,
+		Stored:            rp.Stored,
+		Weight:            rp.Weight,
+		lkID:              rp.lkID,
+	}
+	if rp.FilterIDs != nil {
+		result.FilterIDs = make([]string, len(rp.FilterIDs))
+		copy(result.FilterIDs, rp.FilterIDs)
+	}
+	if rp.ThresholdIDs != nil {
+		result.ThresholdIDs = make([]string, len(rp.ThresholdIDs))
+		copy(result.ThresholdIDs, rp.ThresholdIDs)
+	}
+	if rp.ActivationInterval != nil {
+		result.ActivationInterval = rp.ActivationInterval.Clone()
+	}
+	return result
+}
+
+// CacheValClone returns a clone of ResourceProfile used by ltcache CacheValCloner
+func (rp *ResourceProfile) CacheValClone() any {
+	return rp.Clone()
+}
+
 // ResourceProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type ResourceProfileWithAPIOpts struct {
 	*ResourceProfile
@@ -126,6 +161,49 @@ type Resource struct {
 	tUsage *float64         // sum of all usages
 	dirty  *bool            // the usages were modified, needs save, *bool so we only save if enabled in config
 	rPrf   *ResourceProfile // for ordering purposes
+}
+
+// Clone clones *Resource
+func (r *Resource) Clone() *Resource {
+	if r == nil {
+		return nil
+	}
+	result := &Resource{
+		Tenant: r.Tenant,
+		ID:     r.ID,
+		lkID:   r.lkID,
+	}
+	if r.TTLIdx != nil {
+		result.TTLIdx = make([]string, len(r.TTLIdx))
+		copy(result.TTLIdx, r.TTLIdx)
+	}
+	if r.ttl != nil {
+		ttlCopy := *r.ttl
+		result.ttl = &ttlCopy
+	}
+	if r.tUsage != nil {
+		tUsageCopy := *r.tUsage
+		result.tUsage = &tUsageCopy
+	}
+	if r.dirty != nil {
+		dirtyCopy := *r.dirty
+		result.dirty = &dirtyCopy
+	}
+	if r.rPrf != nil {
+		result.rPrf = r.rPrf.Clone()
+	}
+	if r.Usages != nil {
+		result.Usages = make(map[string]*ResourceUsage, len(r.Usages))
+		for k, v := range r.Usages {
+			result.Usages[k] = v.Clone()
+		}
+	}
+	return result
+}
+
+// CacheValClone returns a clone of Resource used by ltcache CacheValCloner
+func (r *Resource) CacheValClone() any {
+	return r.Clone()
 }
 
 // resourceLockKey returns the ID used to lock a resource with guardian

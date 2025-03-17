@@ -29,12 +29,13 @@ import (
 
 // CacheParamCfg represents the config of a single cache partition
 type CacheParamCfg struct {
-	Limit     int
-	TTL       time.Duration
-	StaticTTL bool
-	Precache  bool
-	Remote    bool
-	Replicate bool
+	Limit      int
+	TTL        time.Duration
+	StaticTTL  bool
+	Precache   bool
+	Remote     bool
+	Replicate  bool
+	CloneItems bool
 }
 
 func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) (err error) {
@@ -56,6 +57,9 @@ func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) (err err
 	if jsnCfg.Replicate != nil {
 		cParam.Replicate = *jsnCfg.Replicate
 	}
+	if jsnCfg.Clone_items != nil {
+		cParam.CloneItems = *jsnCfg.Clone_items
+	}
 	if jsnCfg.Ttl != nil {
 		cParam.TTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Ttl)
 	}
@@ -65,11 +69,12 @@ func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) (err err
 // AsMapInterface returns the config as a map[string]any
 func (cParam *CacheParamCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.LimitCfg:     cParam.Limit,
-		utils.StaticTTLCfg: cParam.StaticTTL,
-		utils.PrecacheCfg:  cParam.Precache,
-		utils.RemoteCfg:    cParam.Remote,
-		utils.ReplicateCfg: cParam.Replicate,
+		utils.LimitCfg:      cParam.Limit,
+		utils.StaticTTLCfg:  cParam.StaticTTL,
+		utils.PrecacheCfg:   cParam.Precache,
+		utils.RemoteCfg:     cParam.Remote,
+		utils.ReplicateCfg:  cParam.Replicate,
+		utils.CloneItemsCfg: cParam.CloneItems,
 	}
 	if cParam.TTL != 0 {
 		initialMP[utils.TTLCfg] = cParam.TTL.String()
@@ -80,12 +85,13 @@ func (cParam *CacheParamCfg) AsMapInterface() (initialMP map[string]any) {
 // Clone returns a deep copy of CacheParamCfg
 func (cParam CacheParamCfg) Clone() (cln *CacheParamCfg) {
 	return &CacheParamCfg{
-		Limit:     cParam.Limit,
-		TTL:       cParam.TTL,
-		StaticTTL: cParam.StaticTTL,
-		Precache:  cParam.Precache,
-		Remote:    cParam.Remote,
-		Replicate: cParam.Replicate,
+		Limit:      cParam.Limit,
+		TTL:        cParam.TTL,
+		StaticTTL:  cParam.StaticTTL,
+		Precache:   cParam.Precache,
+		Remote:     cParam.Remote,
+		Replicate:  cParam.Replicate,
+		CloneItems: cParam.CloneItems,
 	}
 }
 
@@ -133,6 +139,7 @@ func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
+			Clone:     cPcfg.CloneItems,
 		}
 	}
 	return

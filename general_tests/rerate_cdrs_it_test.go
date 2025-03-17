@@ -39,6 +39,12 @@ func TestRerateCDRs(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		cfgDir = "rerate_cdrs_internal"
+		if err := os.MkdirAll("/tmp/internal_db/datadb", 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.MkdirAll("/tmp/internal_db/stordb", 0700); err != nil {
+			t.Fatal(err)
+		}
 		defer os.RemoveAll("/tmp/internal_db")
 	case utils.MetaMySQL:
 		cfgDir = "rerate_cdrs_mysql"
@@ -321,6 +327,12 @@ func TestRerateCDRsNoRefund(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		cfgDir = "rerate_cdrs_internal"
+		if err := os.MkdirAll("/tmp/internal_db/datadb", 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.MkdirAll("/tmp/internal_db/stordb", 0700); err != nil {
+			t.Fatal(err)
+		}
 		defer os.RemoveAll("/tmp/internal_db")
 	case utils.MetaMySQL:
 		cfgDir = "rerate_cdrs_mysql"

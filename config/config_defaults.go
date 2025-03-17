@@ -100,44 +100,44 @@ const CGRATES_CFG_JSON = `
 	"replication_filtered": false, 		// if this is enabled the replication will be made only to the conns that received a get
 	"replication_cache": "", 		// the caching action that is executed on the replication_conns when the items are replicated 
 	"items":{
-		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*sessions_backup": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false, "clone_items": false},
+		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*sessions_backup": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false}, 
 	},
 	"opts":{
 		"internalDBDumpPath": "/var/lib/cgrates/internal_db/datadb",		// the path where datadb will be dumped
@@ -196,31 +196,31 @@ const CGRATES_CFG_JSON = `
 		"pgSchema": ""			// postgres schema to use
 	},
 	"items":{
-		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_timings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_rates": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_destination_rates": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_account_actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_stats": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_attributes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_chargers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*tp_dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}
+		"*session_costs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_timings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_rates": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_destination_rates": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_account_actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_stats": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_attributes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_chargers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false},
+		"*tp_dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "clone_items": false}
 	}
 },
 
@@ -291,58 +291,58 @@ const CGRATES_CFG_JSON = `
 
 "caches":{
 	"partitions": {
-		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// destination caching
-		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// reverse destinations index caching
-		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// rating plans caching
-		"*rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// rating profiles caching
-		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// actions caching
-		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// action plans caching
-		"*account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// account action plans index caching
-		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// action triggers caching
-		"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// shared groups caching
-		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// timings caching
-		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control resource profiles caching
-		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control resources caching
-		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// matching resources to events
-		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control trend profiles caching
-		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control trends caching
-		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// ranking profiles
-		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	 // control rankings caching
-		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// statqueue profiles
-		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// statqueues with metrics
-		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
-		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control thresholds caching
-		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control filters caching
-		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control route profile caching
-		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control attribute profile caching
-		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control charger profile caching
-		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control dispatcher profile caching
-		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control dispatcher hosts caching
-		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control resource filter indexes caching
-		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control stat filter indexes caching
-		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control threshold filter indexes caching
-		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control route filter indexes caching
-		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control attribute filter indexes caching
-		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control charger filter indexes caching
-		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control dispatcher filter indexes caching
-		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control reverse filter indexes caching used only for set and remove filters 
-		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control dispatcher routes caching
-		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// control dispatcher load( in case of *ratio ConnParams is present)
-		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control dispatcher interface
-		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},			// diameter messages caching
-		"*radius_packets": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},				// radius packets caching
-		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "remote":false, "replicate": false},				// RPC responses caching
-		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},			// closed sessions cached for CDRs
-		"*event_charges": {"limit": 0, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},				// events proccessed by ChargerS
-		"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false, "remote":false, "replicate": false},				// protects CDRs against double-charging
-		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control the load_ids for items
-		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// RPC connections caching
-		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},					// User cache
-		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},					// stirShaken cache keys
-		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "remote":false, "replicate": false}, 
-		"*sentrypeer":{"limit": -1, "ttl": "86400s", "static_ttl": true, "remote":false, "replicate": false},
-		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// caps cached samples
-		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// the replication hosts cache(used when replication_filtered is enbled)
+		"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// destination caching
+		"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// reverse destinations index caching
+		"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// rating plans caching
+		"*rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// rating profiles caching
+		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// actions caching
+		"*action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// action plans caching
+		"*account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// account action plans index caching
+		"*action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// action triggers caching
+		"*shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// shared groups caching
+		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// timings caching
+		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// control resource profiles caching
+		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// control resources caching
+		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},				// matching resources to events
+		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// control trend profiles caching
+		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// control trends caching
+		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// ranking profiles
+		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	 // control rankings caching
+		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// statqueue profiles
+		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// statqueues with metrics
+		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// control threshold profiles caching
+		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// control thresholds caching
+		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// control filters caching
+		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// control route profile caching
+		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// control attribute profile caching
+		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// control charger profile caching
+		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// control dispatcher profile caching
+		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},	// control dispatcher hosts caching
+		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false}, 		// control resource filter indexes caching
+		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false}, 			// control stat filter indexes caching
+		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false}, 		// control threshold filter indexes caching
+		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false}, 			// control route filter indexes caching
+		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false}, 		// control attribute filter indexes caching
+		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false}, 			// control charger filter indexes caching
+		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false}, 		// control dispatcher filter indexes caching
+		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false}, 			// control reverse filter indexes caching used only for set and remove filters 
+		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false}, 			// control dispatcher routes caching
+		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},				// control dispatcher load( in case of *ratio ConnParams is present)
+		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false}, 				// control dispatcher interface
+		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},			// diameter messages caching
+		"*radius_packets": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},				// radius packets caching
+		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},				// RPC responses caching
+		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},			// closed sessions cached for CDRs
+		"*event_charges": {"limit": 0, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},				// events proccessed by ChargerS
+		"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},				// protects CDRs against double-charging
+		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false, "clone_items": false},		// control the load_ids for items
+		"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},				// RPC connections caching
+		"*uch": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},					// User cache
+		"*stir": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},					// stirShaken cache keys
+		"*apiban":{"limit": -1, "ttl": "2m", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false}, 
+		"*sentrypeer":{"limit": -1, "ttl": "86400s", "static_ttl": true, "remote":false, "replicate": false, "clone_items": false},
+		"*caps_events": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},				// caps cached samples
+		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "clone_items": false},				// the replication hosts cache(used when replication_filtered is enbled)
 	},
 	"replication_conns": [],
 	"remote_conns": []	// the conns that are queried when the items are not found in cache
@@ -513,15 +513,15 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,				// starts the EventReader service: <true|false>
 	"attributes_conns":[],				// RPC Connections IDs
 	"cache": {
-		"*file_csv": {"limit": -1, "ttl": "5s", "static_ttl": false},
-		"*nats_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
-		"*amqp_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
-		"*amqpv1_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
-		"*kafka_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
-		"*s3_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
-		"*sqs_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
-		"*sql": {"limit": -1, "ttl": "", "static_ttl": false},
-		"*els": {"limit": -1, "ttl": "", "static_ttl": false},
+		"*file_csv": {"limit": -1, "ttl": "5s", "static_ttl": false, "clone_items": false},
+		"*nats_json_map": {"limit": -1, "ttl": "", "static_ttl": false, "clone_items": false},
+		"*amqp_json_map": {"limit": -1, "ttl": "", "static_ttl": false, "clone_items": false},
+		"*amqpv1_json_map": {"limit": -1, "ttl": "", "static_ttl": false, "clone_items": false},
+		"*kafka_json_map": {"limit": -1, "ttl": "", "static_ttl": false, "clone_items": false},
+		"*s3_json_map": {"limit": -1, "ttl": "", "static_ttl": false, "clone_items": false},
+		"*sqs_json_map": {"limit": -1, "ttl": "", "static_ttl": false, "clone_items": false},
+		"*sql": {"limit": -1, "ttl": "", "static_ttl": false, "clone_items": false},
+		"*els": {"limit": -1, "ttl": "", "static_ttl": false, "clone_items": false},
 	},
 	"exporters": [
 		{
