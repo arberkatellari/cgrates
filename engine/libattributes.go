@@ -83,8 +83,8 @@ func (ap *AttributeProfile) Clone() *AttributeProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of AttributeProfile used by ltcache CacheValCloner
-func (ap *AttributeProfile) CacheValClone() any {
+// CacheClone returns a clone of AttributeProfile used by ltcache CacheCloner
+func (ap *AttributeProfile) CacheClone() any {
 	return ap.Clone()
 }
 

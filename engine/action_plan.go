@@ -72,10 +72,9 @@ type ActionPlan struct {
 	ActionTimings []*ActionTiming
 }
 
-// CacheValClone returns a clone of ActionPlan used by ltcache CacheValCloner
-func (apl *ActionPlan) CacheValClone() any {
-	actPlm, _ := apl.Clone()
-	return actPlm
+// CacheClone returns a clone of ActionPlan used by ltcache CacheCloner
+func (apl *ActionPlan) CacheClone() any {
+	return apl.Clone()
 }
 
 func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
@@ -86,7 +85,7 @@ func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
 }
 
 // Clone clones *ActionPlan
-func (apl *ActionPlan) Clone() (any, error) {
+func (apl *ActionPlan) Clone() *ActionPlan {
 	cln := &ActionPlan{
 		Id:         apl.Id,
 		AccountIDs: apl.AccountIDs.Clone(),
@@ -97,7 +96,7 @@ func (apl *ActionPlan) Clone() (any, error) {
 			cln.ActionTimings[i] = act.Clone()
 		}
 	}
-	return cln, nil
+	return cln
 }
 
 // Clone clones ActionTiming

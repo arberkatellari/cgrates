@@ -108,8 +108,8 @@ func (tpd *TPDestination) Clone() *TPDestination {
 	return clone
 }
 
-// CacheValClone returns a clone of TPDestination used by ltcache CacheValCloner
-func (tpd *TPDestination) CacheValClone() any {
+// CacheClone returns a clone of TPDestination used by ltcache CacheCloner
+func (tpd *TPDestination) CacheClone() any {
 	return tpd.Clone()
 }
 
@@ -134,8 +134,8 @@ func (tpr *TPRateRALs) Clone() *TPRateRALs {
 	return clone
 }
 
-// CacheValClone returns a clone of TPRateRALs used by ltcache CacheValCloner
-func (tpr *TPRateRALs) CacheValClone() any {
+// CacheClone returns a clone of TPRateRALs used by ltcache CacheCloner
+func (tpr *TPRateRALs) CacheClone() any {
 	return tpr.Clone()
 }
 
@@ -224,8 +224,8 @@ func (tpdr *TPDestinationRate) Clone() *TPDestinationRate {
 	return clone
 }
 
-// CacheValClone returns a clone of TPDestinationRate used by ltcache CacheValCloner
-func (tpdr *TPDestinationRate) CacheValClone() any {
+// CacheClone returns a clone of TPDestinationRate used by ltcache CacheCloner
+func (tpdr *TPDestinationRate) CacheClone() any {
 	return tpdr.Clone()
 }
 
@@ -278,8 +278,8 @@ func (apt *ApierTPTiming) Clone() *ApierTPTiming {
 	}
 }
 
-// CacheValClone returns a clone of ApierTPTiming used by ltcache CacheValCloner
-func (apt *ApierTPTiming) CacheValClone() any {
+// CacheClone returns a clone of ApierTPTiming used by ltcache CacheCloner
+func (apt *ApierTPTiming) CacheClone() any {
 	return apt.Clone()
 }
 
@@ -309,8 +309,8 @@ func (tpt *TPTiming) Clone() *TPTiming {
 	}
 }
 
-// CacheValClone returns a clone of TPTiming used by ltcache CacheValCloner
-func (tpt *TPTiming) CacheValClone() any {
+// CacheClone returns a clone of TPTiming used by ltcache CacheCloner
+func (tpt *TPTiming) CacheClone() any {
 	return tpt.Clone()
 }
 
@@ -423,8 +423,8 @@ func (tprp *TPRatingPlan) Clone() *TPRatingPlan {
 	return clone
 }
 
-// CacheValClone returns a clone of TPRatingPlan used by ltcache CacheValCloner
-func (tprp *TPRatingPlan) CacheValClone() any {
+// CacheClone returns a clone of TPRatingPlan used by ltcache CacheCloner
+func (tprp *TPRatingPlan) CacheClone() any {
 	return tprp.Clone()
 }
 
@@ -481,8 +481,8 @@ func (rpf *TPRatingProfile) Clone() *TPRatingProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of TPRatingProfile used by ltcache CacheValCloner
-func (rpf *TPRatingProfile) CacheValClone() any {
+// CacheClone returns a clone of TPRatingProfile used by ltcache CacheCloner
+func (rpf *TPRatingProfile) CacheClone() any {
 	return rpf.Clone()
 }
 
@@ -589,8 +589,8 @@ func (tpa *TPActions) Clone() *TPActions {
 	return clone
 }
 
-// CacheValClone returns a clone of TPActions used by ltcache CacheValCloner
-func (tpa *TPActions) CacheValClone() any {
+// CacheClone returns a clone of TPActions used by ltcache CacheCloner
+func (tpa *TPActions) CacheClone() any {
 	return tpa.Clone()
 }
 
@@ -656,8 +656,8 @@ func (tpsg *TPSharedGroups) Clone() *TPSharedGroups {
 	return clone
 }
 
-// CacheValClone returns a clone of TPSharedGroups used by ltcache CacheValCloner
-func (tpsg *TPSharedGroups) CacheValClone() any {
+// CacheClone returns a clone of TPSharedGroups used by ltcache CacheCloner
+func (tpsg *TPSharedGroups) CacheClone() any {
 	return tpsg.Clone()
 }
 
@@ -695,8 +695,8 @@ func (tap *TPActionPlan) Clone() *TPActionPlan {
 	return clone
 }
 
-// CacheValClone returns a clone of TPActionPlan used by ltcache CacheValCloner
-func (tap *TPActionPlan) CacheValClone() any {
+// CacheClone returns a clone of TPActionPlan used by ltcache CacheCloner
+func (tap *TPActionPlan) CacheClone() any {
 	return tap.Clone()
 }
 
@@ -734,8 +734,8 @@ func (tpat *TPActionTriggers) Clone() *TPActionTriggers {
 	return clone
 }
 
-// CacheValClone returns a clone of TPActionTriggers used by ltcache CacheValCloner
-func (tpat *TPActionTriggers) CacheValClone() any {
+// CacheClone returns a clone of TPActionTriggers used by ltcache CacheCloner
+func (tpat *TPActionTriggers) CacheClone() any {
 	return tpat.Clone()
 }
 
@@ -815,8 +815,8 @@ func (aa *TPAccountActions) Clone() *TPAccountActions {
 	}
 }
 
-// CacheValClone returns a clone of TPAccountActions used by ltcache CacheValCloner
-func (aa *TPAccountActions) CacheValClone() any {
+// CacheClone returns a clone of TPAccountActions used by ltcache CacheCloner
+func (aa *TPAccountActions) CacheClone() any {
 	return aa.Clone()
 }
 
@@ -1329,8 +1329,8 @@ func (trp *TPResourceProfile) Clone() *TPResourceProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of TPResourceProfile used by ltcache CacheValCloner
-func (trp *TPResourceProfile) CacheValClone() any {
+// CacheClone returns a clone of TPResourceProfile used by ltcache CacheCloner
+func (trp *TPResourceProfile) CacheClone() any {
 	return trp.Clone()
 }
 
@@ -1468,8 +1468,8 @@ func (tsp *TPStatProfile) Clone() *TPStatProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of TPStatProfile used by ltcache CacheValCloner
-func (tsp *TPStatProfile) CacheValClone() any {
+// CacheClone returns a clone of TPStatProfile used by ltcache CacheCloner
+func (tsp *TPStatProfile) CacheClone() any {
 	return tsp.Clone()
 }
 
@@ -1508,8 +1508,8 @@ func (trp *TPRankingProfile) Clone() *TPRankingProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of TPRankingProfile used by ltcache CacheValCloner
-func (trp *TPRankingProfile) CacheValClone() any {
+// CacheClone returns a clone of TPRankingProfile used by ltcache CacheCloner
+func (trp *TPRankingProfile) CacheClone() any {
 	return trp.Clone()
 }
 
@@ -1558,8 +1558,8 @@ func (ttp *TPTrendsProfile) Clone() *TPTrendsProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of TPTrendsProfile used by ltcache CacheValCloner
-func (ttp *TPTrendsProfile) CacheValClone() any {
+// CacheClone returns a clone of TPTrendsProfile used by ltcache CacheCloner
+func (ttp *TPTrendsProfile) CacheClone() any {
 	return ttp.Clone()
 }
 
@@ -1602,8 +1602,8 @@ func (ttp *TPThresholdProfile) Clone() *TPThresholdProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of TPThresholdProfile used by ltcache CacheValCloner
-func (ttp *TPThresholdProfile) CacheValClone() any {
+// CacheClone returns a clone of TPThresholdProfile used by ltcache CacheCloner
+func (ttp *TPThresholdProfile) CacheClone() any {
 	return ttp.Clone()
 }
 
@@ -1640,8 +1640,8 @@ func (tfp *TPFilterProfile) Clone() *TPFilterProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of TPFilterProfile used by ltcache CacheValCloner
-func (tfp *TPFilterProfile) CacheValClone() any {
+// CacheClone returns a clone of TPFilterProfile used by ltcache CacheCloner
+func (tfp *TPFilterProfile) CacheClone() any {
 	return tfp.Clone()
 }
 
@@ -1722,8 +1722,8 @@ func (tprp *TPRouteProfile) Clone() *TPRouteProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of TPRouteProfile used by ltcache CacheValCloner
-func (tprp *TPRouteProfile) CacheValClone() any {
+// CacheClone returns a clone of TPRouteProfile used by ltcache CacheCloner
+func (tprp *TPRouteProfile) CacheClone() any {
 	return tprp.Clone()
 }
 
@@ -1791,8 +1791,8 @@ func (tpap *TPAttributeProfile) Clone() *TPAttributeProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of TPAttributeProfile used by ltcache CacheValCloner
-func (tpap *TPAttributeProfile) CacheValClone() any {
+// CacheClone returns a clone of TPAttributeProfile used by ltcache CacheCloner
+func (tpap *TPAttributeProfile) CacheClone() any {
 	return tpap.Clone()
 }
 
@@ -1831,8 +1831,8 @@ func (tpcp *TPChargerProfile) Clone() *TPChargerProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of TPChargerProfile used by ltcache CacheValCloner
-func (tpcp *TPChargerProfile) CacheValClone() any {
+// CacheClone returns a clone of TPChargerProfile used by ltcache CacheCloner
+func (tpcp *TPChargerProfile) CacheClone() any {
 	return tpcp.Clone()
 }
 
@@ -1889,8 +1889,8 @@ func (tpdp *TPDispatcherProfile) Clone() *TPDispatcherProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of TPDispatcherProfile used by ltcache CacheValCloner
-func (tpdp *TPDispatcherProfile) CacheValClone() any {
+// CacheClone returns a clone of TPDispatcherProfile used by ltcache CacheCloner
+func (tpdp *TPDispatcherProfile) CacheClone() any {
 	return tpdp.Clone()
 }
 
@@ -1942,8 +1942,8 @@ func (tpdh *TPDispatcherHost) Clone() *TPDispatcherHost {
 	return clone
 }
 
-// CacheValClone returns a clone of TPDispatcherHost used by ltcache CacheValCloner
-func (tpdh *TPDispatcherHost) CacheValClone() any {
+// CacheClone returns a clone of TPDispatcherHost used by ltcache CacheCloner
+func (tpdh *TPDispatcherHost) CacheClone() any {
 	return tpdh.Clone()
 }
 

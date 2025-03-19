@@ -1560,3 +1560,8 @@ func (iDB *InternalDB) DumpStorDB() (err error) {
 func (iDB *InternalDB) RewriteStorDB() (err error) {
 	return iDB.db.RewriteAll()
 }
+
+// BackupStorDBDump will momentarely stop any dumping and rewriting until all dump folder is backed up in folder path backupFolderPath, making zip true will create a zip file in the path instead
+func (iDB *InternalDB) BackupStorDBDump(backupFolderPath string, zip bool) (err error) {
+	return iDB.db.BackupDumpFolder(backupFolderPath, zip)
+}

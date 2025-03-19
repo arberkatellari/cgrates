@@ -84,8 +84,8 @@ func (sqp *StatQueueProfile) Clone() *StatQueueProfile {
 	return result
 }
 
-// CacheValClone returns a clone of StatQueueProfile used by ltcache CacheValCloner
-func (sqp *StatQueueProfile) CacheValClone() any {
+// CacheClone returns a clone of StatQueueProfile used by ltcache CacheCloner
+func (sqp *StatQueueProfile) CacheClone() any {
 	return sqp.Clone()
 }
 
@@ -277,8 +277,8 @@ func (sq *StatQueue) Clone() *StatQueue {
 	return result
 }
 
-// CacheValClone returns a clone of StatQueue used by ltcache CacheValCloner
-func (sq *StatQueue) CacheValClone() any {
+// CacheClone returns a clone of StatQueue used by ltcache CacheCloner
+func (sq *StatQueue) CacheClone() any {
 	return sq.Clone()
 }
 

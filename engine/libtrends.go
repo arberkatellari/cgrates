@@ -73,8 +73,8 @@ func (tP *TrendProfile) Clone() (clnTp *TrendProfile) {
 	return
 }
 
-// CacheValClone returns a clone of TrendProfile used by ltcache CacheValCloner
-func (tP *TrendProfile) CacheValClone() any {
+// CacheClone returns a clone of TrendProfile used by ltcache CacheCloner
+func (tP *TrendProfile) CacheClone() any {
 	return tP.Clone()
 }
 
@@ -146,8 +146,8 @@ func (t *Trend) Clone() (tC *Trend) {
 	return
 }
 
-// CacheValClone returns a clone of Trend used by ltcache CacheValCloner
-func (t *Trend) CacheValClone() any {
+// CacheClone returns a clone of Trend used by ltcache CacheCloner
+func (t *Trend) CacheClone() any {
 	return t.Clone()
 }
 

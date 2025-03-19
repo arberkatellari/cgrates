@@ -311,11 +311,6 @@ func (chS *CacheS) CommitTransaction(transID string) {
 	chS.tCache.CommitTransaction(transID)
 }
 
-// GetCloned is an exported method from TransCache
-func (chS *CacheS) GetCloned(chID, itmID string) (cln any, err error) {
-	return chS.tCache.GetCloned(chID, itmID)
-}
-
 // GetPrecacheChannel returns the channel used to signal precaching
 func (chS *CacheS) GetPrecacheChannel(chID string) chan struct{} {
 	return chS.pcItems[chID]

@@ -2112,3 +2112,26 @@ func (apierSv1 *APIerSv1) RewriteStorDB(ctx *context.Context, ignr *string, repl
 	*reply = utils.OK
 	return
 }
+
+type DumpBackupParams struct {
+	BackupFolderPath string // The path to the folder where the backup will be created
+	Zip              bool   // creates a zip compressing the backup
+}
+
+// BackupDataDBDump will momentarely stop any dumping and rewriting in dataDB, until dump folder is backed up in folder path backupFolderPath. Making zip true will create a zip file in the path instead
+func (apierSv1 *APIerSv1) BackupDataDBDump(ctx *context.Context, params DumpBackupParams, reply *string) (err error) {
+	if err = apierSv1.DataManager.DataDB().BackupDataDBDump(params.BackupFolderPath, params.Zip); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// BackupDataDBDump will momentarely stop any dumping and rewriting in storDB, until dump folder is backed up in folder path backupFolderPath. Making zip true will create a zip file in the path instead
+func (apierSv1 *APIerSv1) BackupStorDBDump(ctx *context.Context, params DumpBackupParams, reply *string) (err error) {
+	if err = apierSv1.StorDb.BackupStorDBDump(params.BackupFolderPath, params.Zip); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}

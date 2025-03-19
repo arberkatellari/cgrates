@@ -1746,12 +1746,17 @@ func (ms *MongoStorage) GetStorageType() string {
 	return utils.MetaMongo
 }
 
-// Will dump everything inside stordb to a file, only for InternalDB
+// RewriteStorDB used only for InternalDB
 func (ms *MongoStorage) DumpStorDB() (err error) {
 	return utils.ErrNotImplemented
 }
 
-// Will rewrite every dump file of StorDB, only for InternalDB
+// RewriteStorDB used only for InternalDB
 func (ms *MongoStorage) RewriteStorDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// BackupStorDBDump used only for InternalDB
+func (ms *MongoStorage) BackupStorDBDump(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }

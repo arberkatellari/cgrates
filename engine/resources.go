@@ -78,8 +78,8 @@ func (rp *ResourceProfile) Clone() *ResourceProfile {
 	return result
 }
 
-// CacheValClone returns a clone of ResourceProfile used by ltcache CacheValCloner
-func (rp *ResourceProfile) CacheValClone() any {
+// CacheClone returns a clone of ResourceProfile used by ltcache CacheCloner
+func (rp *ResourceProfile) CacheClone() any {
 	return rp.Clone()
 }
 
@@ -201,8 +201,8 @@ func (r *Resource) Clone() *Resource {
 	return result
 }
 
-// CacheValClone returns a clone of Resource used by ltcache CacheValCloner
-func (r *Resource) CacheValClone() any {
+// CacheClone returns a clone of Resource used by ltcache CacheCloner
+func (r *Resource) CacheClone() any {
 	return r.Clone()
 }
 

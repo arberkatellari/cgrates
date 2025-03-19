@@ -79,8 +79,8 @@ func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
 	return
 }
 
-// CacheValClone returns a clone of RankingProfile used by ltcache CacheValCloner
-func (rkP *RankingProfile) CacheValClone() any {
+// CacheClone returns a clone of RankingProfile used by ltcache CacheCloner
+func (rkP *RankingProfile) CacheClone() any {
 	return rkP.Clone()
 }
 
@@ -151,8 +151,8 @@ func (r *Ranking) Clone() *Ranking {
 	return cln
 }
 
-// CacheValClone returns a clone of Ranking used by ltcache CacheValCloner
-func (r *Ranking) CacheValClone() any {
+// CacheClone returns a clone of Ranking used by ltcache CacheCloner
+func (r *Ranking) CacheClone() any {
 	return r.Clone()
 }
 

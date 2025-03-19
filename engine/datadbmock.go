@@ -573,3 +573,11 @@ func (dbM *DataDBMock) DumpDataDB() error {
 func (dbM *DataDBMock) RewriteDataDB() (err error) {
 	return utils.ErrNotImplemented
 }
+
+func (dbM *DataDBMock) BackupDataDBDump(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) BackupStorDBDump(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}

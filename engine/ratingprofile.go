@@ -47,8 +47,8 @@ func (rp *RatingProfile) Clone() *RatingProfile {
 	return result
 }
 
-// CacheValClone returns a clone of RatingProfile used by ltcache CacheValCloner
-func (rp *RatingProfile) CacheValClone() any {
+// CacheClone returns a clone of RatingProfile used by ltcache CacheCloner
+func (rp *RatingProfile) CacheClone() any {
 	return rp.Clone()
 }
 

@@ -1132,21 +1132,20 @@ func (a Actions) Sort() {
 }
 
 // Clone returns a clone from object
-func (a Actions) Clone() (any, error) {
+func (a Actions) Clone() Actions {
 	if a == nil {
-		return nil, nil
+		return nil
 	}
 	cln := make(Actions, len(a))
 	for i, action := range a {
 		cln[i] = action.Clone()
 	}
-	return cln, nil
+	return cln
 }
 
-// CacheValClone returns a clone of Actions used by ltcache CacheValCloner
-func (a Actions) CacheValClone() any {
-	act, _ := a.Clone()
-	return act
+// CacheClone returns a clone of Actions used by ltcache CacheCloner
+func (a Actions) CacheClone() any {
+	return a.Clone()
 }
 
 // HasAction checks if the action list contains an action of the given type.

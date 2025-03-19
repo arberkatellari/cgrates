@@ -217,8 +217,8 @@ func (fltr *Filter) Clone() *Filter {
 	return clone
 }
 
-// CacheValClone returns a clone of Filter used by ltcache CacheValCloner
-func (fltr *Filter) CacheValClone() any {
+// CacheClone returns a clone of Filter used by ltcache CacheCloner
+func (fltr *Filter) CacheClone() any {
 	return fltr.Clone()
 }
 

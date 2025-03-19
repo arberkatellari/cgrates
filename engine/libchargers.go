@@ -53,8 +53,8 @@ func (cp *ChargerProfile) Clone() *ChargerProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of ChargerProfile used by ltcache CacheValCloner
-func (cp *ChargerProfile) CacheValClone() any {
+// CacheClone returns a clone of ChargerProfile used by ltcache CacheCloner
+func (cp *ChargerProfile) CacheClone() any {
 	return cp.Clone()
 }
 

@@ -35,7 +35,7 @@ type CacheParamCfg struct {
 	Precache   bool
 	Remote     bool
 	Replicate  bool
-	CloneItems bool
+	CacheClone bool
 }
 
 func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) (err error) {
@@ -57,8 +57,8 @@ func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) (err err
 	if jsnCfg.Replicate != nil {
 		cParam.Replicate = *jsnCfg.Replicate
 	}
-	if jsnCfg.Clone_items != nil {
-		cParam.CloneItems = *jsnCfg.Clone_items
+	if jsnCfg.Clone != nil {
+		cParam.CacheClone = *jsnCfg.Clone
 	}
 	if jsnCfg.Ttl != nil {
 		cParam.TTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Ttl)
@@ -69,12 +69,12 @@ func (cParam *CacheParamCfg) loadFromJSONCfg(jsnCfg *CacheParamJsonCfg) (err err
 // AsMapInterface returns the config as a map[string]any
 func (cParam *CacheParamCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.LimitCfg:      cParam.Limit,
-		utils.StaticTTLCfg:  cParam.StaticTTL,
-		utils.PrecacheCfg:   cParam.Precache,
-		utils.RemoteCfg:     cParam.Remote,
-		utils.ReplicateCfg:  cParam.Replicate,
-		utils.CloneItemsCfg: cParam.CloneItems,
+		utils.LimitCfg:     cParam.Limit,
+		utils.StaticTTLCfg: cParam.StaticTTL,
+		utils.PrecacheCfg:  cParam.Precache,
+		utils.RemoteCfg:    cParam.Remote,
+		utils.ReplicateCfg: cParam.Replicate,
+		utils.CloneCfg:     cParam.CacheClone,
 	}
 	if cParam.TTL != 0 {
 		initialMP[utils.TTLCfg] = cParam.TTL.String()
@@ -91,7 +91,7 @@ func (cParam CacheParamCfg) Clone() (cln *CacheParamCfg) {
 		Precache:   cParam.Precache,
 		Remote:     cParam.Remote,
 		Replicate:  cParam.Replicate,
-		CloneItems: cParam.CloneItems,
+		CacheClone: cParam.CacheClone,
 	}
 }
 
@@ -139,7 +139,7 @@ func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
-			Clone:     cPcfg.CloneItems,
+			Clone:     cPcfg.CacheClone,
 		}
 	}
 	return

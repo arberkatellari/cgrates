@@ -53,7 +53,7 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB b
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
-			Clone:     cPcfg.CloneItems,
+			Clone:     cPcfg.CacheClone,
 		}
 	}
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
@@ -82,7 +82,7 @@ func RecoverDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
-			Clone:     cPcfg.CloneItems,
+			Clone:     cPcfg.CacheClone,
 		}
 	}
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
@@ -1004,4 +1004,9 @@ func (iDB *InternalDB) DumpDataDB() (err error) {
 // Will rewrite every dump file of DataDB
 func (iDB *InternalDB) RewriteDataDB() (err error) {
 	return iDB.db.RewriteAll()
+}
+
+// BackupDataDBDump will momentarely stop any dumping and rewriting until all dump folder is backed up in folder path backupFolderPath, making zip true will create a zip file in the path instead
+func (iDB *InternalDB) BackupDataDBDump(backupFolderPath string, zip bool) (err error) {
+	return iDB.db.BackupDumpFolder(backupFolderPath, zip)
 }

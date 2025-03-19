@@ -2212,14 +2212,14 @@ const (
 
 // ItemOpt
 const (
-	APIKeyCfg     = "api_key"
-	RouteIDCfg    = "route_id"
-	RemoteCfg     = "remote"
-	ReplicateCfg  = "replicate"
-	CloneItemsCfg = "clone_items"
-	TTLCfg        = "ttl"
-	LimitCfg      = "limit"
-	StaticTTLCfg  = "static_ttl"
+	APIKeyCfg    = "api_key"
+	RouteIDCfg   = "route_id"
+	RemoteCfg    = "remote"
+	ReplicateCfg = "replicate"
+	CloneCfg     = "clone"
+	TTLCfg       = "ttl"
+	LimitCfg     = "limit"
+	StaticTTLCfg = "static_ttl"
 )
 
 // Tls

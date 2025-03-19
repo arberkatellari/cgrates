@@ -53,8 +53,8 @@ func (d *Destination) Clone() *Destination {
 	return result
 }
 
-// CacheValClone returns a clone of Destination used by ltcache CacheValCloner
-func (d *Destination) CacheValClone() any {
+// CacheClone returns a clone of Destination used by ltcache CacheCloner
+func (d *Destination) CacheClone() any {
 	return d.Clone()
 }
 

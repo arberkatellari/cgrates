@@ -145,6 +145,7 @@ type DataDB interface {
 	RemoveSessionsBackupDrv(nodeID, tenant, cgrid string) error
 	DumpDataDB() error
 	RewriteDataDB() error
+	BackupDataDBDump(string, bool) error
 }
 
 type StorDB interface {
@@ -224,6 +225,7 @@ type LoadWriter interface {
 	SetTPDispatcherHosts([]*utils.TPDispatcherHost) error
 	DumpStorDB() error
 	RewriteStorDB() error
+	BackupStorDBDump(string, bool) error
 }
 
 // NewMarshaler returns the marshaler type selected by mrshlerStr

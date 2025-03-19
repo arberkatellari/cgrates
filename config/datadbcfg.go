@@ -347,7 +347,7 @@ type ItemOpt struct {
 	StaticTTL  bool
 	Remote     bool
 	Replicate  bool
-	CloneItems bool
+	CacheClone bool
 	// used for ArgDispatcher in case we send this to a dispatcher engine
 	RouteID string
 	APIKey  string
@@ -356,11 +356,11 @@ type ItemOpt struct {
 // AsMapInterface returns the config as a map[string]any
 func (itm *ItemOpt) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.RemoteCfg:     itm.Remote,
-		utils.ReplicateCfg:  itm.Replicate,
-		utils.LimitCfg:      itm.Limit,
-		utils.StaticTTLCfg:  itm.StaticTTL,
-		utils.CloneItemsCfg: itm.CloneItems,
+		utils.RemoteCfg:    itm.Remote,
+		utils.ReplicateCfg: itm.Replicate,
+		utils.LimitCfg:     itm.Limit,
+		utils.StaticTTLCfg: itm.StaticTTL,
+		utils.CloneCfg:     itm.CacheClone,
 	}
 	if itm.APIKey != utils.EmptyString {
 		initialMP[utils.APIKeyCfg] = itm.APIKey
@@ -390,8 +390,8 @@ func (itm *ItemOpt) loadFromJSONCfg(jsonItm *ItemOptJson) (err error) {
 	if jsonItm.Replicate != nil {
 		itm.Replicate = *jsonItm.Replicate
 	}
-	if jsonItm.Clone_items != nil {
-		itm.CloneItems = *jsonItm.Clone_items
+	if jsonItm.Clone != nil {
+		itm.CacheClone = *jsonItm.Clone
 	}
 	if jsonItm.Route_id != nil {
 		itm.RouteID = *jsonItm.Route_id
@@ -413,7 +413,7 @@ func (itm *ItemOpt) Clone() *ItemOpt {
 		StaticTTL:  itm.StaticTTL,
 		Remote:     itm.Remote,
 		Replicate:  itm.Replicate,
-		CloneItems: itm.CloneItems,
+		CacheClone: itm.CacheClone,
 		APIKey:     itm.APIKey,
 		RouteID:    itm.RouteID,
 	}

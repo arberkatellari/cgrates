@@ -150,8 +150,8 @@ func (s *SMCost) Clone() *SMCost {
 	return clone
 }
 
-// CacheValClone returns a clone of SMCost used by ltcache CacheValCloner
-func (s *SMCost) CacheValClone() any {
+// CacheClone returns a clone of SMCost used by ltcache CacheCloner
+func (s *SMCost) CacheClone() any {
 	return s.Clone()
 }
 

@@ -77,8 +77,8 @@ func (tp *ThresholdProfile) Clone() *ThresholdProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of ThresholdProfile used by ltcache CacheValCloner
-func (tp *ThresholdProfile) CacheValClone() any {
+// CacheClone returns a clone of ThresholdProfile used by ltcache CacheCloner
+func (tp *ThresholdProfile) CacheClone() any {
 	return tp.Clone()
 }
 
@@ -154,8 +154,8 @@ func (t *Threshold) Clone() *Threshold {
 	return clone
 }
 
-// CacheValClone returns a clone of Threshold used by ltcache CacheValCloner
-func (t *Threshold) CacheValClone() any {
+// CacheClone returns a clone of Threshold used by ltcache CacheCloner
+func (t *Threshold) CacheClone() any {
 	return t.Clone()
 }
 

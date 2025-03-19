@@ -1685,3 +1685,8 @@ func (sqls *SQLStorage) DumpStorDB() (err error) {
 func (sqls *SQLStorage) RewriteStorDB() (err error) {
 	return utils.ErrNotImplemented
 }
+
+// BackupStorDBDump used only for InternalDB
+func (sqls *SQLStorage) BackupStorDBDump(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}

@@ -13,9 +13,9 @@
 
     "data_db": {
         "db_type": "*internal",
-        "items": {
-            "*actions": {"clone_items": true},
-        },
+        // "items": {
+        //     "*actions": {"clone": true},
+        // },
         "opts":{
             "internalDBDumpPath": "/tmp/internal_db/datadb",
             "internalDBDumpInterval": "500ms",

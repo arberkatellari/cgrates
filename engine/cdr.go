@@ -313,8 +313,8 @@ func (cdr *CDR) Clone() *CDR {
 	return cln
 }
 
-// CacheValClone returns a clone of CDR used by ltcache CacheValCloner
-func (cdr *CDR) CacheValClone() any {
+// CacheClone returns a clone of CDR used by ltcache CacheCloner
+func (cdr *CDR) CacheClone() any {
 	return cdr.Clone()
 }
 

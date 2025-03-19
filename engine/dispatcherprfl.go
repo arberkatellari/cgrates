@@ -136,8 +136,8 @@ func (dp *DispatcherProfile) Clone() *DispatcherProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of DispatcherProfile used by ltcache CacheValCloner
-func (dp *DispatcherProfile) CacheValClone() any {
+// CacheClone returns a clone of DispatcherProfile used by ltcache CacheCloner
+func (dp *DispatcherProfile) CacheClone() any {
 	return dp.Clone()
 }
 
@@ -227,7 +227,7 @@ func (dHPrflIDs DispatcherHostIDs) Clone() (cln DispatcherHostIDs) {
 	return
 }
 
-// CacheValClone returns a clone of DispatcherHostIDs used by ltcache CacheValCloner
-func (dHPrflIDs *DispatcherHostIDs) CacheValClone() any {
+// CacheClone returns a clone of DispatcherHostIDs used by ltcache CacheCloner
+func (dHPrflIDs *DispatcherHostIDs) CacheClone() any {
 	return dHPrflIDs.Clone()
 }

@@ -110,8 +110,8 @@ func (rp *RouteProfile) Clone() *RouteProfile {
 	return clone
 }
 
-// CacheValClone returns a clone of RouteProfile used by ltcache CacheValCloner
-func (rp *RouteProfile) CacheValClone() any {
+// CacheClone returns a clone of RouteProfile used by ltcache CacheCloner
+func (rp *RouteProfile) CacheClone() any {
 	return rp.Clone()
 }
 

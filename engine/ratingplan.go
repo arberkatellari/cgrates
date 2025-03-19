@@ -65,8 +65,8 @@ func (rp *RatingPlan) Clone() *RatingPlan {
 	return result
 }
 
-// CacheValClone returns a clone of RatingPlan used by ltcache CacheValCloner
-func (rp *RatingPlan) CacheValClone() any {
+// CacheClone returns a clone of RatingPlan used by ltcache CacheCloner
+func (rp *RatingPlan) CacheClone() any {
 	return rp.Clone()
 }
 

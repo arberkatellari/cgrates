@@ -2235,7 +2235,12 @@ func (ms *MongoStorage) DumpDataDB() error {
 	return utils.ErrNotImplemented
 }
 
-// Will rewrite every dump file of DataDB,  only for InternalDB
+// Will rewrite every dump file of DataDB, only for InternalDB
 func (ms *MongoStorage) RewriteDataDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// BackupDataDBDump only for InternalDB
+func (ms *MongoStorage) BackupDataDBDump(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }
