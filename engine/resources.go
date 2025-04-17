@@ -49,6 +49,40 @@ type ResourceProfile struct {
 
 }
 
+// Clone clones *ResourceProfile (lkID excluded)
+func (rp *ResourceProfile) Clone() *ResourceProfile {
+	if rp == nil {
+		return nil
+	}
+	clone := &ResourceProfile{
+
+		Tenant:            rp.Tenant,
+		ID:                rp.ID,
+		UsageTTL:          rp.UsageTTL,
+		Limit:             rp.Limit,
+		AllocationMessage: rp.AllocationMessage,
+		Blocker:           rp.Blocker,
+		Stored:            rp.Stored,
+	}
+	if rp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(rp.FilterIDs))
+		copy(clone.FilterIDs, rp.FilterIDs)
+	}
+	if rp.ThresholdIDs != nil {
+		clone.ThresholdIDs = make([]string, len(rp.ThresholdIDs))
+		copy(clone.ThresholdIDs, rp.ThresholdIDs)
+	}
+	if rp.Weights != nil {
+		clone.Weights = rp.Weights.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of ResourceProfile used by ltcache CacheCloner
+func (rp *ResourceProfile) CacheClone() any {
+	return rp.Clone()
+}
+
 // ResourceProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type ResourceProfileWithAPIOpts struct {
 	*ResourceProfile
@@ -127,6 +161,48 @@ type Resource struct {
 	tUsage *float64         // sum of all usages
 	dirty  *bool            // the usages were modified, needs save, *bool so we only save if enabled in config
 	rPrf   *ResourceProfile // for ordering purposes
+}
+
+// Clone clones *Resource (lkID excluded)
+func (r *Resource) Clone() *Resource {
+	if r == nil {
+		return nil
+	}
+	clone := &Resource{
+		Tenant: r.Tenant,
+		ID:     r.ID,
+	}
+	if r.Usages != nil {
+		clone.Usages = make(map[string]*ResourceUsage, len(r.Usages))
+		for key, usage := range r.Usages {
+			clone.Usages[key] = usage.Clone()
+		}
+	}
+	if r.TTLIdx != nil {
+		clone.TTLIdx = make([]string, len(r.TTLIdx))
+		copy(clone.TTLIdx, r.TTLIdx)
+	}
+	if r.ttl != nil {
+		ttlCopy := *r.ttl
+		clone.ttl = &ttlCopy
+	}
+	if r.tUsage != nil {
+		tUsageCopy := *r.tUsage
+		clone.tUsage = &tUsageCopy
+	}
+	if r.dirty != nil {
+		dirtyCopy := *r.dirty
+		clone.dirty = &dirtyCopy
+	}
+	if r.rPrf != nil {
+		clone.rPrf = r.rPrf.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of ActionPlan used by ltcache CacheCloner
+func (apl *Resource) CacheClone() any {
+	return apl.Clone()
 }
 
 // resourceLockKey returns the ID used to lock a resource with guardian

@@ -106,20 +106,22 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager, connMgr *ConnManager, cpS
 				k == utils.CacheCapsEvents {
 				continue
 			}
-			val.OnEvicted = func(itmID string, value any) {
-				if err := connMgr.Call(context.TODO(), cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
-					&utils.ArgCacheReplicateRemove{
-						CacheID: k,
-						ItemID:  itmID,
-					}, &reply); err != nil {
-					utils.Logger.Warning(fmt.Sprintf("error: %+v when autoexpired item: %+v from: %+v", err, itmID, k))
-				}
+			val.OnEvicted = []func(itmID string, value interface{}){
+				func(itmID string, value any) {
+					if err := connMgr.Call(context.TODO(), cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
+						&utils.ArgCacheReplicateRemove{
+							CacheID: k,
+							ItemID:  itmID,
+						}, &reply); err != nil {
+						utils.Logger.Warning(fmt.Sprintf("error: %+v when autoexpired item: %+v from: %+v", err, itmID, k))
+					}
+				},
 			}
 		}
 	}
 
 	if _, has := tCache[utils.CacheCapsEvents]; has && cpS != nil {
-		tCache[utils.CacheCapsEvents].OnEvicted = cpS.OnEvict
+		tCache[utils.CacheCapsEvents].OnEvicted = []func(itmID string, value interface{}){cpS.OnEvict}
 	}
 	c = &CacheS{
 		cfg:     cfg,
@@ -248,11 +250,6 @@ func (chS *CacheS) RollbackTransaction(transID string) {
 // CommitTransaction is an exported method from TransCache
 func (chS *CacheS) CommitTransaction(transID string) {
 	chS.tCache.CommitTransaction(transID)
-}
-
-// GetCloned is an exported method from TransCache
-func (chS *CacheS) GetCloned(chID, itmID string) (cln any, err error) {
-	return chS.tCache.GetCloned(chID, itmID)
 }
 
 // GetPrecacheChannel returns the channel used to signal precaching

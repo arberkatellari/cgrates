@@ -73,7 +73,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dmCharger = engine.NewDataManager(data, cfg, nil)
 
 	fltrCP1 := &engine.Filter{
@@ -222,7 +222,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 		},
 	}
 
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dmCharger = engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmCharger)
 	chargerSrv = NewChargerService(dmCharger, fltrs, cfg, nil)
@@ -392,7 +392,7 @@ func TestChargerProcessEvent(t *testing.T) {
 		},
 	}
 
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dmCharger = engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmCharger)
 	chargerSrv = NewChargerService(dmCharger, fltrs, cfg, nil)
@@ -518,7 +518,7 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().NestedFields = false
 
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dmCharger := engine.NewDataManager(dataDB, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmCharger)
 	cS := &ChargerS{
@@ -562,7 +562,7 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().NestedFields = false
 
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dmCharger := engine.NewDataManager(dataDB, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dmCharger)
 	cS := &ChargerS{
@@ -689,7 +689,7 @@ func TestChargersmatchingChargerProfilesForEventCacheReadErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	cS := &ChargerS{
@@ -741,7 +741,7 @@ func TestChargersmatchingChargerProfilesForEventWeightFromDynamicsErr(t *testing
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	cS := &ChargerS{
@@ -791,7 +791,7 @@ func TestChargersmatchingChargerProfilesForEventBlockerFromDynamicsErr(t *testin
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	cS := &ChargerS{
@@ -846,7 +846,7 @@ func TestChargersmatchingChargerProfilesForEventBlockerTrue(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	cS := &ChargerS{
@@ -984,7 +984,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	cP := &utils.ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -1079,7 +1079,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	cP := &utils.ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -1161,7 +1161,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
@@ -1230,7 +1230,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
@@ -1306,7 +1306,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 func TestChargersV1ProcessEvent(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
@@ -1416,7 +1416,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}

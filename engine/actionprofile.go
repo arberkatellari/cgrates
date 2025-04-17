@@ -39,6 +39,48 @@ type ActionProfile struct {
 	Actions []*APAction
 }
 
+// Clone clones ActionProfile
+func (ap *ActionProfile) Clone() *ActionProfile {
+	if ap == nil {
+		return nil
+	}
+	cloned := &ActionProfile{
+		Tenant:   ap.Tenant,
+		ID:       ap.ID,
+		Schedule: ap.Schedule,
+	}
+	if ap.FilterIDs != nil {
+		cloned.FilterIDs = make([]string, len(ap.FilterIDs))
+		copy(cloned.FilterIDs, ap.FilterIDs)
+	}
+	if ap.Weights != nil {
+		cloned.Weights = ap.Weights.Clone()
+	}
+	if ap.Blockers != nil {
+		cloned.Blockers = ap.Blockers.Clone()
+	}
+	if ap.Targets != nil {
+		cloned.Targets = make(map[string]utils.StringSet)
+		for k, v := range ap.Targets {
+			cloned.Targets[k] = v.Clone()
+		}
+	}
+	if ap.Actions != nil {
+		cloned.Actions = make([]*APAction, len(ap.Actions))
+		for i, action := range ap.Actions {
+			if action != nil {
+				cloned.Actions[i] = action.Clone()
+			}
+		}
+	}
+	return cloned
+}
+
+// CacheClone returns a clone of ActionProfile used by ltcache CacheCloner
+func (ap *ActionProfile) CacheClone() any {
+	return ap.Clone()
+}
+
 func (aP *ActionProfile) TenantID() string {
 	return utils.ConcatenatedKey(aP.Tenant, aP.ID)
 }
@@ -53,11 +95,57 @@ type APAction struct {
 	Diktats   []*APDiktat
 }
 
+// Clone clones APAction
+func (a *APAction) Clone() *APAction {
+	if a == nil {
+		return nil
+	}
+	cloned := &APAction{
+		ID:   a.ID,
+		TTL:  a.TTL,
+		Type: a.Type,
+	}
+	if a.FilterIDs != nil {
+		cloned.FilterIDs = make([]string, len(a.FilterIDs))
+		copy(cloned.FilterIDs, a.FilterIDs)
+	}
+	if a.Opts != nil {
+		cloned.Opts = make(map[string]any, len(a.Opts))
+		for k, v := range a.Opts {
+			cloned.Opts[k] = v
+		}
+	}
+	if a.Diktats != nil {
+		cloned.Diktats = make([]*APDiktat, len(a.Diktats))
+		for i, diktat := range a.Diktats {
+			if diktat != nil {
+				cloned.Diktats[i] = diktat.Clone()
+			}
+		}
+	}
+	return cloned
+}
+
 type APDiktat struct {
 	Path  string // Path to execute
 	Value string // Value to execute on Path
 
 	valRSR utils.RSRParsers
+}
+
+// Clone clones APAction
+func (d *APDiktat) Clone() *APDiktat {
+	if d == nil {
+		return nil
+	}
+	cloned := &APDiktat{
+		Path:  d.Path,
+		Value: d.Value,
+	}
+	if d.valRSR != nil {
+		cloned.valRSR = d.valRSR.Clone()
+	}
+	return cloned
 }
 
 // RSRValues returns the Value as RSRParsers

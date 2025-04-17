@@ -44,14 +44,24 @@ type InternalDB struct {
 
 // NewInternalDB constructs an InternalDB
 func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
-	itmsCfg map[string]*config.ItemOpts) *InternalDB {
+	transCacheOpts *ltcache.TransCacheOpts, itmsCfg map[string]*config.ItemOpts) (iDB *InternalDB,
+	err error) {
 	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
 	for k, cPcfg := range itmsCfg {
 		tcCfg[k] = &ltcache.CacheConfig{
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
+			Clone:     true,
 		}
+	}
+	if transCacheOpts != nil && transCacheOpts.DumpInterval == 0 && transCacheOpts.RewriteInterval == 0 {
+		transCacheOpts = nil // create TransCache without offline collector if neither
+		// DumpInterval or RewriteInterval are provided
+	}
+	tc, err := ltcache.NewTransCacheWithOfflineCollector(transCacheOpts, tcCfg, utils.Logger)
+	if err != nil {
+		return nil, err
 	}
 	ms, _ := utils.NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
 	return &InternalDB{
@@ -59,8 +69,8 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
 		ms:                  ms,
-		db:                  ltcache.NewTransCache(tcCfg),
-	}
+		db:                  tc,
+	}, nil
 }
 
 // SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)

@@ -80,7 +80,10 @@ func (eeS *EeS) SetupExporterCache() error {
 			continue // skip if caching is disabled
 		}
 
-		expCache[chID] = ltcache.NewCache(chCfg.Limit, chCfg.TTL, chCfg.StaticTTL, onCacheEvicted)
+		expCache[chID] = ltcache.NewCache(chCfg.Limit, chCfg.TTL, chCfg.StaticTTL, false,
+			[]func(itmID string, value any){
+				onCacheEvicted,
+			})
 
 		// Precache exporters if required.
 		if chCfg.Precache {

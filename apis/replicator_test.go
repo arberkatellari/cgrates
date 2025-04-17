@@ -32,7 +32,7 @@ import (
 
 func TestNewReplicatorSv1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -52,7 +52,7 @@ func TestNewReplicatorSv1(t *testing.T) {
 
 func TestReplicatorGetAccount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -104,7 +104,7 @@ func TestReplicatorGetAccount(t *testing.T) {
 
 func TestReplicatorGetAccountError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -153,7 +153,7 @@ func TestReplicatorGetAccountError(t *testing.T) {
 
 func TestReplicatorGetStatQueue(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -188,7 +188,7 @@ func TestReplicatorGetStatQueue(t *testing.T) {
 
 func TestReplicatorGetStatQueueErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -220,7 +220,7 @@ func TestReplicatorGetStatQueueErr(t *testing.T) {
 
 func TestReplicatorGetFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -272,7 +272,7 @@ func TestReplicatorGetFilter(t *testing.T) {
 
 func TestReplicatorGetFilterError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -321,7 +321,7 @@ func TestReplicatorGetFilterError(t *testing.T) {
 
 func TestReplicatorGetThreshold(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -353,7 +353,7 @@ func TestReplicatorGetThreshold(t *testing.T) {
 
 func TestReplicatorGetThresholdError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -382,7 +382,7 @@ func TestReplicatorGetThresholdError(t *testing.T) {
 
 func TestReplicatorGetThresholdProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -423,7 +423,7 @@ func TestReplicatorGetThresholdProfile(t *testing.T) {
 
 func TestReplicatorGetThresholdProfileError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -461,7 +461,7 @@ func TestReplicatorGetThresholdProfileError(t *testing.T) {
 
 func TestReplicatorGetResource(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -492,7 +492,7 @@ func TestReplicatorGetResource(t *testing.T) {
 
 func TestReplicatorGetResourceError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -520,7 +520,7 @@ func TestReplicatorGetResourceError(t *testing.T) {
 
 func TestReplicatorGetResourceProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -558,7 +558,7 @@ func TestReplicatorGetResourceProfile(t *testing.T) {
 
 func TestReplicatorGetResourceProfileError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -593,7 +593,7 @@ func TestReplicatorGetResourceProfileError(t *testing.T) {
 
 func TestReplicatorGetRouteProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -640,7 +640,7 @@ func TestReplicatorGetRouteProfile(t *testing.T) {
 
 func TestReplicatorGetRouteProfileError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -684,7 +684,7 @@ func TestReplicatorGetRouteProfileError(t *testing.T) {
 
 func TestReplicatorGetAttributeProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -732,7 +732,7 @@ func TestReplicatorGetAttributeProfile(t *testing.T) {
 
 func TestReplicatorGetAttributeProfileError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -777,7 +777,7 @@ func TestReplicatorGetAttributeProfileError(t *testing.T) {
 
 func TestReplicatorGetChargerProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -814,7 +814,7 @@ func TestReplicatorGetChargerProfile(t *testing.T) {
 
 func TestReplicatorGetChargerProfileError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -848,7 +848,7 @@ func TestReplicatorGetChargerProfileError(t *testing.T) {
 
 func TestReplicatorGetItemLoadIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -877,7 +877,7 @@ func TestReplicatorGetItemLoadIDs(t *testing.T) {
 
 func TestReplicatorGetItemLoadIDsError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -906,7 +906,7 @@ func TestReplicatorGetItemLoadIDsError(t *testing.T) {
 
 func TestReplicatorSetThresholdProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -964,7 +964,7 @@ func TestReplicatorSetThresholdProfile(t *testing.T) {
 
 func TestReplicatorSetThresholdProfileErr1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1002,7 +1002,7 @@ func TestReplicatorSetThresholdProfileErr1(t *testing.T) {
 
 func TestReplicatorSetAccount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1084,7 +1084,7 @@ func TestReplicatorSetAccount(t *testing.T) {
 
 func TestReplicatorSetThreshold(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1124,7 +1124,7 @@ func TestReplicatorSetThreshold(t *testing.T) {
 
 func TestReplicatorSetThresholdErr1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1153,7 +1153,7 @@ func TestReplicatorSetThresholdErr1(t *testing.T) {
 
 func TestReplicatorSetStatQueueProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1211,7 +1211,7 @@ func TestReplicatorSetStatQueueProfile(t *testing.T) {
 
 func TestReplicatorSetStatQueueProfileErr1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1262,7 +1262,7 @@ func TestReplicatorSetStatQueueProfileErr1(t *testing.T) {
 }
 func TestReplicatorSetStatQueue(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1300,7 +1300,7 @@ func TestReplicatorSetStatQueue(t *testing.T) {
 
 func TestReplicatorSetFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1355,7 +1355,7 @@ func TestReplicatorSetFilter(t *testing.T) {
 
 func TestReplicatorSetFilterErr1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1404,7 +1404,7 @@ func TestReplicatorSetFilterErr1(t *testing.T) {
 
 func TestReplicatorSetResourceProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1446,7 +1446,7 @@ func TestReplicatorSetResourceProfile(t *testing.T) {
 
 func TestReplicatorSetResourceProfileErr1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1482,7 +1482,7 @@ func TestReplicatorSetResourceProfileErr1(t *testing.T) {
 
 func TestReplicatorSetResource(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1517,7 +1517,7 @@ func TestReplicatorSetResource(t *testing.T) {
 
 func TestReplicatorSetResourceErr1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1545,7 +1545,7 @@ func TestReplicatorSetResourceErr1(t *testing.T) {
 }
 func TestReplicatorSetRouteProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1596,7 +1596,7 @@ func TestReplicatorSetRouteProfile(t *testing.T) {
 
 func TestReplicatorSetRouteProfileErr1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1641,7 +1641,7 @@ func TestReplicatorSetRouteProfileErr1(t *testing.T) {
 
 func TestReplicatorSetAttributeProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1693,7 +1693,7 @@ func TestReplicatorSetAttributeProfile(t *testing.T) {
 
 func TestReplicatorSetAttributeProfileErr1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1739,7 +1739,7 @@ func TestReplicatorSetAttributeProfileErr1(t *testing.T) {
 
 func TestReplicatorChargerProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1780,7 +1780,7 @@ func TestReplicatorChargerProfile(t *testing.T) {
 
 func TestReplicatorChargerProfileErr1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1815,7 +1815,7 @@ func TestReplicatorChargerProfileErr1(t *testing.T) {
 
 func TestReplicatorRemoveThreshold(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1851,7 +1851,7 @@ func TestReplicatorRemoveThreshold(t *testing.T) {
 
 func TestReplicatorRemoveThresholdErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1884,7 +1884,7 @@ func TestReplicatorRemoveThresholdErr(t *testing.T) {
 
 func TestReplicatorRemoveAccount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1941,7 +1941,7 @@ func TestReplicatorRemoveAccount(t *testing.T) {
 
 func TestReplicatorRemoveStatQueue(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -1980,7 +1980,7 @@ func TestReplicatorRemoveStatQueue(t *testing.T) {
 
 func TestReplicatorRemoveStatQueueErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2016,7 +2016,7 @@ func TestReplicatorRemoveStatQueueErr(t *testing.T) {
 
 func TestReplicatorRemoveFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2072,7 +2072,7 @@ func TestReplicatorRemoveFilter(t *testing.T) {
 
 func TestReplicatorRemoveFilterErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2125,7 +2125,7 @@ func TestReplicatorRemoveFilterErr(t *testing.T) {
 
 func TestReplicatorRemoveThresholdProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2170,7 +2170,7 @@ func TestReplicatorRemoveThresholdProfile(t *testing.T) {
 
 func TestReplicatorRemoveThresholdProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2212,7 +2212,7 @@ func TestReplicatorRemoveThresholdProfileErr(t *testing.T) {
 
 func TestReplicatorRemoveStatQueueProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2271,7 +2271,7 @@ func TestReplicatorRemoveStatQueueProfile(t *testing.T) {
 
 func TestReplicatorRemoveStatQueueProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2327,7 +2327,7 @@ func TestReplicatorRemoveStatQueueProfileErr(t *testing.T) {
 
 func TestReplicatorRemoveResource(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2363,7 +2363,7 @@ func TestReplicatorRemoveResource(t *testing.T) {
 
 func TestReplicatorRemoveResourceErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2397,7 +2397,7 @@ func TestReplicatorRemoveResourceErr(t *testing.T) {
 
 func TestReplicatorRemoveResourceProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2440,7 +2440,7 @@ func TestReplicatorRemoveResourceProfile(t *testing.T) {
 
 func TestReplicatorRemoveResourceProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2481,7 +2481,7 @@ func TestReplicatorRemoveResourceProfileErr(t *testing.T) {
 
 func TestReplicatorRemoveRouteProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2533,7 +2533,7 @@ func TestReplicatorRemoveRouteProfile(t *testing.T) {
 
 func TestReplicatorRemoveRouteProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2583,7 +2583,7 @@ func TestReplicatorRemoveRouteProfileErr(t *testing.T) {
 
 func TestReplicatorRemoveAttributeProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2636,7 +2636,7 @@ func TestReplicatorRemoveAttributeProfile(t *testing.T) {
 
 func TestReplicatorRemoveAttributeProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2687,7 +2687,7 @@ func TestReplicatorRemoveAttributeProfileErr(t *testing.T) {
 
 func TestReplicatorRemoveChargerProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2729,7 +2729,7 @@ func TestReplicatorRemoveChargerProfile(t *testing.T) {
 
 func TestReplicatorRemoveChargerProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2769,7 +2769,7 @@ func TestReplicatorRemoveChargerProfileErr(t *testing.T) {
 
 func TestReplicatorGetRateProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2835,7 +2835,7 @@ func TestReplicatorGetRateProfile(t *testing.T) {
 
 func TestReplicatorGetRateProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2898,7 +2898,7 @@ func TestReplicatorGetRateProfileErr(t *testing.T) {
 
 func TestReplicatorGetActionProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2940,7 +2940,7 @@ func TestReplicatorGetActionProfile(t *testing.T) {
 
 func TestReplicatorGetActionProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -2979,7 +2979,7 @@ func TestReplicatorGetActionProfileErr(t *testing.T) {
 
 func TestReplicatorSetRateProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -3049,7 +3049,7 @@ func TestReplicatorSetRateProfile(t *testing.T) {
 
 func TestReplicatorSetRateProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -3114,7 +3114,7 @@ func TestReplicatorSetRateProfileErr(t *testing.T) {
 
 func TestReplicatorSetActionProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -3160,7 +3160,7 @@ func TestReplicatorSetActionProfile(t *testing.T) {
 
 func TestReplicatorSetActionProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -3200,7 +3200,7 @@ func TestReplicatorSetActionProfileErr(t *testing.T) {
 
 func TestReplicatorRemoveRateProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -3271,7 +3271,7 @@ func TestReplicatorRemoveRateProfile(t *testing.T) {
 
 func TestReplicatorRemoveRateProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -3340,7 +3340,7 @@ func TestReplicatorRemoveRateProfileErr(t *testing.T) {
 
 func TestReplicatorRemoveActionProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,
@@ -3387,7 +3387,7 @@ func TestReplicatorRemoveActionProfile(t *testing.T) {
 
 func TestReplicatorRemoveActionProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	v1 := &AdminSv1{
 		cfg:     cfg,

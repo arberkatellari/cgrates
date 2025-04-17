@@ -28,23 +28,30 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 type StorDBOpts struct {
-	SQLMaxOpenConns    int
-	SQLMaxIdleConns    int
-	SQLLogLevel        int
-	SQLConnMaxLifetime time.Duration
-	SQLDSNParams       map[string]string
-	PgSSLMode          string
-	PgSSLCert          string
-	PgSSLKey           string
-	PgSSLPassword      string
-	PgSSLCertMode      string
-	PgSSLRootCert      string
-	MySQLLocation      string
-	MongoQueryTimeout  time.Duration
-	MongoConnScheme    string
+	InternalDBDumpPath        string        // Path to the dump file
+	InternalDBBackupPath      string        // Path where db dump will backup
+	InternalDBStartTimeout    time.Duration // Transcache recover from dump files timeout duration
+	InternalDBDumpInterval    time.Duration // Regurarly dump database to file
+	InternalDBRewriteInterval time.Duration // Regurarly rewrite dump files
+	InternalDBFileSizeLimit   int64         // maximum size that can be written in a singular dump file
+	SQLMaxOpenConns           int
+	SQLMaxIdleConns           int
+	SQLLogLevel               int
+	SQLConnMaxLifetime        time.Duration
+	SQLDSNParams              map[string]string
+	PgSSLMode                 string
+	PgSSLCert                 string
+	PgSSLKey                  string
+	PgSSLPassword             string
+	PgSSLCertMode             string
+	PgSSLRootCert             string
+	MySQLLocation             string
+	MongoQueryTimeout         time.Duration
+	MongoConnScheme           string
 }
 
 // StorDbCfg StroreDb config
@@ -394,4 +401,19 @@ func diffStorDBJsonCfg(d *DbJsonCfg, v1, v2 *StorDbCfg) *DbJsonCfg {
 	d.Opts = diffStorDBOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 
 	return d
+}
+
+// ToTransCacheOpts returns to ltcache.TransCacheOpts from StorDBOpts
+func (s *StorDBOpts) ToTransCacheOpts() *ltcache.TransCacheOpts {
+	if s == nil {
+		return nil
+	}
+	return &ltcache.TransCacheOpts{
+		DumpPath:        s.InternalDBDumpPath,
+		BackupPath:      s.InternalDBBackupPath,
+		StartTimeout:    s.InternalDBStartTimeout,
+		DumpInterval:    s.InternalDBDumpInterval,
+		RewriteInterval: s.InternalDBRewriteInterval,
+		FileSizeLimit:   s.InternalDBFileSizeLimit,
+	}
 }

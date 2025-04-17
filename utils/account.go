@@ -366,6 +366,11 @@ func (acc *Account) Clone() (cln *Account) {
 	return
 }
 
+// CacheClone returns a clone of Account used by ltcache CacheCloner
+func (a *Account) CacheClone() any {
+	return a.Clone()
+}
+
 // Clone returns a clone of the ActivationInterval
 func (aI *ActivationInterval) Clone() *ActivationInterval {
 	if aI == nil {

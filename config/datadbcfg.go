@@ -27,6 +27,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func defaultDBPort(dbType, port string) string {
@@ -48,23 +49,29 @@ func defaultDBPort(dbType, port string) string {
 }
 
 type DataDBOpts struct {
-	RedisMaxConns           int
-	RedisConnectAttempts    int
-	RedisSentinel           string
-	RedisCluster            bool
-	RedisClusterSync        time.Duration
-	RedisClusterOndownDelay time.Duration
-	RedisConnectTimeout     time.Duration
-	RedisReadTimeout        time.Duration
-	RedisWriteTimeout       time.Duration
-	RedisPoolPipelineWindow time.Duration
-	RedisPoolPipelineLimit  int
-	RedisTLS                bool
-	RedisClientCertificate  string
-	RedisClientKey          string
-	RedisCACertificate      string
-	MongoQueryTimeout       time.Duration
-	MongoConnScheme         string
+	InternalDBDumpPath        string        // Path to the dump file
+	InternalDBBackupPath      string        // Path where db dump will backup
+	InternalDBStartTimeout    time.Duration // Transcache recover from dump files timeout duration
+	InternalDBDumpInterval    time.Duration // Regurarly dump database to file
+	InternalDBRewriteInterval time.Duration // Regurarly rewrite dump files
+	InternalDBFileSizeLimit   int64         // maximum size that can be written in a singular dump file
+	RedisMaxConns             int
+	RedisConnectAttempts      int
+	RedisSentinel             string
+	RedisCluster              bool
+	RedisClusterSync          time.Duration
+	RedisClusterOndownDelay   time.Duration
+	RedisConnectTimeout       time.Duration
+	RedisReadTimeout          time.Duration
+	RedisWriteTimeout         time.Duration
+	RedisPoolPipelineWindow   time.Duration
+	RedisPoolPipelineLimit    int
+	RedisTLS                  bool
+	RedisClientCertificate    string
+	RedisClientKey            string
+	RedisCACertificate        string
+	MongoQueryTimeout         time.Duration
+	MongoConnScheme           string
 }
 
 // DataDbCfg Database config
@@ -641,4 +648,19 @@ func diffDataDBJsonCfg(d *DbJsonCfg, v1, v2 *DataDbCfg) *DbJsonCfg {
 	d.Items = diffMapItemOptJson(d.Items, v1.Items, v2.Items)
 	d.Opts = diffDataDBOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
+}
+
+// ToTransCacheOpts returns to ltcache.TransCacheOpts from DataDBOpts
+func (d *DataDBOpts) ToTransCacheOpts() *ltcache.TransCacheOpts {
+	if d == nil {
+		return nil
+	}
+	return &ltcache.TransCacheOpts{
+		DumpPath:        d.InternalDBDumpPath,
+		BackupPath:      d.InternalDBBackupPath,
+		StartTimeout:    d.InternalDBStartTimeout,
+		DumpInterval:    d.InternalDBDumpInterval,
+		RewriteInterval: d.InternalDBRewriteInterval,
+		FileSizeLimit:   d.InternalDBFileSizeLimit,
+	}
 }

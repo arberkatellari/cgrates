@@ -63,7 +63,7 @@ var attrs = &engine.AttrSProcessEventReply{
 
 func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	sessions := NewSessionS(cfg, dm, nil, nil)
 
@@ -93,7 +93,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 
 func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	sessions := NewSessionS(cfg, dm, nil, nil)
 
@@ -1280,7 +1280,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	mpStr := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	mpStr, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	sS := NewSessionS(cfg, engine.NewDataManager(mpStr, cfg, nil), nil, nil)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
@@ -1889,7 +1889,7 @@ func (mk *mockConnWarnDisconnect2) Call(method string, args any, rply any) error
 func TestWarnSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().NodeID = "ClientConnIdtest"
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
 	sessions := NewSessionS(cfg, dm, nil)
@@ -1988,7 +1988,7 @@ func TestSessionSAsBiRPC(t *testing.T) {
 func TestBiJClntID(t *testing.T) {
 	client := &mockConnWarnDisconnect1{}
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 	sessions.biJClnts = map[birpc.ClientConnector]string{
