@@ -20,6 +20,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -122,6 +123,9 @@ var (
 type ConfigDB interface {
 	GetSection(ctx *context.Context, section string, val any) error // in this case value must be a not nil pointer
 	SetSection(ctx *context.Context, section string, val any) error
+	DumpConfigDB() error
+	RewriteConfigDB() error
+	BackupConfigDB(string, bool) error
 }
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -148,6 +152,21 @@ func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn any)
 	}
 	jsnCfg[section] = json.RawMessage(data)
 	return
+}
+
+// Only intended for InternalDB
+func (jsnCfg CgrJsonCfg) BackupConfigDB(string, bool) error {
+	return utils.ErrNotImplemented
+}
+
+// Only intended for InternalDB
+func (jsnCfg CgrJsonCfg) DumpConfigDB() error {
+	return utils.ErrNotImplemented
+}
+
+// Only intended for InternalDB
+func (jsnCfg CgrJsonCfg) RewriteConfigDB() error {
+	return utils.ErrNotImplemented
 }
 
 type Section interface {
@@ -237,6 +256,8 @@ func (r Sections) LoadWithout(ctx *context.Context, db ConfigDB, cfg *CGRConfig,
 	eSec := utils.NewStringSet(sections)
 	for _, sec := range r {
 		if !eSec.Has(sec.SName()) {
+			fmt.Println("sec.SName(): ", sec.SName())
+			fmt.Println("eSec: ", eSec)
 			if err = sec.Load(ctx, db, cfg); err != nil {
 				return
 			}

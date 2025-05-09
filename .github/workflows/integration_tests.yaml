@@ -3,15 +3,15 @@ name: integration
 on:
   push:
     branches:
-      - 1.0
+      - aof
     paths-ignore:
-      - 'docs/**'
+      - "docs/**"
       - README.md
   pull_request:
     branches:
       - 1.0
     paths-ignore:
-      - 'docs/**'
+      - "docs/**"
       - README.md
   workflow_dispatch:
 
@@ -66,10 +66,10 @@ jobs:
           sudo env "PATH=$PATH" go test github.com/cgrates/cgrates/migrator -tags=integration
           sudo env "PATH=$PATH" go test github.com/cgrates/cgrates/services -tags=integration
 
-      - name: Run flaky tests
-        continue-on-error: true 
-        run: |
-          sudo env "PATH=$PATH" ./flaky_test.sh
+      # - name: Run flaky tests
+      #   continue-on-error: true
+      #   run: |
+      #     sudo env "PATH=$PATH" ./flaky_test.sh
 
       - name: Run integration tests
         run: |

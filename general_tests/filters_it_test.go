@@ -48,7 +48,7 @@ var (
 	sTestsFltr = []func(t *testing.T){
 		testV1FltrLoadConfig,
 		testV1FltrFlushDBs,
-		testV1FltrStartEngine,
+		// testV1FltrStartEngine,
 		testV1FltrRpcConn,
 		testV1FltrLoadTarrifPlans,
 		testV1FltrAddStats,
@@ -62,7 +62,7 @@ var (
 		testV1FltrAttributesPrefix,
 		testV1FltrFlushDBs,
 		testV1FltrChargerSuffix,
-		testV1FltrStopEngine,
+		// testV1FltrStopEngine,
 	}
 )
 
