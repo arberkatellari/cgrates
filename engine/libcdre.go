@@ -36,7 +36,7 @@ import (
 var failedPostCache *ltcache.Cache
 
 func init() {
-	failedPostCache = ltcache.NewCache(-1, 5*time.Second, false, writeFailedPosts) // configurable  general
+	failedPostCache = ltcache.NewCache(-1, 5*time.Second, false, false, writeFailedPosts) // configurable  general
 }
 
 // SetFailedPostCacheTTL recreates the failed cache

@@ -248,22 +248,6 @@ func TestAtplSort(t *testing.T) {
 	}
 }
 
-func TestCacheGetCloned(t *testing.T) {
-	at1 := &ActionPlan{
-		Id:         "test",
-		AccountIDs: utils.StringMap{"one": true, "two": true, "three": true},
-	}
-	Cache.Set(utils.CacheActionPlans, "MYTESTAPL", at1, nil, true, "")
-	clned, err := Cache.GetCloned(utils.CacheActionPlans, "MYTESTAPL")
-	if err != nil {
-		t.Error(err)
-	}
-	at1Cloned := clned.(*ActionPlan)
-	if !reflect.DeepEqual(at1, at1Cloned) {
-		t.Errorf("Expecting: %+v, received: %+v", at1, at1Cloned)
-	}
-}
-
 func TestATExecute(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cfg.SchedulerCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}

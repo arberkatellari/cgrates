@@ -2545,49 +2545,6 @@ func TestClonedActions(t *testing.T) {
 
 }
 
-func TestCacheGetClonedActions(t *testing.T) {
-	actions := Actions{
-		&Action{
-			Id:         "RECUR_FOR_V3HSILLMILLD1G",
-			ActionType: utils.TOPUP,
-			Balance: &BalanceFilter{
-				ID:    utils.StringPointer(utils.MetaDefault),
-				Value: &utils.ValueFormula{Static: 1},
-				Type:  utils.StringPointer(utils.MONETARY),
-			},
-			Weight: float64(30),
-		},
-		&Action{
-			Id:         "REACT_FOR_V3HSILLMILL",
-			ActionType: utils.SET_BALANCE,
-			Balance: &BalanceFilter{
-				ID:    utils.StringPointer("for_v3hsillmill_sms_ill"),
-				Type:  utils.StringPointer(utils.SMS),
-				Value: &utils.ValueFormula{Static: 20000},
-				DestinationIDs: &utils.StringMap{
-					"FRANCE_NATIONAL":      true,
-					"FRANCE_NATIONAL_FREE": false,
-					"ZONE1":                false},
-				Categories: &utils.StringMap{
-					"sms_eurotarif": true,
-					"sms_france":    true},
-				Disabled: utils.BoolPointer(false),
-				Blocker:  utils.BoolPointer(false),
-			},
-			Weight: float64(10),
-		},
-	}
-	Cache.Set(utils.CacheActions, "MYTEST", actions, nil, true, "")
-	clned, err := Cache.GetCloned(utils.CacheActions, "MYTEST")
-	if err != nil {
-		t.Error(err)
-	}
-	aCloned := clned.(Actions)
-	if !reflect.DeepEqual(actions, aCloned) {
-		t.Errorf("Expecting: %+v, received: %+v", actions[1].Balance, aCloned[1].Balance)
-	}
-}
-
 func TestRemoveSessionCosts(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)

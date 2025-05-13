@@ -2,7 +2,7 @@
 %global version 0.10.4
 %global git_commit %(echo $gitLastCommit)
 %global releaseTag %(echo $rpmTag)
-%global go_version 1.24.0
+%global go_version 1.24.3
 
 # Define system paths
 %global _logdir	       /var/log/%name
