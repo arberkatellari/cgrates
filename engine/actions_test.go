@@ -5600,3 +5600,353 @@ func TestDynamicAttribute(t *testing.T) {
 		})
 	}
 }
+
+func TestDynamicActionPlan(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var ap *AttrSetActionPlan
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetActionPlan: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if ap, canCast = args.(*AttrSetActionPlan); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+			utils.APIerSv1GetActions: func(ctx *context.Context, args2, reply any) error {
+				return nil
+			},
+			utils.APIerSv1GetTiming: func(ctx *context.Context, args3, reply any) error {
+				var canCast bool
+				if args3, canCast = args3.(string); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				var exp *utils.TPTiming
+				if args3 == "Timing_1" {
+					exp = &utils.TPTiming{
+						ID:        "Timing_1",
+						Years:     utils.Years{2025},
+						Months:    utils.Months{2},
+						MonthDays: utils.MonthDays{3},
+						WeekDays:  utils.WeekDays{1, 2, 3},
+						StartTime: "00:12:12",
+						EndTime:   "12:12:12",
+					}
+				}
+				if args3 == "*asap" {
+					exp = &utils.TPTiming{
+						ID:        "*asap",
+						Years:     utils.Years{2025},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: "*asap",
+					}
+				}
+				if exp == nil {
+					return utils.ErrNotFound
+				}
+				*reply.(*utils.TPTiming) = *exp
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expAp       *AttrSetActionPlan
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expAp: &AttrSetActionPlan{
+				Id: "ActPl_1",
+				ActionPlan: []*AttrActionPlan{
+					{
+						ActionsId: "Action_1",
+						TimingID:  "Timing_1",
+						Years:     "2025",
+						Months:    "2",
+						MonthDays: "3",
+						WeekDays:  "1;2;3",
+						Time:      "00:12:12;12:12:12",
+						Weight:    10,
+					},
+				},
+				Overwrite:       false,
+				ReloadScheduler: true,
+			},
+			extraParams: "ActPl_1;Action_1;Timing_1;10",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expAp: &AttrSetActionPlan{
+				Id: "ActPl_1",
+				ActionPlan: []*AttrActionPlan{
+					{
+						ActionsId: "Action_1001",
+						TimingID:  "*asap",
+						Years:     "2025",
+						Months:    "*any",
+						MonthDays: "*any",
+						WeekDays:  "*any",
+						Time:      "*asap",
+						Weight:    10,
+					},
+				},
+				Overwrite:       false,
+				ReloadScheduler: true,
+			},
+			extraParams: "ActPl_1;Action_<~*req.Account>;*asap;10",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expAp: &AttrSetActionPlan{
+				Id: "ActPl_1",
+				ActionPlan: []*AttrActionPlan{
+					{
+						ActionsId: "Action_1",
+						TimingID:  "",
+						Weight:    0,
+					},
+				},
+				Overwrite:       false,
+				ReloadScheduler: true,
+			},
+			extraParams: "ActPl_1;Action_1;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "ActPl_1;Action_1;*asap;10",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "ActPl_1;Action_1;*asap;10;;;",
+			expectedErr: "invalid number of parameters; expected 4",
+		},
+		{
+			name:        "ActionIdEmptyFail",
+			extraParams: "ActPl_1;;*asap;10",
+			expectedErr: `empty ActionsId for <ActPl_1> dynamic_action_plan`,
+		},
+		{
+			name:        "WeightFail",
+			connIDs:     []string{connID},
+			extraParams: "ActPl_1;Action_1;*asap;BadString",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				ap = nil
+			})
+			err := dynamicActionPlan(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if utils.ToJSON(ap) != utils.ToJSON(tc.expAp) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAp), utils.ToJSON(ap))
+			}
+		})
+	}
+}
+
+func TestDynamicActionAll(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var a *utils.AttrSetActions
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv2SetActions: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if a, canCast = args.(*utils.AttrSetActions); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expA        *utils.AttrSetActions
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expA: &utils.AttrSetActions{
+				ActionsId: "TOPUP_MONETARY_10",
+				Actions: []*utils.TPAction{
+					{
+						Identifier:      utils.MetaTopUp,
+						Filters:         "*string:~*req.Account:1001;filter2",
+						BalanceId:       "badID",
+						BalanceType:     utils.MetaMonetary,
+						Categories:      "call;data",
+						DestinationIds:  "1002;1003",
+						RatingSubject:   "SPECIAL_1002",
+						SharedGroups:    "SHARED_A;SHARED_B",
+						ExpiryTime:      "*unlimited",
+						TimingTags:      "weekdays;offpeak",
+						Units:           "10",
+						BalanceWeight:   "10",
+						BalanceBlocker:  "true",
+						BalanceDisabled: "true",
+						Weight:          10,
+					},
+				},
+				Overwrite: false,
+			},
+			extraParams: "TOPUP_MONETARY_10;*topup;;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expA: &utils.AttrSetActions{
+				ActionsId: "TOPUP_MONETARY_1001",
+				Actions: []*utils.TPAction{
+					{
+						Identifier:      utils.MetaTopUp,
+						Filters:         "*string:~*req.Account:1001;filter2",
+						BalanceId:       "badID",
+						BalanceType:     utils.MetaMonetary,
+						Categories:      "call;data",
+						DestinationIds:  "1002;1003",
+						RatingSubject:   "SPECIAL_1002",
+						SharedGroups:    "SHARED_A;SHARED_B",
+						ExpiryTime:      "*unlimited",
+						TimingTags:      "weekdays;offpeak",
+						Units:           "10",
+						BalanceWeight:   "10",
+						BalanceBlocker:  "true",
+						BalanceDisabled: "true",
+						Weight:          10,
+					},
+				},
+				Overwrite: false,
+			},
+			extraParams: "TOPUP_MONETARY_<~*req.Account>;*topup;;*string:~*req.Account:<~*req.Account>&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expA: &utils.AttrSetActions{
+				ActionsId: "DISABLE_ACC",
+				Actions: []*utils.TPAction{
+					{
+						Identifier: utils.MetaDisableAccount,
+					},
+				},
+			},
+			extraParams: "DISABLE_ACC;*disable_account;;;;;;;;;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "TOPUP_MONETARY_10;*topup;;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "TOPUP_MONETARY_10;*topup;;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10;;;",
+			expectedErr: "invalid number of parameters; expected 17",
+		},
+		{
+			name:        "ActionIdEmptyFail",
+			extraParams: "DISABLE_ACC;;;;;;;;;;;;;;;;",
+			expectedErr: `empty Action for <DISABLE_ACC> dynamic_action`,
+		},
+		{
+			name:        "ActionIdEmptyFail",
+			extraParams: ";;;;;;;;;;;;;;;;",
+			expectedErr: `empty ActionsId for dynamic_action`,
+		},
+		{
+			name:        "WeightFail",
+			extraParams: "TOPUP_MONETARY_10;*topup;;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;BadString",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				a = nil
+			})
+			err := dynamicAction(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if utils.ToJSON(a) != utils.ToJSON(tc.expA) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expA), utils.ToJSON(a))
+			}
+		})
+	}
+}

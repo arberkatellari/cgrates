@@ -1183,6 +1183,8 @@ const (
 	MetaDynamicThreshold        = "*dynamic_threshold"
 	MetaDynamicStats            = "*dynamic_stats"
 	MetaDynamicAttribute        = "*dynamic_attribute"
+	MetaDynamicActionPlan       = "*dynamic_action_plan"
+	MetaDynamicAction           = "*dynamic_action"
 	ActionID                    = "ActionID"
 	ActionType                  = "ActionType"
 	ActionValue                 = "ActionValue"

@@ -259,8 +259,8 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 		t.Error(err)
 	}
 	tNow := time.Now().Add(time.Minute)
-	argAP1 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAP_AP_1",
-		ActionPlan: []*v1.AttrActionPlan{
+	argAP1 := &engine.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAP_AP_1",
+		ActionPlan: []*engine.AttrActionPlan{
 			{ActionsId: argActs1.ActionsId,
 				Time:   fmt.Sprintf("%v:%v:%v", tNow.Hour(), tNow.Minute(), tNow.Second()), // 10:4:12
 				Weight: 20.0}}}
@@ -296,8 +296,8 @@ func testAPIerSv2itSetAccountWithAP(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAAPids, aapIDs)
 	}
 	// Set second AP so we can see the proper indexing done
-	argAP2 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAP_AP_2",
-		ActionPlan: []*v1.AttrActionPlan{
+	argAP2 := &engine.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAP_AP_2",
+		ActionPlan: []*engine.AttrActionPlan{
 			{ActionsId: argActs1.ActionsId, MonthDays: "1", Time: "00:00:00", Weight: 20.0}}}
 	if _, err := dm.GetActionPlan(argAP2.Id, false, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
@@ -401,8 +401,8 @@ func testAPIerSv2itSetActionWithCategory(t *testing.T) {
 func testAPIerSv2itSetActionPlanWithWrongTiming(t *testing.T) {
 	var reply string
 	tNow := time.Now().Add(time.Minute).String()
-	argAP1 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAPWithWrongTiming",
-		ActionPlan: []*v1.AttrActionPlan{
+	argAP1 := &engine.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAPWithWrongTiming",
+		ActionPlan: []*engine.AttrActionPlan{
 			{
 				ActionsId: "TestAPIerSv2itSetAccountWithAP_ACT_1",
 				Time:      tNow,
@@ -419,8 +419,8 @@ func testAPIerSv2itSetActionPlanWithWrongTiming(t *testing.T) {
 
 func testAPIerSv2itSetActionPlanWithWrongTiming2(t *testing.T) {
 	var reply string
-	argAP1 := &v1.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAPWithWrongTiming",
-		ActionPlan: []*v1.AttrActionPlan{
+	argAP1 := &engine.AttrSetActionPlan{Id: "TestAPIerSv2itSetAccountWithAPWithWrongTiming",
+		ActionPlan: []*engine.AttrActionPlan{
 			{
 				ActionsId: "TestAPIerSv2itSetAccountWithAP_ACT_1",
 				Time:      "aa:bb:cc",

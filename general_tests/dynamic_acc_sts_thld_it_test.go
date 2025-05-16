@@ -29,7 +29,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -121,9 +120,9 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 
 	t.Run("SetActionPlanOfDynaPrepaidAccounts", func(t *testing.T) {
 		var reply string
-		atms1 := &v1.AttrSetActionPlan{
+		atms1 := &engine.AttrSetActionPlan{
 			Id: "DYNA_ACC",
-			ActionPlan: []*v1.AttrActionPlan{
+			ActionPlan: []*engine.AttrActionPlan{
 				{
 					ActionsId: "TOPUP_RST_DATA_100",
 					Time:      "00:00:00",
