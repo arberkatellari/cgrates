@@ -125,14 +125,18 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		utils.MetaAlterSessions,
 		utils.MetaForceDisconnectSessions,
 	}
+	dynamicActions := []string{
+		utils.MetaDynamicThreshold, utils.MetaDynamicStats,
+		utils.MetaDynamicAttribute, utils.MetaDynamicActionPlan,
+		utils.MetaDynamicAction, utils.MetaDynamicDestination,
+	}
 	act := ActionConnCfg{}
 	switch source {
 	case utils.ThresholdS:
 		switch {
 		case slices.Contains(sessionActions, action):
 			act.ConnIDs = cfg.ThresholdSCfg().SessionSConns
-		case utils.MetaDynamicThreshold == action || utils.MetaDynamicStats == action ||
-			utils.MetaDynamicAttribute == action:
+		case slices.Contains(dynamicActions, action):
 			act.ConnIDs = cfg.ThresholdSCfg().ApierSConns
 		}
 	case utils.RALs:
@@ -189,6 +193,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicAttribute] = dynamicAttribute
 	actionFuncMap[utils.MetaDynamicActionPlan] = dynamicActionPlan
 	actionFuncMap[utils.MetaDynamicAction] = dynamicAction
+	actionFuncMap[utils.MetaDynamicDestination] = dynamicDestination
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -992,7 +997,7 @@ func alterSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, ";")
 	if len(params) != 5 {
-		return errors.New("invalid number of parameters; expected 5")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 5", len(params)))
 	}
 
 	// If conversion fails, limit will default to 0.
@@ -1037,7 +1042,7 @@ func forceDisconnectSessionsAction(_ *Account, act *Action, _ Actions, _ *Filter
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, ";")
 	if len(params) != 5 {
-		return errors.New("invalid number of parameters; expected 5")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 5", len(params)))
 	}
 
 	// If conversion fails, limit will default to 0.
@@ -1470,7 +1475,7 @@ func dynamicThreshold(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 12 {
-		return errors.New("invalid number of parameters; expected 12")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 12", len(params)))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1599,7 +1604,7 @@ func dynamicStats(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 14 {
-		return errors.New("invalid number of parameters; expected 14")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 14", len(params)))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1741,7 +1746,7 @@ func dynamicAttribute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 12 {
-		return errors.New("invalid number of parameters; expected 12")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 12", len(params)))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1840,12 +1845,11 @@ func dynamicActionPlan(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		utils.MetaReq:    cgrEv.Event,
 		utils.MetaTenant: cgrEv.Tenant,
 		utils.MetaNow:    time.Now(),
-		utils.MetaOpts:   cgrEv.APIOpts,
 	}
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 4 {
-		return errors.New("invalid number of parameters; expected 4")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 4", len(params)))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1872,7 +1876,7 @@ func dynamicActionPlan(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	if params[2] != utils.EmptyString {
 		// Make sure TimingID exists in DataDB and use it for the action plan
 		var tpTiming utils.TPTiming
-		if err := connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1GetTiming, params[2], &tpTiming); err != nil {
+		if err := connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1GetTiming, &utils.ArgsGetTimingID{ID: params[2]}, &tpTiming); err != nil {
 			return err
 		}
 		ap.ActionPlan[0].TimingID = tpTiming.ID
@@ -1905,7 +1909,7 @@ func dynamicActionPlan(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 //
 //		0 ActionsId: string
 //		1 Action: string
-//		2 ExtraParameters: string
+//		2 ExtraParameters: string encapsulated by \f
 //		3 Filters: strings separated by "&".
 //		4 BalanceId: string
 //		5 BalanceType: string
@@ -1932,14 +1936,31 @@ func dynamicAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		utils.MetaReq:    cgrEv.Event,
 		utils.MetaTenant: cgrEv.Tenant,
 		utils.MetaNow:    time.Now(),
-		utils.MetaOpts:   cgrEv.APIOpts,
 	}
+
+	var params []string       // parameters split by ;
+	var bildr strings.Builder // used to build the params strings by looking at each character of act.ExtraParameters
+	inEncapsulation := false
+	for i := range len(act.ExtraParameters) {
+		// Check for \f (form feed character)
+		if act.ExtraParameters[i] == '\f' {
+			inEncapsulation = !inEncapsulation
+			// Don't add \f to the current string - just skip it
+		} else if act.ExtraParameters[i] == ';' && !inEncapsulation {
+			// Found separator ";" outside encapsulation
+			params = append(params, bildr.String())
+			bildr.Reset()
+		} else {
+			// Regular character or semicolon inside encapsulation
+			bildr.WriteByte(act.ExtraParameters[i])
+		}
+	}
+	params = append(params, bildr.String()) // append last param left even if empty
 	// Parse action parameters based on the predefined format.
-	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 17 {
-		return errors.New("invalid number of parameters; expected 17")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 17", len(params)))
 	}
-	// replace '&' with ';' before parsing
+	// replace '&' with ';' before parsing to comply with TPAction fields that need ";" seperators
 	params[3] = strings.ReplaceAll(params[3], utils.ANDSep, utils.InfieldSep)
 	params[6] = strings.ReplaceAll(params[6], utils.ANDSep, utils.InfieldSep)
 	params[7] = strings.ReplaceAll(params[7], utils.ANDSep, utils.InfieldSep)
@@ -1993,4 +2014,46 @@ func dynamicAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// create the Action based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv2SetActions, ap, &reply)
+}
+
+// dynamicDestination processes the `ExtraParameters` field from the action to construct a new Destination
+//
+// The ExtraParameters field format is expected as follows:
+//
+//	0 Id: string
+//	1 Prefix: strings separated by "&".
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicDestination(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq: cgrEv.Event,
+	}
+	// Parse Destination parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 2 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 2", len(params)))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+			return err
+		}
+	}
+	// populate Destination's parameters
+	dest := &utils.AttrSetDestination{
+		Id: params[0],
+	}
+	// populate Destination's FilterIDs
+	if params[1] != utils.EmptyString {
+		dest.Prefixes = strings.Split(params[1], utils.ANDSep)
+	}
+
+	// create the Destination based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetDestination, dest, &reply)
 }

@@ -522,8 +522,9 @@ func checkDefaultTiming(tStr string) (rTm *RITiming, isDefault bool) {
 }
 
 func verifyFormat(tStr string) bool {
-	if tStr == utils.EmptyString ||
-		tStr == utils.MetaASAP {
+	if tStr == utils.EmptyString || tStr == utils.MetaASAP ||
+		strings.HasPrefix(tStr, utils.PlusChar) ||
+		strings.HasPrefix(tStr, utils.MinusChar) {
 		return true
 	}
 

@@ -4843,7 +4843,7 @@ func TestActionsAlterAndDisconnectSessions(t *testing.T) {
 		{
 			name:        "WrongNumberOfParams",
 			extraParams: "tenant;;1;",
-			expectedErr: "invalid number of parameters; expected 5",
+			expectedErr: "invalid number of parameters <4> expected 5",
 		},
 		{
 			name:        "InvalidEventMap",
@@ -5044,7 +5044,7 @@ func TestDynamicThreshold(t *testing.T) {
 		{
 			name:        "WrongNumberOfParams",
 			extraParams: "tenant;;1;",
-			expectedErr: "invalid number of parameters; expected 12",
+			expectedErr: "invalid number of parameters <4> expected 12",
 		},
 		{
 			name:        "ActivationIntervalLengthFail",
@@ -5291,7 +5291,7 @@ func TestDynamicStats(t *testing.T) {
 		{
 			name:        "WrongNumberOfParams",
 			extraParams: "tenant;;1;",
-			expectedErr: "invalid number of parameters; expected 14",
+			expectedErr: "invalid number of parameters <4> expected 14",
 		},
 		{
 			name:        "ActivationIntervalLengthFail",
@@ -5514,7 +5514,7 @@ func TestDynamicAttribute(t *testing.T) {
 		{
 			name:        "WrongNumberOfParams",
 			extraParams: "tenant;;1;",
-			expectedErr: "invalid number of parameters; expected 12",
+			expectedErr: "invalid number of parameters <4> expected 12",
 		},
 		{
 			name:        "ActivationIntervalLengthFail",
@@ -5742,7 +5742,7 @@ func TestDynamicActionPlan(t *testing.T) {
 		{
 			name:        "WrongNumberOfParams",
 			extraParams: "ActPl_1;Action_1;*asap;10;;;",
-			expectedErr: "invalid number of parameters; expected 4",
+			expectedErr: "invalid number of parameters <7> expected 4",
 		},
 		{
 			name:        "ActionIdEmptyFail",
@@ -5828,10 +5828,11 @@ func TestDynamicActionAll(t *testing.T) {
 			name:    "SuccessfulRequest",
 			connIDs: []string{connID},
 			expA: &utils.AttrSetActions{
-				ActionsId: "TOPUP_MONETARY_10",
+				ActionsId: "Alter_Session_10",
 				Actions: []*utils.TPAction{
 					{
-						Identifier:      utils.MetaTopUp,
+						Identifier:      utils.MetaAlterSessions,
+						ExtraParameters: "cgrates.org;*string:~*req.Account:1001;1;*radCoATemplate:mycoa;CustomFilter:mycustomvalue",
 						Filters:         "*string:~*req.Account:1001;filter2",
 						BalanceId:       "badID",
 						BalanceType:     utils.MetaMonetary,
@@ -5850,16 +5851,17 @@ func TestDynamicActionAll(t *testing.T) {
 				},
 				Overwrite: false,
 			},
-			extraParams: "TOPUP_MONETARY_10;*topup;;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10",
+			extraParams: "Alter_Session_10;*alter_sessions;\fcgrates.org;*string:~*req.Account:1001;1;*radCoATemplate:mycoa;CustomFilter:mycustomvalue\f;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10",
 		},
 		{
 			name:    "SuccessfulRequestWithDynamicPaths",
 			connIDs: []string{connID},
 			expA: &utils.AttrSetActions{
-				ActionsId: "TOPUP_MONETARY_1001",
+				ActionsId: "CDR_Log_1001",
 				Actions: []*utils.TPAction{
 					{
-						Identifier:      utils.MetaTopUp,
+						Identifier:      utils.CDRLog,
+						ExtraParameters: "{\"Account\":\"1001\",\"RequestType\":\"*pseudoprepaid\",\"Subject\":\"DifferentThanAccount\", \"ToR\":\"~ActionType:s/^\\*(.*)$/did_$1/\"}",
 						Filters:         "*string:~*req.Account:1001;filter2",
 						BalanceId:       "badID",
 						BalanceType:     utils.MetaMonetary,
@@ -5878,7 +5880,7 @@ func TestDynamicActionAll(t *testing.T) {
 				},
 				Overwrite: false,
 			},
-			extraParams: "TOPUP_MONETARY_<~*req.Account>;*topup;;*string:~*req.Account:<~*req.Account>&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10",
+			extraParams: "CDR_Log_<~*req.Account>;*cdrlog;\f{\"Account\":\"<~*req.Account>\",\"RequestType\":\"*pseudoprepaid\",\"Subject\":\"DifferentThanAccount\", \"ToR\":\"~ActionType:s/^\\*(.*)$/did_$1/\"}\f;*string:~*req.Account:<~*req.Account>&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10",
 		},
 		{
 			name:    "SuccessfulRequestEmptyFields",
@@ -5901,7 +5903,7 @@ func TestDynamicActionAll(t *testing.T) {
 		{
 			name:        "WrongNumberOfParams",
 			extraParams: "TOPUP_MONETARY_10;*topup;;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10;;;",
-			expectedErr: "invalid number of parameters; expected 17",
+			expectedErr: "invalid number of parameters <20> expected 17",
 		},
 		{
 			name:        "ActionIdEmptyFail",
@@ -5946,6 +5948,114 @@ func TestDynamicActionAll(t *testing.T) {
 				t.Error(err)
 			} else if utils.ToJSON(a) != utils.ToJSON(tc.expA) {
 				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expA), utils.ToJSON(a))
+			}
+		})
+	}
+}
+
+func TestDynamicDestination(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var dest *utils.AttrSetDestination
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetDestination: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if dest, canCast = args.(*utils.AttrSetDestination); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expDest     *utils.AttrSetDestination
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expDest: &utils.AttrSetDestination{
+				Id:        "DST_1002&1003",
+				Prefixes:  []string{"1002", "1003"},
+				Overwrite: false,
+			},
+			extraParams: "DST_1002&1003;1002&1003",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expDest: &utils.AttrSetDestination{
+				Id:        "DST_1001&1003",
+				Prefixes:  []string{"1001", "1003"},
+				Overwrite: false,
+			},
+			extraParams: "DST_1001&1003;<~*req.Account>&1003",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expDest: &utils.AttrSetDestination{
+				Id:        "DST_Any",
+				Overwrite: false,
+			},
+			extraParams: "DST_Any;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "DST_1002&1003;1002&1003",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "DST_1002&1003;1002&1003;;;",
+			expectedErr: "invalid number of parameters; expected 2",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				dest = nil
+			})
+			err := dynamicDestination(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if utils.ToJSON(dest) != utils.ToJSON(tc.expDest) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expDest), utils.ToJSON(dest))
 			}
 		})
 	}
