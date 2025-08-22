@@ -83,7 +83,7 @@ var (
 )
 
 // NewDataManager returns a new DataManager
-func NewDataManager(dataDB DataDB, cfg *config.CGRConfig, connMgr *ConnManager) *DataManager {
+func NewDataManager(dataDB map[string]DataDB, cfg *config.CGRConfig, connMgr *ConnManager) *DataManager {
 	ms, _ := utils.NewMarshaler(cfg.GeneralCfg().DBDataEncoding)
 	return &DataManager{
 		dataDB:  dataDB,
@@ -96,14 +96,14 @@ func NewDataManager(dataDB DataDB, cfg *config.CGRConfig, connMgr *ConnManager) 
 // DataManager is the data storage manager for CGRateS
 // transparently manages data retrieval, further serialization and caching
 type DataManager struct {
-	dataDB  DataDB
+	dataDB  map[string]DataDB
 	cfg     *config.CGRConfig
 	connMgr *ConnManager
 	ms      utils.Marshaler
 }
 
 // DataDB exports access to dataDB
-func (dm *DataManager) DataDB() DataDB {
+func (dm *DataManager) DataDB() map[string]DataDB {
 	if dm != nil {
 		return dm.dataDB
 	}
@@ -2765,11 +2765,16 @@ func (dm *DataManager) RemoveActionProfile(ctx *context.Context, tenant, id stri
 	return
 }
 
-// Reconnect reconnects to the DB when the config was changed
-func (dm *DataManager) Reconnect(d DataDB) {
+// ReconnectAll reconnects all dataDBs when the config was changed
+func (dm *DataManager) ReconnectAll(d map[string]DataDBDriver) {
 	// ToDo: consider locking
-	dm.dataDB.Close()
-	dm.dataDB = d
+	for dataDBKey := range dm.dataDB {
+		dm.dataDB[dataDBKey].Close()
+		delete(dm.dataDB, dataDBKey) // remove old keys so they dont get left over
+	}
+	for driverKey := range d {
+		dm.dataDB[driverKey] = d[driverKey]
+	}
 }
 
 func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string,

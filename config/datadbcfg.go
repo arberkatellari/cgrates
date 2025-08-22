@@ -74,8 +74,8 @@ type DataDBOpts struct {
 	MongoConnScheme           string
 }
 
-// DataDbCfg Database config
-type DataDbCfg struct {
+// DBConn the config to establish connection to DataDB
+type DBConn struct {
 	Type        string
 	Host        string   // The host to connect to. Values that start with / are for UNIX domain sockets.
 	Port        string   // The port to bind to.
@@ -87,8 +87,77 @@ type DataDbCfg struct {
 	RplConns    []string // Replication connIDs
 	RplFiltered bool
 	RplCache    string
-	Items       map[string]*ItemOpts
-	Opts        *DataDBOpts
+}
+
+// loadFromJSONCfg load the DBConn section of the DataDBCfg
+func (dbc *DBConn) loadFromJSONCfg(jsnDbConnCfg *DbConnJson) (err error) {
+	if dbc == nil {
+		return
+	}
+	if jsnDbConnCfg.Db_type != nil {
+		if !strings.HasPrefix(*jsnDbConnCfg.Db_type, "*") {
+			dbc.Type = fmt.Sprintf("*%v", *jsnDbConnCfg.Db_type)
+		} else {
+			dbc.Type = *jsnDbConnCfg.Db_type
+		}
+	}
+	if jsnDbConnCfg.Db_host != nil {
+		dbc.Host = *jsnDbConnCfg.Db_host
+	}
+	if jsnDbConnCfg.Db_port != nil {
+		port := strconv.Itoa(*jsnDbConnCfg.Db_port)
+		if port == "-1" {
+			port = utils.MetaDynamic
+		}
+		dbc.Port = defaultDBPort(dbc.Type, port)
+	}
+	if jsnDbConnCfg.Db_name != nil {
+		dbc.Name = *jsnDbConnCfg.Db_name
+	}
+	if jsnDbConnCfg.Db_user != nil {
+		dbc.User = *jsnDbConnCfg.Db_user
+	}
+	if jsnDbConnCfg.Db_password != nil {
+		dbc.Password = *jsnDbConnCfg.Db_password
+	}
+	if jsnDbConnCfg.Remote_conns != nil {
+		dbc.RmtConns = make([]string, len(*jsnDbConnCfg.Remote_conns))
+		for idx, rmtConn := range *jsnDbConnCfg.Remote_conns {
+			if rmtConn == utils.MetaInternal {
+				return fmt.Errorf("Remote connection ID needs to be different than <%s> ", utils.MetaInternal)
+			}
+			dbc.RmtConns[idx] = rmtConn
+		}
+	}
+	if jsnDbConnCfg.Replication_conns != nil {
+		dbc.RplConns = make([]string, len(*jsnDbConnCfg.Replication_conns))
+		for idx, rplConn := range *jsnDbConnCfg.Replication_conns {
+			if rplConn == utils.MetaInternal {
+				return fmt.Errorf("Remote connection ID needs to be different than <%s> ", utils.MetaInternal)
+			}
+			dbc.RplConns[idx] = rplConn
+		}
+	}
+	if jsnDbConnCfg.Replication_filtered != nil {
+		dbc.RplFiltered = *jsnDbConnCfg.Replication_filtered
+	}
+	if jsnDbConnCfg.Remote_conn_id != nil {
+		dbc.RmtConnID = *jsnDbConnCfg.Remote_conn_id
+	}
+	if jsnDbConnCfg.Replication_cache != nil {
+		dbc.RplCache = *jsnDbConnCfg.Replication_cache
+	}
+	return
+}
+
+// DBConns the config for all DataDB connections
+type DBConns map[string]*DBConn
+
+// DataDbCfg Database config
+type DataDbCfg struct {
+	DBConns DBConns
+	Items   map[string]*ItemOpts
+	Opts    *DataDBOpts
 }
 
 // loadDataDBCfg loads the DataDB section of the configuration
@@ -102,13 +171,17 @@ func (dbcfg *DataDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConf
 	}
 	// in case of internalDB we need to disable the cache
 	// so we enforce it here
-	if cfg.dataDbCfg.Type == utils.MetaInternal {
+	for _, dbCfg := range cfg.dataDbCfg.DBConns {
+		if dbCfg.Type != utils.MetaInternal {
+			continue
+		}
 		// overwrite only StatelessDataDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
 		for key := range utils.StatelessDataDBPartitions {
 			if _, has := cfg.cacheCfg.Partitions[key]; has {
 				cfg.cacheCfg.Partitions[key] = &CacheParamCfg{}
 			}
 		}
+		return // there is only 1 internalDB, stop searching for more
 	}
 	return
 }
@@ -216,50 +289,15 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg == nil {
 		return nil
 	}
-	if jsnDbCfg.Db_type != nil {
-		if !strings.HasPrefix(*jsnDbCfg.Db_type, "*") {
-			dbcfg.Type = fmt.Sprintf("*%v", *jsnDbCfg.Db_type)
-		} else {
-			dbcfg.Type = *jsnDbCfg.Db_type
-		}
-	}
-	if jsnDbCfg.Db_host != nil {
-		dbcfg.Host = *jsnDbCfg.Db_host
-	}
-	if jsnDbCfg.Db_port != nil {
-		port := strconv.Itoa(*jsnDbCfg.Db_port)
-		if port == "-1" {
-			port = utils.MetaDynamic
-		}
-		dbcfg.Port = defaultDBPort(dbcfg.Type, port)
-	}
-	if jsnDbCfg.Db_name != nil {
-		dbcfg.Name = *jsnDbCfg.Db_name
-	}
-	if jsnDbCfg.Db_user != nil {
-		dbcfg.User = *jsnDbCfg.Db_user
-	}
-	if jsnDbCfg.Db_password != nil {
-		dbcfg.Password = *jsnDbCfg.Db_password
-	}
-	if jsnDbCfg.Remote_conns != nil {
-		dbcfg.RmtConns = make([]string, len(*jsnDbCfg.Remote_conns))
-		for idx, rmtConn := range *jsnDbCfg.Remote_conns {
-			if rmtConn == utils.MetaInternal {
-				return fmt.Errorf("Remote connection ID needs to be different than <%s> ", utils.MetaInternal)
+	if jsnDbCfg.Db_conns != nil {
+		for kJsn, vJsn := range jsnDbCfg.Db_conns {
+			// dbcfg.DBConns[kJsn] = &DBConn{}
+			if err = dbcfg.DBConns[kJsn].loadFromJSONCfg(vJsn); err != nil {
+				return err
 			}
-			dbcfg.RmtConns[idx] = rmtConn
 		}
 	}
-	if jsnDbCfg.Replication_conns != nil {
-		dbcfg.RplConns = make([]string, len(*jsnDbCfg.Replication_conns))
-		for idx, rplConn := range *jsnDbCfg.Replication_conns {
-			if rplConn == utils.MetaInternal {
-				return fmt.Errorf("Remote connection ID needs to be different than <%s> ", utils.MetaInternal)
-			}
-			dbcfg.RplConns[idx] = rplConn
-		}
-	}
+
 	if jsnDbCfg.Items != nil {
 		for kJsn, vJsn := range jsnDbCfg.Items {
 			val, has := dbcfg.Items[kJsn]
@@ -272,15 +310,7 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			dbcfg.Items[kJsn] = val
 		}
 	}
-	if jsnDbCfg.Replication_filtered != nil {
-		dbcfg.RplFiltered = *jsnDbCfg.Replication_filtered
-	}
-	if jsnDbCfg.Remote_conn_id != nil {
-		dbcfg.RmtConnID = *jsnDbCfg.Remote_conn_id
-	}
-	if jsnDbCfg.Replication_cache != nil {
-		dbcfg.RplCache = *jsnDbCfg.Replication_cache
-	}
+
 	if jsnDbCfg.Opts != nil {
 		err = dbcfg.Opts.loadFromJSONCfg(jsnDbCfg.Opts)
 	}
@@ -321,26 +351,37 @@ func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 // Clone returns the cloned object
 func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
 	cln = &DataDbCfg{
-		Type:        dbcfg.Type,
-		Host:        dbcfg.Host,
-		Port:        dbcfg.Port,
-		Name:        dbcfg.Name,
-		User:        dbcfg.User,
-		Password:    dbcfg.Password,
-		RplFiltered: dbcfg.RplFiltered,
-		RplCache:    dbcfg.RplCache,
-		RmtConnID:   dbcfg.RmtConnID,
-		Items:       make(map[string]*ItemOpts),
-		Opts:        dbcfg.Opts.Clone(),
+		DBConns: make(DBConns),
+		Items:   make(map[string]*ItemOpts),
+		Opts:    dbcfg.Opts.Clone(),
+	}
+	for k, v := range dbcfg.DBConns {
+		cln.DBConns[k] = v.Clone()
 	}
 	for k, itm := range dbcfg.Items {
 		cln.Items[k] = itm.Clone()
 	}
-	if dbcfg.RmtConns != nil {
-		cln.RmtConns = slices.Clone(dbcfg.RmtConns)
+	return
+}
+
+// Clone returns the cloned object
+func (dbc *DBConn) Clone() (cln *DBConn) {
+	cln = &DBConn{
+		Type:        dbc.Type,
+		Host:        dbc.Host,
+		Port:        dbc.Port,
+		Name:        dbc.Name,
+		User:        dbc.User,
+		Password:    dbc.Password,
+		RplFiltered: dbc.RplFiltered,
+		RplCache:    dbc.RplCache,
+		RmtConnID:   dbc.RmtConnID,
 	}
-	if dbcfg.RplConns != nil {
-		cln.RplConns = slices.Clone(dbcfg.RplConns)
+	if dbc.RmtConns != nil {
+		cln.RmtConns = slices.Clone(dbc.RmtConns)
+	}
+	if dbc.RplConns != nil {
+		cln.RplConns = slices.Clone(dbc.RplConns)
 	}
 	return
 }
@@ -372,18 +413,27 @@ func (dbcfg DataDbCfg) AsMapInterface() any {
 		utils.MongoQueryTimeoutCfg:         dbcfg.Opts.MongoQueryTimeout.String(),
 		utils.MongoConnSchemeCfg:           dbcfg.Opts.MongoConnScheme,
 	}
+	dbConns := make(map[string]map[string]any)
+	for k, dbc := range dbcfg.DBConns {
+		dbConns[k] = map[string]any{
+			utils.DataDbTypeCfg:          dbc.Type,
+			utils.DataDbHostCfg:          dbc.Host,
+			utils.DataDbNameCfg:          dbc.Name,
+			utils.DataDbUserCfg:          dbc.User,
+			utils.DataDbPassCfg:          dbc.Password,
+			utils.RemoteConnsCfg:         dbc.RmtConns,
+			utils.RemoteConnIDCfg:        dbc.RmtConnID,
+			utils.ReplicationConnsCfg:    dbc.RplConns,
+			utils.ReplicationFilteredCfg: dbc.RplFiltered,
+			utils.ReplicationCache:       dbc.RplCache,
+		}
+		if dbc.Port != "" {
+			dbConns[k][utils.DataDbPortCfg], _ = strconv.Atoi(dbc.Port)
+		}
+	}
 	mp := map[string]any{
-		utils.DataDbTypeCfg:          dbcfg.Type,
-		utils.DataDbHostCfg:          dbcfg.Host,
-		utils.DataDbNameCfg:          dbcfg.Name,
-		utils.DataDbUserCfg:          dbcfg.User,
-		utils.DataDbPassCfg:          dbcfg.Password,
-		utils.RemoteConnsCfg:         dbcfg.RmtConns,
-		utils.RemoteConnIDCfg:        dbcfg.RmtConnID,
-		utils.ReplicationConnsCfg:    dbcfg.RplConns,
-		utils.ReplicationFilteredCfg: dbcfg.RplFiltered,
-		utils.ReplicationCache:       dbcfg.RplCache,
-		utils.OptsCfg:                opts,
+		utils.DataDbConnsCfg: dbConns,
+		utils.OptsCfg:        opts,
 	}
 	if dbcfg.Items != nil {
 		items := make(map[string]any)
@@ -391,9 +441,6 @@ func (dbcfg DataDbCfg) AsMapInterface() any {
 			items[key] = item.AsMapInterface()
 		}
 		mp[utils.ItemsCfg] = items
-	}
-	if dbcfg.Port != "" {
-		mp[utils.DataDbPortCfg], _ = strconv.Atoi(dbcfg.Port)
 	}
 	return mp
 }
@@ -405,6 +452,7 @@ type ItemOpts struct {
 	StaticTTL bool
 	Remote    bool
 	Replicate bool
+	DataDBID  string // ID of the DataDB connection that this item belongs to
 	// used for ArgDispatcher in case we send this to a dispatcher engine
 	RouteID string
 	APIKey  string
@@ -489,6 +537,7 @@ type ItemOptsJson struct {
 	Static_ttl *bool
 	Remote     *bool
 	Replicate  *bool
+	Datadb_id  *string
 	// used for ArgDispatcher in case we send this to a dispatcher engine
 	Route_id *string
 	Api_key  *string
@@ -574,8 +623,7 @@ type DBOptsJson struct {
 	MySQLLocation             *string           `json:"mysqlLocation"`
 }
 
-// Database config
-type DbJsonCfg struct {
+type DbConnJson struct {
 	Db_type               *string
 	Db_host               *string
 	Db_port               *int
@@ -589,8 +637,15 @@ type DbJsonCfg struct {
 	Replication_conns     *[]string
 	Replication_filtered  *bool
 	Replication_cache     *string
-	Items                 map[string]*ItemOptsJson
-	Opts                  *DBOptsJson
+}
+
+type DbConnsJson map[string]*DbConnJson
+
+// Database config
+type DbJsonCfg struct {
+	Db_conns DbConnsJson
+	Items    map[string]*ItemOptsJson
+	Opts     *DBOptsJson
 }
 
 func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DataDBOpts) *DBOptsJson {
@@ -669,44 +724,54 @@ func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DataDBOpts) *DBOptsJson {
 	return d
 }
 
+func diffDataDBConnsJsonCfg(d DbConnsJson, v1, v2 DBConns) DbConnsJson {
+	if d == nil {
+		d = DbConnsJson{}
+	}
+	for key, v1 := range v2 {
+		if v1.Type != v2[key].Type {
+			d[key].Db_type = utils.StringPointer(v2[key].Type)
+		}
+		if v1.Host != v2[key].Host {
+			d[key].Db_host = utils.StringPointer(v2[key].Host)
+		}
+		if v1.Port != v2[key].Port {
+			port, _ := strconv.Atoi(v2[key].Port)
+			d[key].Db_port = utils.IntPointer(port)
+		}
+		if v1.Name != v2[key].Name {
+			d[key].Db_name = utils.StringPointer(v2[key].Name)
+		}
+		if v1.User != v2[key].User {
+			d[key].Db_user = utils.StringPointer(v2[key].User)
+		}
+		if v1.Password != v2[key].Password {
+			d[key].Db_password = utils.StringPointer(v2[key].Password)
+		}
+		if !slices.Equal(v1.RmtConns, v2[key].RmtConns) {
+			d[key].Remote_conns = &v2[key].RmtConns
+		}
+		if v1.RmtConnID != v2[key].RmtConnID {
+			d[key].Remote_conn_id = utils.StringPointer(v2[key].RmtConnID)
+		}
+		if !slices.Equal(v1.RplConns, v2[key].RplConns) {
+			d[key].Replication_conns = &v2[key].RplConns
+		}
+		if v1.RplFiltered != v2[key].RplFiltered {
+			d[key].Replication_filtered = utils.BoolPointer(v2[key].RplFiltered)
+		}
+		if v1.RplCache != v2[key].RplCache {
+			d[key].Replication_cache = utils.StringPointer(v2[key].RplCache)
+		}
+	}
+	return d
+}
+
 func diffDataDBJsonCfg(d *DbJsonCfg, v1, v2 *DataDbCfg) *DbJsonCfg {
 	if d == nil {
 		d = new(DbJsonCfg)
 	}
-	if v1.Type != v2.Type {
-		d.Db_type = utils.StringPointer(v2.Type)
-	}
-	if v1.Host != v2.Host {
-		d.Db_host = utils.StringPointer(v2.Host)
-	}
-	if v1.Port != v2.Port {
-		port, _ := strconv.Atoi(v2.Port)
-		d.Db_port = utils.IntPointer(port)
-	}
-	if v1.Name != v2.Name {
-		d.Db_name = utils.StringPointer(v2.Name)
-	}
-	if v1.User != v2.User {
-		d.Db_user = utils.StringPointer(v2.User)
-	}
-	if v1.Password != v2.Password {
-		d.Db_password = utils.StringPointer(v2.Password)
-	}
-	if !slices.Equal(v1.RmtConns, v2.RmtConns) {
-		d.Remote_conns = &v2.RmtConns
-	}
-	if v1.RmtConnID != v2.RmtConnID {
-		d.Remote_conn_id = utils.StringPointer(v2.RmtConnID)
-	}
-	if !slices.Equal(v1.RplConns, v2.RplConns) {
-		d.Replication_conns = &v2.RplConns
-	}
-	if v1.RplFiltered != v2.RplFiltered {
-		d.Replication_filtered = utils.BoolPointer(v2.RplFiltered)
-	}
-	if v1.RplCache != v2.RplCache {
-		d.Replication_cache = utils.StringPointer(v2.RplCache)
-	}
+	d.Db_conns = diffDataDBConnsJsonCfg(d.Db_conns, v1.DBConns, v2.DBConns)
 	d.Items = diffMapItemOptJson(d.Items, v1.Items, v2.Items)
 	d.Opts = diffDataDBOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
