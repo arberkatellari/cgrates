@@ -201,7 +201,7 @@ func TestAttributeITMoveEncoding2(t *testing.T) {
 }
 
 func testAttrITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(attrCfgIn.DataDbCfg().Type,
+	dataDBIn, err := NewMigratorDataDBs(attrCfgIn.DataDbCfg().Type,
 		attrCfgIn.DataDbCfg().Host, attrCfgIn.DataDbCfg().Port,
 		attrCfgIn.DataDbCfg().Name, attrCfgIn.DataDbCfg().User,
 		attrCfgIn.DataDbCfg().Password, attrCfgIn.GeneralCfg().DBDataEncoding,
@@ -209,7 +209,7 @@ func testAttrITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(attrCfgOut.DataDbCfg().Type,
+	dataDBOut, err := NewMigratorDataDBs(attrCfgOut.DataDbCfg().Type,
 		attrCfgOut.DataDbCfg().Host, attrCfgOut.DataDbCfg().Port,
 		attrCfgOut.DataDbCfg().Name, attrCfgOut.DataDbCfg().User,
 		attrCfgOut.DataDbCfg().Password, attrCfgOut.GeneralCfg().DBDataEncoding,

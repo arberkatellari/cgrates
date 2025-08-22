@@ -29,8 +29,12 @@ import (
 )
 
 func (m *Migrator) migrateCurrentCharger() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaChargerProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
 	if err != nil {
 		return err
 	}

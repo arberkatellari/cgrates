@@ -46,21 +46,23 @@ import (
 )
 
 func InitDataDB(cfg *config.CGRConfig) error {
-	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		return err
-	}
-	defer dataDB.Close()
-	if err := dataDB.Flush(""); err != nil {
-		return err
-	}
-	// Set versions before starting.
-	if err := OverwriteDBVersions(dataDB); err != nil {
-		return err
+	for _, dbConn := range cfg.DataDbCfg().DBConns {
+		dataDB, err := NewDataDBConn(dbConn.Type,
+			dbConn.Host, dbConn.Port,
+			dbConn.Name, dbConn.User,
+			dbConn.Password, cfg.GeneralCfg().DBDataEncoding,
+			cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+		if err != nil {
+			return err
+		}
+		defer dataDB.Close()
+		if err := dataDB.Flush(""); err != nil {
+			return err
+		}
+		// Set versions before starting.
+		if err := OverwriteDBVersions(dataDB); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -177,7 +179,12 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disableR
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	loader, err := NewTpReader(dm.dataDB, csvStorage, "",
+	dataDBs := make(map[string]DataDB, len(dm.DataDB()))
+	for connID, dataDB := range dm.DataDB() {
+		dataDBs[connID] = dataDB
+	}
+	dbcManager := NewDBConnManager(dataDBs, dm.cfg.DataDbCfg())
+	loader, err := NewTpReader(dbcManager, csvStorage, "",
 		timezone, cacheConns, schedConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -512,7 +519,7 @@ func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool
 	t.Helper()
 	if flushDataDB {
 		if err := InitDataDB(cfg); err != nil {
-			t.Fatalf("failed to flush %s dataDB: %v", cfg.DataDbCfg().Type, err)
+			t.Fatalf("failed to flush DataDB err: %v", err)
 		}
 	}
 	if flushStorDB {

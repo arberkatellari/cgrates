@@ -36,10 +36,17 @@ var (
 )
 
 func newRedisMigrator(dm *engine.DataManager) (rM *redisMigrator) {
-	return &redisMigrator{
-		dm:  dm,
-		rds: dm.DataDB().(*engine.RedisStorage),
+	var rdsDB *engine.RedisStorage
+	for _, dbInf := range dm.DataDB() {
+		var canCast bool
+		if rdsDB, canCast = dbInf.(*engine.RedisStorage); canCast {
+			return &redisMigrator{
+				dm:  dm,
+				rds: rdsDB,
+			}
+		}
 	}
+	return nil
 }
 
 func (v1rs *redisMigrator) close() {

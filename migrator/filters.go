@@ -29,8 +29,12 @@ import (
 )
 
 func (m *Migrator) migrateCurrentRequestFilter() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaFilters)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.FilterPrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.FilterPrefix)
 	if err != nil {
 		return
 	}
@@ -354,8 +358,12 @@ func (m *Migrator) migrateFilters() (err error) {
 }
 
 func (m *Migrator) migrateResourceProfileFiltersV1() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaResourceProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix)
 	if err != nil {
 		return err
 	}
@@ -383,8 +391,12 @@ func (m *Migrator) migrateResourceProfileFiltersV1() (err error) {
 }
 
 func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaStatQueueProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -412,8 +424,12 @@ func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 }
 
 func (m *Migrator) migrateThresholdsProfileFiltersV1() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaThresholdProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -466,8 +482,12 @@ func (m *Migrator) migrateSupplierProfileFiltersV1() (err error) {
 }
 
 func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaAttributeProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -505,8 +525,12 @@ func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 }
 
 func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaChargerProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -535,8 +559,12 @@ func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 
 // migrate filters from v2 to v3 for items
 func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaResourceProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting resource profile IDs", err.Error())
 	}
@@ -566,8 +594,12 @@ func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
 }
 
 func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaStatQueueProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting statQueue profile IDs", err.Error())
 	}
@@ -597,8 +629,12 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 }
 
 func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaThresholdProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting threshold profile IDs", err)
 	}
@@ -654,8 +690,12 @@ func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
 }
 
 func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaAttributeProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting attribute profile IDs", err)
 	}
@@ -695,8 +735,12 @@ func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 }
 
 func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaChargerProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting charger profile IDs", err)
 	}
@@ -841,12 +885,16 @@ func migrateInlineFilterV4(v4fltIDs []string) (fltrIDs []string, err error) {
 
 // setFilterv5WithoutCompile we need a method that get's the filter from DataDB without compiling the filter rules
 func (m *Migrator) setFilterv5WithoutCompile(fltr *engine.Filter) (err error) {
+	dataDB, _, err := m.dmOut.DataManager().DBConns().GetConn(utils.MetaFilters)
+	if err != nil {
+		return err
+	}
 	var oldFlt *engine.Filter
-	if oldFlt, err = m.dmOut.DataManager().DataDB().GetFilterDrv(context.TODO(), fltr.Tenant, fltr.ID); err != nil &&
+	if oldFlt, err = dataDB.GetFilterDrv(context.TODO(), fltr.Tenant, fltr.ID); err != nil &&
 		err != utils.ErrNotFound {
 		return
 	}
-	if err = m.dmOut.DataManager().DataDB().SetFilterDrv(context.TODO(), fltr); err != nil {
+	if err = dataDB.SetFilterDrv(context.TODO(), fltr); err != nil {
 		return
 	}
 	return engine.UpdateFilterIndex(context.TODO(), m.dmOut.DataManager(), oldFlt, fltr)

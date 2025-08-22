@@ -28,8 +28,12 @@ import (
 )
 
 func (m *Migrator) migrateCurrentResource() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaResourceProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix)
 	if err != nil {
 		return err
 	}

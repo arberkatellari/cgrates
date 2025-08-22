@@ -2079,6 +2079,7 @@ const (
 
 // DataDbCfg
 const (
+	DataDbConnsCfg               = "db_conns"
 	DataDbTypeCfg                = "db_type"
 	DataDbHostCfg                = "db_host"
 	DataDbPortCfg                = "db_port"
@@ -2120,6 +2121,7 @@ const (
 	TTLCfg       = "ttl"
 	LimitCfg     = "limit"
 	StaticTTLCfg = "static_ttl"
+	DataDBIDCfg  = "datadb_id"
 )
 
 // Tls
@@ -2488,16 +2490,11 @@ const (
 
 // MigratorCgrCfg
 const (
-	OutDataDBTypeCfg       = "out_datadb_type"
-	OutDataDBHostCfg       = "out_datadb_host"
-	OutDataDBPortCfg       = "out_datadb_port"
-	OutDataDBNameCfg       = "out_datadb_name"
-	OutDataDBUserCfg       = "out_datadb_user"
-	OutDataDBPasswordCfg   = "out_datadb_password"
 	OutDataDBEncodingCfg   = "out_datadb_encoding"
 	OutDataDBRedisSentinel = "out_redis_sentinel"
 	OutDataDBOptsCfg       = "out_datadb_opts"
 	UsersFiltersCfg        = "users_filters"
+	InItemsCfg             = "in_items"
 )
 
 // MailerCfg

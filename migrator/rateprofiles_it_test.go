@@ -125,7 +125,7 @@ func TestRatePrfITMoveEncoding2(t *testing.T) {
 }
 
 func testRatePrfITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(ratePrfCfgIn.DataDbCfg().Type,
+	dataDBIn, err := NewMigratorDataDBs(ratePrfCfgIn.DataDbCfg().Type,
 		ratePrfCfgIn.DataDbCfg().Host, ratePrfCfgIn.DataDbCfg().Port,
 		ratePrfCfgIn.DataDbCfg().Name, ratePrfCfgIn.DataDbCfg().User,
 		ratePrfCfgIn.DataDbCfg().Password, ratePrfCfgIn.GeneralCfg().DBDataEncoding,
@@ -133,7 +133,7 @@ func testRatePrfITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(ratePrfCfgOut.DataDbCfg().Type,
+	dataDBOut, err := NewMigratorDataDBs(ratePrfCfgOut.DataDbCfg().Type,
 		ratePrfCfgOut.DataDbCfg().Host, ratePrfCfgOut.DataDbCfg().Port,
 		ratePrfCfgOut.DataDbCfg().Name, ratePrfCfgOut.DataDbCfg().User,
 		ratePrfCfgOut.DataDbCfg().Password, ratePrfCfgOut.GeneralCfg().DBDataEncoding,

@@ -29,9 +29,13 @@ import (
 )
 
 func (m *Migrator) migrateCurrentThresholds() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaThresholdProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
 	//ThresholdProfiles
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
 	if err != nil {
 		return err
 	}

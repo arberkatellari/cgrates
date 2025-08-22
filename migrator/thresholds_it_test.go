@@ -144,7 +144,7 @@ func TestThresholdsITMoveEncoding2(t *testing.T) {
 }
 
 func testTrsITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(trsCfgIn.DataDbCfg().Type,
+	dataDBIn, err := NewMigratorDataDBs(trsCfgIn.DataDbCfg().Type,
 		trsCfgIn.DataDbCfg().Host, trsCfgIn.DataDbCfg().Port,
 		trsCfgIn.DataDbCfg().Name, trsCfgIn.DataDbCfg().User,
 		trsCfgIn.DataDbCfg().Password, trsCfgIn.GeneralCfg().DBDataEncoding,
@@ -152,7 +152,7 @@ func testTrsITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(trsCfgOut.DataDbCfg().Type,
+	dataDBOut, err := NewMigratorDataDBs(trsCfgOut.DataDbCfg().Type,
 		trsCfgOut.DataDbCfg().Host, trsCfgOut.DataDbCfg().Port,
 		trsCfgOut.DataDbCfg().Name, trsCfgOut.DataDbCfg().User,
 		trsCfgOut.DataDbCfg().Password, trsCfgOut.GeneralCfg().DBDataEncoding,

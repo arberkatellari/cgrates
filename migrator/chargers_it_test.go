@@ -126,7 +126,7 @@ func TestChargersITMoveEncoding2(t *testing.T) {
 }
 
 func testChrgITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(chrgCfgIn.DataDbCfg().Type,
+	dataDBIn, err := NewMigratorDataDBs(chrgCfgIn.DataDbCfg().Type,
 		chrgCfgIn.DataDbCfg().Host, chrgCfgIn.DataDbCfg().Port,
 		chrgCfgIn.DataDbCfg().Name, chrgCfgIn.DataDbCfg().User,
 		chrgCfgIn.DataDbCfg().Password, chrgCfgIn.GeneralCfg().DBDataEncoding,
@@ -134,7 +134,7 @@ func testChrgITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(chrgCfgOut.DataDbCfg().Type,
+	dataDBOut, err := NewMigratorDataDBs(chrgCfgOut.DataDbCfg().Type,
 		chrgCfgOut.DataDbCfg().Host, chrgCfgOut.DataDbCfg().Port,
 		chrgCfgOut.DataDbCfg().Name, chrgCfgOut.DataDbCfg().User,
 		chrgCfgOut.DataDbCfg().Password, chrgCfgOut.GeneralCfg().DBDataEncoding,

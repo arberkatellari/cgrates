@@ -54,6 +54,25 @@ type StorDBOpts struct {
 	MongoConnScheme           string
 }
 
+// Database config for stor_db and config_db
+type StorDbJsonCfg struct {
+	Db_type               *string
+	Db_host               *string
+	Db_port               *int
+	Db_name               *string
+	Db_user               *string
+	Db_password           *string
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Remote_conns          *[]string
+	Remote_conn_id        *string
+	Replication_conns     *[]string
+	Replication_filtered  *bool
+	Replication_cache     *string
+	Items                 map[string]*ItemOptsJson
+	Opts                  *DBOptsJson
+}
+
 // StorDbCfg StroreDb config
 type StorDbCfg struct {
 	Type                string // should reflect the database type used to store logs
@@ -72,7 +91,7 @@ type StorDbCfg struct {
 
 // loadStorDBCfg loads the StorDB section of the configuration
 func (dbcfg *StorDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
-	jsnDataDbCfg := new(DbJsonCfg)
+	jsnDataDbCfg := new(StorDbJsonCfg)
 	if err = jsnCfg.GetSection(ctx, StorDBJSON, jsnDataDbCfg); err != nil {
 		return
 	}
@@ -160,7 +179,7 @@ func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 }
 
 // loadFromJSONCfg loads StoreDb config from JsonCfg
-func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
+func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *StorDbJsonCfg) (err error) {
 	if jsnDbCfg == nil {
 		return nil
 	}
@@ -415,9 +434,9 @@ func diffStorDBOptsJsonCfg(d *DBOptsJson, v1, v2 *StorDBOpts) *DBOptsJson {
 	return d
 }
 
-func diffStorDBJsonCfg(d *DbJsonCfg, v1, v2 *StorDbCfg) *DbJsonCfg {
+func diffStorDBJsonCfg(d *StorDbJsonCfg, v1, v2 *StorDbCfg) *StorDbJsonCfg {
 	if d == nil {
-		d = new(DbJsonCfg)
+		d = new(StorDbJsonCfg)
 	}
 	if v1.Type != v2.Type {
 		d.Db_type = utils.StringPointer(v2.Type)

@@ -1042,46 +1042,50 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 
 	// DataDB sanity checks
-	if cfg.dataDbCfg.Type == utils.MetaInternal {
-		if (cfg.dataDbCfg.Opts.InternalDBDumpInterval != 0 ||
-			cfg.dataDbCfg.Opts.InternalDBRewriteInterval != 0) &&
-			cfg.dataDbCfg.Opts.InternalDBFileSizeLimit <= 0 {
-			return fmt.Errorf("<%s> InternalDBFileSizeLimit field cannot be equal or smaller than 0: <%v>", utils.DataDB,
-				cfg.dataDbCfg.Opts.InternalDBFileSizeLimit)
-		}
-		for key, config := range cfg.cacheCfg.Partitions {
-			if utils.StatelessDataDBPartitions.Has(key) && config.Limit != 0 {
-				return fmt.Errorf("<%s> %s needs to be 0 when DataBD is *internal, received : %d", utils.CacheS, key, config.Limit)
+	for _, dbcfg := range cfg.dataDbCfg.DBConns {
+		if dbcfg.Type == utils.MetaInternal {
+			if (cfg.dataDbCfg.Opts.InternalDBDumpInterval != 0 ||
+				cfg.dataDbCfg.Opts.InternalDBRewriteInterval != 0) &&
+				cfg.dataDbCfg.Opts.InternalDBFileSizeLimit <= 0 {
+				return fmt.Errorf("<%s> InternalDBFileSizeLimit field cannot be equal or smaller than 0: <%v>", utils.DataDB,
+					cfg.dataDbCfg.Opts.InternalDBFileSizeLimit)
+			}
+			for key, config := range cfg.cacheCfg.Partitions {
+				if utils.StatelessDataDBPartitions.Has(key) && config.Limit != 0 {
+					return fmt.Errorf("<%s> %s needs to be 0 when DataBD is *internal, received : %d", utils.CacheS, key, config.Limit)
+				}
 			}
 		}
 	}
 	for item, val := range cfg.dataDbCfg.Items {
-		if val.Remote && len(cfg.dataDbCfg.RmtConns) == 0 {
-			return fmt.Errorf("remote connections required by: <%s>", item)
-		}
-		if val.Replicate && len(cfg.dataDbCfg.RplConns) == 0 {
-			return fmt.Errorf("replicate connections required by: <%s>", item)
-		}
-	}
-	for _, connID := range cfg.dataDbCfg.RplConns {
-		conn, has := cfg.rpcConns[connID]
-		if !has {
-			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DataDB, connID)
-		}
-		for _, rpc := range conn.Conns {
-			if rpc.Transport != utils.MetaGOB {
-				return fmt.Errorf("<%s> unsupported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
+		for _, dbcfg := range cfg.dataDbCfg.DBConns {
+			if val.Remote && len(dbcfg.RmtConns) == 0 {
+				return fmt.Errorf("remote connections required by: <%s>", item)
 			}
-		}
-	}
-	for _, connID := range cfg.dataDbCfg.RmtConns {
-		conn, has := cfg.rpcConns[connID]
-		if !has {
-			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DataDB, connID)
-		}
-		for _, rpc := range conn.Conns {
-			if rpc.Transport != utils.MetaGOB {
-				return fmt.Errorf("<%s> unsupported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
+			if val.Replicate && len(dbcfg.RplConns) == 0 {
+				return fmt.Errorf("replicate connections required by: <%s>", item)
+			}
+			for _, connID := range dbcfg.RplConns {
+				conn, has := cfg.rpcConns[connID]
+				if !has {
+					return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DataDB, connID)
+				}
+				for _, rpc := range conn.Conns {
+					if rpc.Transport != utils.MetaGOB {
+						return fmt.Errorf("<%s> unsupported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
+					}
+				}
+			}
+			for _, connID := range dbcfg.RmtConns {
+				conn, has := cfg.rpcConns[connID]
+				if !has {
+					return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DataDB, connID)
+				}
+				for _, rpc := range conn.Conns {
+					if rpc.Transport != utils.MetaGOB {
+						return fmt.Errorf("<%s> unsupported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
+					}
+				}
 			}
 		}
 	}

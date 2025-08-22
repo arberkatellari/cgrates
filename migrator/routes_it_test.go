@@ -125,7 +125,7 @@ func TestSuppliersITMoveEncoding2(t *testing.T) {
 }
 
 func testSupITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(supCfgIn.DataDbCfg().Type,
+	dataDBIn, err := NewMigratorDataDBs(supCfgIn.DataDbCfg().Type,
 		supCfgIn.DataDbCfg().Host, supCfgIn.DataDbCfg().Port,
 		supCfgIn.DataDbCfg().Name, supCfgIn.DataDbCfg().User,
 		supCfgIn.DataDbCfg().Password, supCfgIn.GeneralCfg().DBDataEncoding,
@@ -133,7 +133,7 @@ func testSupITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(supCfgOut.DataDbCfg().Type,
+	dataDBOut, err := NewMigratorDataDBs(supCfgOut.DataDbCfg().Type,
 		supCfgOut.DataDbCfg().Host, supCfgOut.DataDbCfg().Port,
 		supCfgOut.DataDbCfg().Name, supCfgOut.DataDbCfg().User,
 		supCfgOut.DataDbCfg().Password, supCfgOut.GeneralCfg().DBDataEncoding,

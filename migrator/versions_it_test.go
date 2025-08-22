@@ -74,7 +74,7 @@ func TestVersionITMongo(t *testing.T) {
 }
 
 func testVrsITConnect(t *testing.T) {
-	dataDBOut, err := NewMigratorDataDB(vrsCfg.DataDbCfg().Type,
+	dataDBOut, err := NewMigratorDataDBs(vrsCfg.DataDbCfg().Type,
 		vrsCfg.DataDbCfg().Host, vrsCfg.DataDbCfg().Port,
 		vrsCfg.DataDbCfg().Name, vrsCfg.DataDbCfg().User,
 		vrsCfg.DataDbCfg().Password, vrsCfg.GeneralCfg().DBDataEncoding,

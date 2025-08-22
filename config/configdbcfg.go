@@ -40,7 +40,7 @@ type ConfigDBCfg struct {
 
 // loadConfigDBCfg loads the DataDB section of the configuration
 func (dbcfg *ConfigDBCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
-	jsnConfigDBCfg := new(DbJsonCfg)
+	jsnConfigDBCfg := new(StorDbJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ConfigDBJSON, jsnConfigDBCfg); err != nil {
 		return
 	}
@@ -51,7 +51,7 @@ func (dbcfg *ConfigDBCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConf
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
-func (dbcfg *ConfigDBCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
+func (dbcfg *ConfigDBCfg) loadFromJSONCfg(jsnDbCfg *StorDbJsonCfg) (err error) {
 	if jsnDbCfg == nil {
 		return nil
 	}

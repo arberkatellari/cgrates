@@ -126,7 +126,7 @@ func TestResourceITMoveEncoding2(t *testing.T) {
 }
 
 func testResITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(resCfgIn.DataDbCfg().Type,
+	dataDBIn, err := NewMigratorDataDBs(resCfgIn.DataDbCfg().Type,
 		resCfgIn.DataDbCfg().Host, resCfgIn.DataDbCfg().Port,
 		resCfgIn.DataDbCfg().Name, resCfgIn.DataDbCfg().User,
 		resCfgIn.DataDbCfg().Password, resCfgIn.GeneralCfg().DBDataEncoding,
@@ -134,7 +134,7 @@ func testResITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(resCfgOut.DataDbCfg().Type,
+	dataDBOut, err := NewMigratorDataDBs(resCfgOut.DataDbCfg().Type,
 		resCfgOut.DataDbCfg().Host, resCfgOut.DataDbCfg().Port,
 		resCfgOut.DataDbCfg().Name, resCfgOut.DataDbCfg().User,
 		resCfgOut.DataDbCfg().Password, resCfgOut.GeneralCfg().DBDataEncoding,

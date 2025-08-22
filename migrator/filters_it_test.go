@@ -103,7 +103,7 @@ func testFltrStart(testName, action string, t *testing.T) {
 }
 
 func testFltrITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(fltrCfgIn.DataDbCfg().Type,
+	dataDBIn, err := NewMigratorDataDBs(fltrCfgIn.DataDbCfg().Type,
 		fltrCfgIn.DataDbCfg().Host, fltrCfgIn.DataDbCfg().Port,
 		fltrCfgIn.DataDbCfg().Name, fltrCfgIn.DataDbCfg().User,
 		fltrCfgIn.DataDbCfg().Password, fltrCfgIn.GeneralCfg().DBDataEncoding,
@@ -111,7 +111,7 @@ func testFltrITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(fltrCfgOut.DataDbCfg().Type,
+	dataDBOut, err := NewMigratorDataDBs(fltrCfgOut.DataDbCfg().Type,
 		fltrCfgOut.DataDbCfg().Host, fltrCfgOut.DataDbCfg().Port,
 		fltrCfgOut.DataDbCfg().Name, fltrCfgOut.DataDbCfg().User,
 		fltrCfgOut.DataDbCfg().Password, fltrCfgOut.GeneralCfg().DBDataEncoding,

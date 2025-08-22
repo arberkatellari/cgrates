@@ -108,7 +108,7 @@ func TestStatsQueueITMove(t *testing.T) {
 }
 
 func testStsITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(stsCfgIn.DataDbCfg().Type,
+	dataDBIn, err := NewMigratorDataDBs(stsCfgIn.DataDbCfg().Type,
 		stsCfgIn.DataDbCfg().Host, stsCfgIn.DataDbCfg().Port,
 		stsCfgIn.DataDbCfg().Name, stsCfgIn.DataDbCfg().User,
 		stsCfgIn.DataDbCfg().Password, stsCfgIn.GeneralCfg().DBDataEncoding,
@@ -116,7 +116,7 @@ func testStsITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(stsCfgOut.DataDbCfg().Type,
+	dataDBOut, err := NewMigratorDataDBs(stsCfgOut.DataDbCfg().Type,
 		stsCfgOut.DataDbCfg().Host, stsCfgOut.DataDbCfg().Port,
 		stsCfgOut.DataDbCfg().Name, stsCfgOut.DataDbCfg().User,
 		stsCfgOut.DataDbCfg().Password, stsCfgOut.GeneralCfg().DBDataEncoding,
