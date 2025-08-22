@@ -46,8 +46,12 @@ type v1AttributeProfile struct {
 }
 
 func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaAttributeProfiles)
+	if err != nil {
+		return
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -254,8 +258,12 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 				}
 			}
 			if vrs[utils.Attributes] == 1 {
-				if err = m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(context.TODO(), v7Attr); err != nil {
-					return
+				dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.MetaAttributeProfiles)
+				if err != nil {
+					return err
+				}
+				if err = dataDB.SetAttributeProfileDrv(context.TODO(), v7Attr); err != nil {
+					return err
 				}
 			}
 			// Set the fresh-migrated AttributeProfile into DB

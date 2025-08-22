@@ -31,10 +31,17 @@ type internalMigrator struct {
 }
 
 func newInternalMigrator(dm *engine.DataManager) (iDBMig *internalMigrator) {
-	return &internalMigrator{
-		dm:  dm,
-		iDB: dm.DataDB().(*engine.InternalDB),
+	var iDB *engine.InternalDB
+	for _, dbInf := range dm.DataDB() {
+		var canCast bool
+		if iDB, canCast = dbInf.(*engine.InternalDB); canCast {
+			return &internalMigrator{
+				dm:  dm,
+				iDB: iDB,
+			}
+		}
 	}
+	return nil
 }
 
 func (iDBMig *internalMigrator) DataManager() *engine.DataManager {

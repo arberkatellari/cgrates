@@ -42,17 +42,17 @@ var (
 	cfgPath        = cgrLoaderFlags.String(utils.CfgPathCgr, utils.EmptyString,
 		"Configuration directory path.")
 	printConfig = cgrLoaderFlags.Bool(utils.PrintCfgCgr, false, "Print the configuration object in JSON format")
-	dataDBType  = cgrLoaderFlags.String(utils.DataDBTypeCgr, dfltCfg.DataDbCfg().Type,
+	dataDBType  = cgrLoaderFlags.String(utils.DataDBTypeCgr, dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].Type,
 		"The type of the DataDB database <*redis|*mongo>")
-	dataDBHost = cgrLoaderFlags.String(utils.DataDBHostCgr, dfltCfg.DataDbCfg().Host,
+	dataDBHost = cgrLoaderFlags.String(utils.DataDBHostCgr, dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].Host,
 		"The DataDb host to connect to.")
-	dataDBPort = cgrLoaderFlags.String(utils.DataDBPortCgr, dfltCfg.DataDbCfg().Port,
+	dataDBPort = cgrLoaderFlags.String(utils.DataDBPortCgr, dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].Port,
 		"The DataDb port to bind to.")
-	dataDBName = cgrLoaderFlags.String(utils.DataDBNameCgr, dfltCfg.DataDbCfg().Name,
+	dataDBName = cgrLoaderFlags.String(utils.DataDBNameCgr, dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].Name,
 		"The name/number of the DataDb to connect to.")
-	dataDBUser = cgrLoaderFlags.String(utils.DataDBUserCgr, dfltCfg.DataDbCfg().User,
+	dataDBUser = cgrLoaderFlags.String(utils.DataDBUserCgr, dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].User,
 		"The DataDb user to sign in as.")
-	dataDBPasswd = cgrLoaderFlags.String(utils.DataDBPasswdCgr, dfltCfg.DataDbCfg().Password,
+	dataDBPasswd = cgrLoaderFlags.String(utils.DataDBPasswdCgr, dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].Password,
 		"The DataDb user's password.")
 	dbDataEncoding = cgrLoaderFlags.String(utils.DBDataEncodingCfg, dfltCfg.GeneralCfg().DBDataEncoding,
 		"The encoding used to store object data in strings")
@@ -142,28 +142,28 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 		config.SetCgrConfig(ldrCfg)
 	}
 	// Data for DataDB
-	if *dataDBType != dfltCfg.DataDbCfg().Type {
-		ldrCfg.DataDbCfg().Type = *dataDBType
+	if *dataDBType != dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].Type {
+		ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].Type = *dataDBType
 	}
 
-	if *dataDBHost != dfltCfg.DataDbCfg().Host {
-		ldrCfg.DataDbCfg().Host = *dataDBHost
+	if *dataDBHost != dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].Host {
+		ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].Host = *dataDBHost
 	}
 
-	if *dataDBPort != dfltCfg.DataDbCfg().Port {
-		ldrCfg.DataDbCfg().Port = *dataDBPort
+	if *dataDBPort != dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].Port {
+		ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].Port = *dataDBPort
 	}
 
-	if *dataDBName != dfltCfg.DataDbCfg().Name {
-		ldrCfg.DataDbCfg().Name = *dataDBName
+	if *dataDBName != dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].Name {
+		ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].Name = *dataDBName
 	}
 
-	if *dataDBUser != dfltCfg.DataDbCfg().User {
-		ldrCfg.DataDbCfg().User = *dataDBUser
+	if *dataDBUser != dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].User {
+		ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].User = *dataDBUser
 	}
 
-	if *dataDBPasswd != dfltCfg.DataDbCfg().Password {
-		ldrCfg.DataDbCfg().Password = *dataDBPasswd
+	if *dataDBPasswd != dfltCfg.DataDbCfg().DBConns[utils.MetaDefault].Password {
+		ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].Password = *dataDBPasswd
 	}
 
 	if *dbRedisMaxConns != dfltCfg.DataDbCfg().Opts.RedisMaxConns {
@@ -317,21 +317,22 @@ func main() {
 	// we initialize connManager here with nil for InternalChannels
 	engine.NewConnManager(ldrCfg)
 
-	if dataDB, err = engine.NewDataDBConn(ldrCfg.DataDbCfg().Type,
-		ldrCfg.DataDbCfg().Host, ldrCfg.DataDbCfg().Port,
-		ldrCfg.DataDbCfg().Name, ldrCfg.DataDbCfg().User,
-		ldrCfg.DataDbCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
+	if dataDB, err = engine.NewDataDBConn(ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].Type,
+		ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].Host, ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].Port,
+		ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].Name, ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].User,
+		ldrCfg.DataDbCfg().DBConns[utils.MetaDefault].Password, ldrCfg.GeneralCfg().DBDataEncoding,
 		ldrCfg.DataDbCfg().Opts, ldrCfg.DataDbCfg().Items); err != nil {
 		log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 	}
 	defer dataDB.Close()
-
 	var loader engine.LoadReader
 	if loader, err = getLoader(ldrCfg); err != nil {
 		log.Fatal(err)
 	}
+	dbcManager := engine.NewDBConnManager(map[string]engine.DataDB{
+		utils.MetaDefault: dataDB}, ldrCfg.DataDbCfg())
 	var tpReader *engine.TpReader
-	if tpReader, err = engine.NewTpReader(dataDB, loader,
+	if tpReader, err = engine.NewTpReader(dbcManager, loader,
 		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone,
 		ldrCfg.LoaderCgrCfg().CachesConns,
 		ldrCfg.LoaderCgrCfg().ActionSConns); err != nil {

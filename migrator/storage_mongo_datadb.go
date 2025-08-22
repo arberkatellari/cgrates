@@ -43,11 +43,18 @@ type mongoMigrator struct {
 }
 
 func newMongoMigrator(dm *engine.DataManager) (mgoMig *mongoMigrator) {
-	return &mongoMigrator{
-		dm:     dm,
-		mgoDB:  dm.DataDB().(*engine.MongoStorage),
-		cursor: nil,
+	var mgoDB *engine.MongoStorage
+	for _, dbInf := range dm.DataDB() {
+		var canCast bool
+		if mgoDB, canCast = dbInf.(*engine.MongoStorage); canCast {
+			return &mongoMigrator{
+				dm:     dm,
+				mgoDB:  mgoDB,
+				cursor: nil,
+			}
+		}
 	}
+	return nil
 }
 
 func (v1ms *mongoMigrator) close() {

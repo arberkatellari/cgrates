@@ -38,7 +38,9 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 	if err != nil {
 		return nil, err
 	}
-	dm := engine.NewDataManager(dbCon, cfg, nil)
+	dbcManager := engine.NewDBConnManager(map[string]engine.DataDB{
+		utils.MetaDefault: dbCon}, cfg.DataDbCfg())
+	dm := engine.NewDataManager(dbcManager, cfg, nil)
 	var d MigratorDataDB
 	switch db_type {
 	case utils.MetaRedis:
@@ -57,7 +59,11 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 }
 
 func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConn(utils.CacheVersions)
+	if err != nil {
+		return nil, err
+	}
+	vrs, err = dataDB.GetVersions(utils.EmptyString)
 	if err != nil {
 		return nil, utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -74,7 +80,11 @@ func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
 
 func (m *Migrator) setVersions(str string) (err error) {
 	vrs := engine.Versions{str: engine.CurrentDataDBVersions()[str]}
-	err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false)
+	dataDB, _, err := m.dmOut.DataManager().DBConns().GetConn(utils.CacheVersions)
+	if err != nil {
+		return err
+	}
+	err = dataDB.SetVersions(vrs, false)
 	if err != nil {
 		err = utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

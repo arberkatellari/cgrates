@@ -107,8 +107,9 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			Opts: new(LoggerOptsCfg),
 		},
 		dataDbCfg: &DataDbCfg{
-			Items: make(map[string]*ItemOpts),
-			Opts:  &DataDBOpts{},
+			DBConns: make(DBConns),
+			Items:   make(map[string]*ItemOpts),
+			Opts:    &DataDBOpts{},
 		},
 		storDbCfg: &StorDbCfg{
 			Items: make(map[string]*ItemOpts),
@@ -433,7 +434,7 @@ func (cfg *CGRConfig) GetAllSectionIDs() (s []string) {
 
 // loadConfigDBCfg loads the ConfigDB section of the configuration
 func (cfg *CGRConfig) loadConfigDBCfg(ctx *context.Context, jsnCfg ConfigDB) (err error) {
-	jsnDBCfg := new(DbJsonCfg)
+	jsnDBCfg := new(StorDbJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ConfigDBJSON, jsnDBCfg); err != nil {
 		return
 	}

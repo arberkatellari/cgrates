@@ -107,52 +107,56 @@ const CGRATES_CFG_JSON = `
 },
 
 "data_db": {				// database used to store runtime data (eg: accounts)
-	"db_type": "*redis",		// data_db type: <*redis|*mongo>
-	"db_host": "127.0.0.1",		// data_db host address
-	"db_port": 6379, 		// data_db port to reach the database
-	"db_name": "10", 		// data_db database name to connect to
-	"db_user": "cgrates", 		// username to use when connecting to data_db
-	"db_password": "", 		// password to use when connecting to data_db
-	"remote_conns":[],		// the conns that are queried when the items are not found in local DB
-	"remote_conn_id": "",		// the ID to be sent to remote_conns to identify the connection
-	"replication_conns":[],		// the conns the items are replicated
-	"replication_filtered": false, 	// if this is enabled the replication will be made only to the conns that received a get
-	"replication_cache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
+	"db_conns": {
+		"*default": {		// The id of the DB connection
+			"db_type": "*redis",		// data_db type: <*redis|*mongo>
+			"db_host": "127.0.0.1",		// data_db host address
+			"db_port": 6379, 		// data_db port to reach the database
+			"db_name": "10", 		// data_db database name to connect to
+			"db_user": "cgrates", 		// username to use when connecting to data_db
+			"db_password": "", 		// password to use when connecting to data_db
+			"remote_conns": [],		// the conns that are queried when the items are not found in local DB
+			"remote_conn_id": "",		// the ID to be sent to remote_conns to identify the connection
+			"replication_conns": [],		// the conns the items are replicated
+			"replication_filtered": false, 	// if this is enabled the replication will be made only to the conns that received a get
+			"replication_cache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
+		},
+	},
 	"items":{
-		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*ip_allocations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*ip_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}
+		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*ip_allocations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"},
+		"*ip_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"},
+		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"},
+		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"},
+		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "datadb_id": "*default"},
+		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"},
+		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"},
+		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"},
+		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"},
+		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"},
+		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"},
+		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"},
+		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "datadb_id": "*default"}
 	},
 	"opts":{
 		"internalDBDumpPath": "/var/lib/cgrates/internal_db/datadb",		// the path where datadb will be dumped
@@ -1728,14 +1732,44 @@ const CGRATES_CFG_JSON = `
 
 
 "migrator": {
-	"out_datadb_type": "redis",
-	"out_datadb_host": "127.0.0.1",
-	"out_datadb_port": "6379",
-	"out_datadb_name": "10",
-	"out_datadb_user": "cgrates",
-	"out_datadb_password": "",
 	"out_datadb_encoding" : "msgpack",
 	"users_filters":[],
+	"in_items":{
++++		"*accounts": {"datadb_id": "*default"},
+		"*actions": {"datadb_id": "*default"},
+		"*resource_profiles": {"datadb_id": "*default"},
+		"*resources": {"datadb_id": "*default"},
+		"*ip_profiles": {"datadb_id": "*default"},
+		"*ip_allocations": {"datadb_id": "*default"},
++++		"*statqueue_profiles": {"datadb_id": "*default"},
++++		"*statqueues": {"datadb_id": "*default"},
+		"*threshold_profiles": {"datadb_id": "*default"},
+		"*thresholds": {"datadb_id": "*default"},
+		"*filters": {"datadb_id": "*default"},
+		"*route_profiles": {"datadb_id": "*default"},
+		"*attribute_profiles": {"datadb_id": "*default"},
+		"*charger_profiles": {"datadb_id": "*default"},
+		"*rate_profiles": {"datadb_id": "*default"},
++++		"*action_profiles": {"datadb_id": "*default"},
+		"*load_ids": {"datadb_id": "*default"},
++++		"*versions": {"datadb_id": "*default"},
+		"*resource_filter_indexes" : {"datadb_id": "*default"},
+		"*ip_filter_indexes" : {"datadb_id": "*default"},
+		"*stat_filter_indexes" : {"datadb_id": "*default"},
+		"*threshold_filter_indexes" : {"datadb_id": "*default"},
+		"*ranking_profiles": {"datadb_id": "*default"},
+		"*rankings": {"datadb_id": "*default"},
+		"*trend_profiles": {"datadb_id": "*default"},
+		"*trends": {"datadb_id": "*default"},
+		"*route_filter_indexes" : {"datadb_id": "*default"},
+		"*attribute_filter_indexes" : {"datadb_id": "*default"},
+		"*charger_filter_indexes" : {"datadb_id": "*default"},
+		"*rate_profile_filter_indexes" : {"datadb_id": "*default"},
+		"*rate_filter_indexes" : {"datadb_id": "*default"},
+		"*action_profile_filter_indexes" : {"datadb_id": "*default"},
+		"*account_filter_indexes" : {"datadb_id": "*default"},
+		"*reverse_filter_indexes" : {"datadb_id": "*default"}
+	},
 	"out_datadb_opts":{
 		"redisMaxConns": 10,			// the connection pool size
 		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
