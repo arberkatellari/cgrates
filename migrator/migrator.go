@@ -62,19 +62,27 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				log.Print("Cannot dryRun SetVersions!")
 				return
 			}
-			err = engine.OverwriteDBVersions(m.dmOut.DataManager().DataDB())
+			dataDB, _, err := m.dmOut.DataManager().DBConns().GetConnID(utils.CacheVersions)
+			if err != nil {
+				return err, nil
+			}
+			err = engine.OverwriteDBVersions(dataDB)
 			if err != nil {
 				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
 					fmt.Sprintf("error: <%s> when seting versions for DataDB", err.Error())), nil
 			}
 		case utils.MetaEnsureIndexes:
-
-			if m.dmOut.DataManager().DataDB().GetStorageType() == utils.MetaMongo {
-				mgo := m.dmOut.DataManager().DataDB().(*engine.MongoStorage)
-				if err = mgo.EnsureIndexes(); err != nil {
-					return
+			foundMongoDB := false
+			for _, db := range m.dmOut.DataManager().DataDB() {
+				if db.GetStorageType() == utils.MetaMongo {
+					mgo := db.(*engine.MongoStorage)
+					if err = mgo.EnsureIndexes(); err != nil {
+						return
+					}
+					break // there can only be 1 of each dataDB type per engine
 				}
-			} else {
+			}
+			if !foundMongoDB {
 				log.Printf("The DataDB type has to be %s .\n ", utils.MetaMongo)
 			}
 
@@ -141,11 +149,13 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 }
 
 func (m *Migrator) ensureIndexesDataDB(cols ...string) error {
-	if m.dmOut.DataManager().DataDB().GetStorageType() != utils.MetaMongo {
-		return nil
+	for _, db := range m.dmOut.DataManager().DataDB() {
+		if db.GetStorageType() == utils.MetaMongo {
+			mgo := db.(*engine.MongoStorage)
+			return mgo.EnsureIndexes(cols...) // there can only be 1 of each dataDB type per engine
+		}
 	}
-	mgo := m.dmOut.DataManager().DataDB().(*engine.MongoStorage)
-	return mgo.EnsureIndexes(cols...)
+	return nil
 }
 
 // closes all opened DBs

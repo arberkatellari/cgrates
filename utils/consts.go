@@ -2079,6 +2079,7 @@ const (
 
 // DataDbCfg
 const (
+	DataDbConnsCfg               = "db_conns"
 	DataDbTypeCfg                = "db_type"
 	DataDbHostCfg                = "db_host"
 	DataDbPortCfg                = "db_port"
@@ -2120,6 +2121,7 @@ const (
 	TTLCfg       = "ttl"
 	LimitCfg     = "limit"
 	StaticTTLCfg = "static_ttl"
+	DataDBIDCfg  = "datadb_id"
 )
 
 // Tls

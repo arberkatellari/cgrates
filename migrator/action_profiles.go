@@ -29,8 +29,12 @@ import (
 )
 
 func (m *Migrator) migrateCurrentActionProfiles() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConnID(utils.MetaActionProfiles)
+	if err != nil {
+		return
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ActionProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ActionProfilePrefix)
 	if err != nil {
 		return err
 	}

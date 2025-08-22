@@ -28,8 +28,12 @@ import (
 )
 
 func (m *Migrator) migrateCurrentRateProfiles() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConnID(utils.MetaRateProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.RateProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.RateProfilePrefix)
 	if err != nil {
 		return err
 	}

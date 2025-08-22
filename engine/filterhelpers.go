@@ -48,8 +48,12 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	guardian.Guardian.Guard(ctx, func(ctx *context.Context) (_ error) {
 		if !indexedSelects {
+			dataDB, _, err := dm.dbConns.GetConnID(cacheID)
+			if err != nil {
+				return
+			}
 			var keysWithID []string
-			if keysWithID, err = dm.DataDB().GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[cacheID]); err != nil {
+			if keysWithID, err = dataDB.GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[cacheID]); err != nil {
 				return
 			}
 			var sliceIDs []string

@@ -29,8 +29,12 @@ func (m *Migrator) migrateLoadIDs() (err error) {
 		return
 	}
 	if vrs[utils.LoadIDs] != 1 {
-		if err = m.dmOut.DataManager().DataDB().RemoveLoadIDsDrv(); err != nil {
-			return
+		dataDB, _, err := m.dmOut.DataManager().DBConns().GetConnID(utils.MetaLoadIDs)
+		if err != nil {
+			return err
+		}
+		if err = dataDB.RemoveLoadIDsDrv(); err != nil {
+			return err
 		}
 		if err = m.setVersions(utils.LoadIDsVrs); err != nil {
 			return err

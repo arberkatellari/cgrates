@@ -29,8 +29,12 @@ import (
 )
 
 func (m *Migrator) migrateCurrentAccounts() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConnID(utils.MetaAccounts)
+	if err != nil {
+		return
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.AccountPrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.AccountPrefix)
 	if err != nil {
 		return err
 	}

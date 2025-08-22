@@ -100,7 +100,11 @@ func (m *Migrator) migrateFromSupplierToRoute() (err error) {
 	}
 	// All done, update version with current one
 	vrs := engine.Versions{utils.Routes: 1}
-	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConnID(utils.CacheVersions)
+	if err != nil {
+		return err
+	}
+	if err = dataDB.SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
@@ -110,8 +114,12 @@ func (m *Migrator) migrateFromSupplierToRoute() (err error) {
 }
 
 func (m *Migrator) migrateCurrentRouteProfile() (err error) {
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConnID(utils.MetaRouteProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.RouteProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.RouteProfilePrefix)
 	if err != nil {
 		return err
 	}

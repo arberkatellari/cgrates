@@ -57,7 +57,11 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass,
 }
 
 func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
+	dataDB, _, err := m.dmIN.DataManager().DBConns().GetConnID(utils.CacheVersions)
+	if err != nil {
+		return nil, err
+	}
+	vrs, err = dataDB.GetVersions(utils.EmptyString)
 	if err != nil {
 		return nil, utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -74,7 +78,11 @@ func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
 
 func (m *Migrator) setVersions(str string) (err error) {
 	vrs := engine.Versions{str: engine.CurrentDataDBVersions()[str]}
-	err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false)
+	dataDB, _, err := m.dmOut.DataManager().DBConns().GetConnID(utils.CacheVersions)
+	if err != nil {
+		return err
+	}
+	err = dataDB.SetVersions(vrs, false)
 	if err != nil {
 		err = utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
