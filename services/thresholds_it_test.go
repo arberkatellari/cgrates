@@ -68,6 +68,18 @@ func TestThresholdSReload(t *testing.T) {
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+	go func() { // simulate cgr-engine starting birpc serve
+		var onConns []func(c birpc.ClientConnector)
+		var onDiss []func(c birpc.ClientConnector)
+		if tS.ShouldRun() {
+			onConn, onDisconn := tS.GetThresholdSOnBiJSONFuncs()
+			onConns = append(onConns, onConn)
+			onDiss = append(onDiss, onDisconn)
+		}
+		if err := server.ServeBiRPC(cfg.ListenCfg().BiJSONListen, cfg.ListenCfg().BiGobListen, onConns, onDiss); err != nil {
+			t.Error(err)
+		}
+	}()
 	var reply string
 	if err := cfg.V1ReloadConfig(context.Background(),
 		&config.ReloadArgs{
@@ -109,7 +121,6 @@ func TestThresholdSReload2(t *testing.T) {
 	// utils.Logger.SetLogLevel(7)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ApierCfg().Enabled = true
-
 	utils.Logger, _ = utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
@@ -138,6 +149,18 @@ func TestThresholdSReload2(t *testing.T) {
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+	go func() { // simulate cgr-engine starting birpc serve
+		var onConns []func(c birpc.ClientConnector)
+		var onDiss []func(c birpc.ClientConnector)
+		if tS.ShouldRun() {
+			onConn, onDisconn := tS.GetThresholdSOnBiJSONFuncs()
+			onConns = append(onConns, onConn)
+			onDiss = append(onDiss, onDisconn)
+		}
+		if err := server.ServeBiRPC(cfg.ListenCfg().BiJSONListen, cfg.ListenCfg().BiGobListen, onConns, onDiss); err != nil {
+			t.Error(err)
+		}
+	}()
 	var reply string
 	if err := cfg.V1ReloadConfig(context.Background(),
 		&config.ReloadArgs{

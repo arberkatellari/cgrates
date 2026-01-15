@@ -38,11 +38,11 @@ import (
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/registrarc"
+	"github.com/cgrates/cgrates/services"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -476,7 +476,8 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaERs):            internalERsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
 
-		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS): internalSessionSChan,
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS):   internalSessionSChan,
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaThresholds): internalThresholdSChan,
 	})
 	srvDep := map[string]*sync.WaitGroup{
 		utils.AnalyzerS:       new(sync.WaitGroup),
@@ -615,7 +616,7 @@ func main() {
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
 		connManager, anz, srvDep)
 
-	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, shdChan, connManager, anz, srvDep)
+	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, connManager, anz, srvDep)
 
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
 		internalLoaderSChan, connManager, anz, srvDep)
@@ -685,6 +686,36 @@ func main() {
 
 	if *preload != utils.EmptyString {
 		runPreload(ldrs, internalLoaderSChan, shdChan)
+	}
+
+	// Start Serving BiRPC
+	if cfg.ListenCfg().BiJSONListen != utils.EmptyString ||
+		cfg.ListenCfg().BiGobListen != utils.EmptyString {
+		go func() {
+			var onConns []func(c birpc.ClientConnector)
+			var onDiss []func(c birpc.ClientConnector)
+			// wait for conn funcs to be populated only if service should run and BiRPC is populated
+			if smg.ShouldRun() {
+				onConn, onDisconn := smg.GetSessionSOnBiJSONFuncs()
+				onConns = append(onConns, onConn)
+				onDiss = append(onDiss, onDisconn)
+			}
+			if tS.ShouldRun() {
+				onConn, onDisconn := tS.GetThresholdSOnBiJSONFuncs()
+				onConns = append(onConns, onConn)
+				onDiss = append(onDiss, onDisconn)
+			}
+			if err := server.ServeBiRPC(cfg.ListenCfg().BiJSONListen, cfg.ListenCfg().BiGobListen, onConns, onDiss); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
+				if smg.ShouldRun() {
+					smg.DisableBiRPC()
+				}
+				if tS.ShouldRun() {
+					tS.DisableBiRPC()
+				}
+				shdChan.CloseOnce()
+			}
+		}()
 	}
 
 	// Serve rpc connections
