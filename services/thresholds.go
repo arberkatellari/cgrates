@@ -27,15 +27,22 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
+)
+
+var (
+	// store OnBiJSONDisconnect globaly to access it from cgr-engine
+	ThresholdSOnBiJSONConnect = make(chan func(c birpc.ClientConnector))
+	// store OnBiJSONDisconnect globaly to access it from cgr-engine
+	ThresholdSOnBiJSONDisconnect = make(chan func(c birpc.ClientConnector))
 )
 
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalThresholdSChan chan birpc.ClientConnector, connMgr *engine.ConnManager,
-	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	server *cores.Server, internalThresholdSChan chan birpc.ClientConnector,
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) *ThresholdService {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
 		cfg:         cfg,
@@ -52,12 +59,13 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 // ThresholdService implements Service interface
 type ThresholdService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
-	dm          *DataDBService
-	cacheS      *engine.CacheS
-	filterSChan chan *engine.FilterS
-	server      *cores.Server
-	connMgr     *engine.ConnManager
+	cfg          *config.CGRConfig
+	dm           *DataDBService
+	cacheS       *engine.CacheS
+	filterSChan  chan *engine.FilterS
+	server       *cores.Server
+	birpcEnabled bool
+	connMgr      *engine.ConnManager
 
 	thrs     *engine.ThresholdService
 	connChan chan birpc.ClientConnector
@@ -96,7 +104,23 @@ func (thrs *ThresholdService) Start() error {
 		thrs.server.RpcRegister(srv)
 	}
 	thrs.connChan <- thrs.anz.GetInternalCodec(srv, utils.ThresholdS)
+	// Register BiRpc handlers
+	if thrs.cfg.ListenCfg().BiJSONListen != "" {
+		thrs.birpcEnabled = true
+		thrs.server.BiRPCRegisterName(utils.ThresholdSv1, srv)
+		ThresholdSOnBiJSONConnect <- thrs.thrs.OnBiJSONConnect
+		ThresholdSOnBiJSONDisconnect <- thrs.thrs.OnBiJSONDisconnect
+	}
 	return nil
+}
+
+func (thrs *ThresholdService) DisableBiRPC() {
+	if thrs == nil {
+		return
+	}
+	thrs.Lock()
+	thrs.birpcEnabled = false
+	thrs.Unlock()
 }
 
 // Reload handles the change of config
@@ -113,6 +137,10 @@ func (thrs *ThresholdService) Shutdown() (err error) {
 	thrs.Lock()
 	defer thrs.Unlock()
 	thrs.thrs.Shutdown()
+	if thrs.birpcEnabled {
+		thrs.server.StopBiRPC()
+		thrs.birpcEnabled = false
+	}
 	thrs.thrs = nil
 	<-thrs.connChan
 	return

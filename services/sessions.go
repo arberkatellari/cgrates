@@ -19,31 +19,36 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+)
+
+var (
+	// store OnBiJSONConnect globaly to access it from cgr-engine
+	SessionSOnBiJSONConnect = make(chan func(c birpc.ClientConnector))
+	// store OnBiJSONDisconnect globaly to access it from cgr-engine
+	SessionSOnBiJSONDisconnect = make(chan func(c birpc.ClientConnector))
 )
 
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *cores.Server, internalChan chan birpc.ClientConnector,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
-	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	connMgr *engine.ConnManager, anz *AnalyzerService,
+	srvDep map[string]*sync.WaitGroup) *SessionService {
 	return &SessionService{
 		connChan: internalChan,
 		cfg:      cfg,
 		dm:       dm,
 		server:   server,
-		shdChan:  shdChan,
 		connMgr:  connMgr,
 		anz:      anz,
 		srvDep:   srvDep,
@@ -56,7 +61,6 @@ type SessionService struct {
 	cfg      *config.CGRConfig
 	dm       *DataDBService
 	server   *cores.Server
-	shdChan  *utils.SyncedChan
 	stopChan chan struct{}
 
 	sm       *sessions.SessionS
@@ -102,6 +106,7 @@ func (smg *SessionService) Start() error {
 		return err
 	}
 	smg.connChan <- smg.anz.GetInternalCodec(srv, utils.SessionS)
+	smg.sm.PopulateCtx(context.WithClient(context.TODO(), srv))
 	if !smg.cfg.DispatcherSCfg().Enabled {
 		smg.server.RpcRegister(srv)
 
@@ -113,25 +118,22 @@ func (smg *SessionService) Start() error {
 		smg.server.RpcRegister(legacySrv)
 	}
 	// Register BiRpc handlers
-	if smg.cfg.SessionSCfg().ListenBiJSON != "" {
+	if smg.cfg.ListenCfg().BiJSONListen != utils.EmptyString {
 		smg.birpcEnabled = true
 		smg.server.BiRPCRegisterName(utils.SessionSv1, srv)
-		// run this in it's own goroutine
-		go smg.start()
+		SessionSOnBiJSONConnect <- smg.sm.OnBiJSONConnect
+		SessionSOnBiJSONDisconnect <- smg.sm.OnBiJSONDisconnect
 	}
 	return nil
 }
 
-func (smg *SessionService) start() (err error) {
-	if err := smg.server.ServeBiRPC(smg.cfg.SessionSCfg().ListenBiJSON,
-		smg.cfg.SessionSCfg().ListenBiGob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
-		smg.Lock()
-		smg.birpcEnabled = false
-		smg.Unlock()
-		smg.shdChan.CloseOnce()
+func (smg *SessionService) DisableBiRPC() {
+	if smg == nil {
+		return
 	}
-	return
+	smg.Lock()
+	smg.birpcEnabled = false
+	smg.Unlock()
 }
 
 // Reload handles the change of config
