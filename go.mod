@@ -10,7 +10,7 @@ go 1.26.2
 
 // replace github.com/cgrates/kamevapi => ../kamevapi
 
-// replace github.com/cgrates/aringo => ../aringo
+replace github.com/cgrates/ltcache => ../ltcache
 
 require (
 	github.com/Azure/go-amqp v1.0.5

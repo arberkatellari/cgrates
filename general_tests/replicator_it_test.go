@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"slices"
@@ -47,6 +48,7 @@ func TestReplicatorFailedPosts(t *testing.T) {
 	primaryCfg := fmt.Sprintf(`{
 "general": {
 	"node_id": "primary",
+	"log_level": 7,
 	"reconnects": 1
 },
 "listen": {
@@ -86,7 +88,11 @@ func TestReplicatorFailedPosts(t *testing.T) {
 	primaryNG := engine.TestEngine{
 		ConfigJSON: primaryCfg,
 		DBCfg:      engine.InternalDBCfg,
+		LogBuffer:  &bytes.Buffer{},
 	}
+	t.Cleanup(func() {
+		fmt.Println(primaryNG.LogBuffer)
+	})
 	primaryClient, _ := primaryNG.Run(t)
 
 	var reply string
@@ -141,7 +147,11 @@ func TestReplicatorFailedPosts(t *testing.T) {
 	targetNG := engine.TestEngine{
 		ConfigJSON: targetCfg,
 		DBCfg:      engine.InternalDBCfg,
+		LogBuffer:  &bytes.Buffer{},
 	}
+	t.Cleanup(func() {
+		fmt.Println(targetNG.LogBuffer)
+	})
 	targetClient, _ := targetNG.Run(t)
 
 	if err := primaryClient.Call(context.Background(), utils.APIerSv1ReplayFailedReplications,

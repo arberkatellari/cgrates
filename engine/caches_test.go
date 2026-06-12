@@ -941,9 +941,9 @@ func TestCacheRemoveGroup(t *testing.T) {
 
 func TestUpdateReplicationFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	tmp := *Cache
+	tmp := Cache
 	defer func() {
-		*Cache = tmp
+		Cache = tmp
 	}()
 	Cache.Clear(nil)
 	Cache = NewCacheS(cfg, nil, nil)
