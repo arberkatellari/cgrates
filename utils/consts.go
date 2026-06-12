@@ -349,6 +349,7 @@ const (
 	TrendsProfilePrefix       = "trp_"
 	LoadIDPrefix              = "lid_"
 	SessionsBackupPrefix      = "sbk_"
+	CacheEntity               = "che_"
 	LoadInstKey               = "load_history"
 	CreateCDRsTablesSQL       = "create_cdrs_tables.sql"
 	CreateTariffPlanTablesSQL = "create_tariffplan_tables.sql"
@@ -1563,6 +1564,7 @@ const (
 	ReplicatorSv1GetIndexes              = "ReplicatorSv1.GetIndexes"
 	ReplicatorSv1SetIndexes              = "ReplicatorSv1.SetIndexes"
 	ReplicatorSv1RemoveIndexes           = "ReplicatorSv1.RemoveIndexes"
+	ReplicatorSv1ReplicateSet            = "ReplicatorSv1.ReplicateSet"
 )
 
 // APIerSv1 APIs
@@ -2090,6 +2092,7 @@ const (
 	CacheSv1Ping              = "CacheSv1.Ping"
 	CacheSv1ReplicateSet      = "CacheSv1.ReplicateSet"
 	CacheSv1ReplicateRemove   = "CacheSv1.ReplicateRemove"
+	CacheSv1ReplicateEntity   = "CacheSv1.ReplicateEntity"
 )
 
 // GuardianS APIs

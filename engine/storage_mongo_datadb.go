@@ -37,6 +37,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
@@ -2377,4 +2378,9 @@ func (ms *MongoStorage) RestoreDataDB(backupFolderPath string) (err error) {
 // SnapshotDataDB only for InternalDB
 func (ms *MongoStorage) SnapshotDataDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
+}
+
+// GetInternalReplicationChannels, only for InternalDB
+func (ms *MongoStorage) GetInternalReplicationChannels() map[string]chan *ltcache.CacheEntity {
+	return nil
 }

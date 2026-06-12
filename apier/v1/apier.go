@@ -2150,7 +2150,7 @@ func (apierSv1 *APIerSv1) BackupStorDB(ctx *context.Context, params *BackupParam
 // Any data that was dumped from internal DB will be cleared before restoring from backup
 func (apierSv1 *APIerSv1) RestoreDataDB(ctx *context.Context, backupFolderPath *string, reply *string) (err error) {
 	*backupFolderPath = utils.FirstNonEmpty(*backupFolderPath, apierSv1.Config.DataDbCfg().Opts.InternalDBBackupPath)
-	if err = apierSv1.DataManager.DataDB().RestoreDataDB(*backupFolderPath); err != nil {
+	if err = apierSv1.DataManager.RestoreDataDB(*backupFolderPath); err != nil {
 		return
 	}
 	*reply = utils.OK

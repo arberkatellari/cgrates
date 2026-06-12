@@ -20,6 +20,7 @@ package engine
 
 import (
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 type DataDBMock struct {
@@ -620,4 +621,8 @@ func (dbM *DataDBMock) RestoreDataDB(backupFolderPath string) (err error) {
 
 func (dbM *DataDBMock) SnapshotDataDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) GetInternalReplicationChannels() map[string]chan *ltcache.CacheEntity {
+	return nil
 }

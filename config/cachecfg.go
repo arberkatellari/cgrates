@@ -95,6 +95,8 @@ func (cParam *CacheParamCfg) Clone() (cln *CacheParamCfg) {
 // CacheCfg used to store the cache config
 type CacheCfg struct {
 	Partitions       map[string]*CacheParamCfg
+	RplFailedDir     string
+	RplInterval      time.Duration
 	ReplicationConns []string
 	RemoteConns      []string
 }
@@ -110,6 +112,15 @@ func (cCfg *CacheCfg) loadFromJSONCfg(jsnCfg *CacheJsonCfg) (err error) {
 				return err
 			}
 			cCfg.Partitions[kJsn] = val
+		}
+	}
+	if jsnCfg.RplFailedDir != nil {
+		cCfg.RplFailedDir = *jsnCfg.RplFailedDir
+	}
+	if jsnCfg.RplInterval != nil {
+		cCfg.RplInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.RplInterval)
+		if err != nil {
+			return
 		}
 	}
 	if jsnCfg.Replication_conns != nil {
@@ -157,6 +168,8 @@ func (cCfg *CacheCfg) AsMapInterface() (mp map[string]any) {
 		partitions[key] = value.AsMapInterface()
 	}
 	mp[utils.PartitionsCfg] = partitions
+	mp[utils.ReplicationFailedDirCfg] = cCfg.RplFailedDir
+	mp[utils.ReplicationIntervalCfg] = cCfg.RplInterval.String()
 	if cCfg.ReplicationConns != nil {
 		mp[utils.ReplicationConnsCfg] = cCfg.ReplicationConns
 	}
@@ -172,7 +185,9 @@ func (cCfg *CacheCfg) Clone() (cln *CacheCfg) {
 		return nil
 	}
 	cln = &CacheCfg{
-		Partitions: make(map[string]*CacheParamCfg),
+		Partitions:   make(map[string]*CacheParamCfg),
+		RplFailedDir: cCfg.RplFailedDir,
+		RplInterval:  cCfg.RplInterval,
 	}
 	for key, par := range cCfg.Partitions {
 		cln.Partitions[key] = par.Clone()

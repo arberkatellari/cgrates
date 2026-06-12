@@ -129,7 +129,8 @@ func replicate(connMgr *ConnManager, connIDs []string, filtered bool, objType, o
 	var reply string
 	if !filtered {
 		// is not partial so send to all defined connections
-		return utils.CastRPCErr(connMgr.Call(context.TODO(), connIDs, method, args, &reply))
+		err := connMgr.Call(context.TODO(), connIDs, method, args, &reply)
+		return utils.CastRPCErr(err)
 	}
 	// is partial so get all the replicationHosts from cache based on object Type and ID
 	// alp_cgrates.org:ATTR1

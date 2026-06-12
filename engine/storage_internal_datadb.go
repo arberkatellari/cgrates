@@ -56,6 +56,10 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB b
 			StaticTTL: cPcfg.StaticTTL,
 			Clone:     true, // cloning is mandatory for databases
 		}
+		// if replicate is enabled, send the channel to ltcache to be populated on set/remove of items.
+		if cPcfg.Replicate == true {
+			tcCfg[k].Replicate = make(chan *ltcache.CacheEntity)
+		}
 	}
 	if transCacheOpts != nil && transCacheOpts.DumpInterval == 0 && transCacheOpts.RewriteInterval == 0 {
 		transCacheOpts = nil // create TransCache without offline collector if neither
@@ -74,6 +78,10 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB b
 		db:                  tc,
 		isDataDB:            isDataDB,
 	}, nil
+}
+
+func (iDB *InternalDB) GetInternalReplicationChannels() map[string]chan *ltcache.CacheEntity {
+	return iDB.db.GetInternalReplicationChannels()
 }
 
 // SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)

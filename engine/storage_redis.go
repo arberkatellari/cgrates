@@ -36,6 +36,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	"github.com/redis/rueidis"
 )
 
@@ -1842,4 +1843,9 @@ func (rs *RedisStorage) RestoreDataDB(backupFolderPath string) (err error) {
 // SnapshotDataDB, only for InternalDB
 func (rs *RedisStorage) SnapshotDataDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
+}
+
+// GetInternalReplicationChannels, only for InternalDB
+func (rs *RedisStorage) GetInternalReplicationChannels() map[string]chan *ltcache.CacheEntity {
+	return nil
 }

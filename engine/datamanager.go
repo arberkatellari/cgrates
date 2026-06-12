@@ -91,6 +91,20 @@ var (
 func NewDataManager(dataDB DataDB, cacheCfg *config.CacheCfg, connMgr *ConnManager) *DataManager {
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
 	rpl := newReplicator(connMgr)
+	if dataDB.GetStorageType() == utils.MetaInternal {
+		for instance, rChan := range dataDB.GetInternalReplicationChannels() {
+			go func() {
+				for {
+					rp := &ReplicationCacheEntity{
+						CacheInstance: instance,
+						CacheEntity:   <-rChan,
+					}
+					rpl.replicate("internalReplicate", "internalReplicate", utils.CacheSv1ReplicateEntity, rp, config.CgrConfig().DataDbCfg().Items[instance])
+				}
+			}()
+		}
+
+	}
 	return &DataManager{
 		dataDB:     dataDB,
 		cacheCfg:   cacheCfg,
@@ -4032,4 +4046,15 @@ func (dm *DataManager) RemoveSessionsBackup(nodeID, tenant, cgrid string) (err e
 			NodeID: nodeID,
 			Tenant: tenant,
 		}, itm)
+}
+
+// RestoreDataDB is used only for offline internal DB. It attempts to restore the internal DB from
+// the latest backup in the specified backupPath. If backupPath is not specified, it will be
+// taken from the default's backup path.
+// Any data that was dumped from internal DB will be cleared before restoring from backup
+func (dm *DataManager) RestoreDataDB(backupFolderPath string) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	return dm.dataDB.RestoreDataDB(backupFolderPath)
 }

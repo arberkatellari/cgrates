@@ -531,6 +531,8 @@ type CacheParamJsonCfg struct {
 
 type CacheJsonCfg struct {
 	Partitions        *map[string]*CacheParamJsonCfg
+	RplFailedDir      *string `json:"replication_failed_dir"`
+	RplInterval       *string `json:"replication_interval"`
 	Replication_conns *[]string
 	Remote_conns      *[]string
 }

@@ -26,6 +26,7 @@ import (
 	"reflect"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	"github.com/ugorji/go/codec"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -153,6 +154,7 @@ type DataDB interface {
 	BackupDataDB(string, bool) error
 	RestoreDataDB(string) error
 	SnapshotDataDB(string, bool) error
+	GetInternalReplicationChannels() map[string]chan *ltcache.CacheEntity
 }
 
 type StorDB interface {

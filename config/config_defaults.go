@@ -66,6 +66,8 @@ const CGRATES_CFG_JSON = `
 
 "rpc_conns": {
 	//"*localhost": {
+		//"strategy": "", // Controls connection selection within the pool. <*first|*next|*random|*first_positive|*first_positive_async|*broadcast|*broadcast_sync|*broadcast_async|*parallel>
+		//"pool_size": 0, // Sets the connection limit for *parallel strategy (0 means unlimited)
 		//"conns": [	// rpc connections definitions
 			//{
 				//"address": "127.0.0.1:2012",
@@ -357,6 +359,8 @@ const CGRATES_CFG_JSON = `
 		"*replication_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// the replication hosts cache(used when replication_filtered is enbled)
 	},
 	"replication_conns": [],
+	"replication_failed_dir": "", 		// directory for failed batch replications (used when interval > 0)
+	"replication_interval": "", 		// interval between batched replications (0 for immediate)
 	"remote_conns": []	// the conns that are queried when the items are not found in cache
 },
 

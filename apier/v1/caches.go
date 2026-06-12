@@ -138,3 +138,8 @@ func (chSv1 *CacheSv1) ReplicateSet(ctx *context.Context, args *utils.ArgCacheRe
 func (chSv1 *CacheSv1) ReplicateRemove(ctx *context.Context, args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
 	return chSv1.cacheS.V1ReplicateRemove(ctx, args, reply)
 }
+
+// ReplicateEntity replicate a CacheEntity
+func (chSv1 *CacheSv1) ReplicateEntity(ctx *context.Context, args *engine.ReplicationCacheEntity, reply *string) (err error) {
+	return chSv1.cacheS.V1ReplicateEntity(ctx, args, reply)
+}

@@ -36,7 +36,7 @@ import (
 var Cache *CacheS
 
 func init() {
-	Cache = NewCacheS(config.CgrConfig(), nil, nil)
+	Cache = NewPreCacheS(config.CgrConfig(), nil, nil)
 	// Register objects for cache replication/remotes
 	//AttributeS
 	gob.Register(new(AttributeProfile))
@@ -187,10 +187,12 @@ func init() {
 	gob.Register(new(utils.ArgCacheReplicateRemove))
 
 	gob.Register(utils.StringSet{})
+	gob.Register(ltcache.CacheEntity{})
+	gob.Register(ReplicationCacheEntity{})
 }
 
-// NewCacheS initializes the Cache service and executes the precaching
-func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *CacheS) {
+// NewPreCacheS initializes a temporaty global Cache, until Cache service is initiated
+func NewPreCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *CacheS) {
 	cfg.CacheCfg().AddTmpCaches()
 	tCache := cfg.CacheCfg().AsTransCacheConfig()
 	if len(cfg.CacheCfg().ReplicationConns) != 0 {
@@ -231,12 +233,89 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *Cache
 	return
 }
 
+// struct used when replicating CacheEntities. Needed for finding which cache instance to set/remove the entity from.
+type ReplicationCacheEntity struct {
+	UUID          string               // used to stop self-engine replication
+	CacheInstance string               // the cache instance where the entity will be set/removed
+	CacheEntity   *ltcache.CacheEntity // the entity that will be set/removed
+}
+
+// NewCacheS initializes the Cache service and executes the precaching
+func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *CacheS) {
+	cfg.CacheCfg().AddTmpCaches()
+	tCache := cfg.CacheCfg().AsTransCacheConfig()
+	c = &CacheS{
+		cfg:              cfg,
+		dm:               dm,
+		pcItems:          make(map[string]chan struct{}),
+		replicationUUIDs: make(map[string]struct{}),
+	}
+	if len(cfg.CacheCfg().ReplicationConns) != 0 {
+		// newReplicator function modified for CacheS
+		// planned to be combined with datadb replicator
+		r := &replicator{
+			cm:        connMgr,
+			pending:   make(map[string]*replicationData),
+			interval:  cfg.CacheCfg().RplInterval, // use the same intervals as datadb
+			failedDir: cfg.CacheCfg().RplFailedDir,
+			conns:     cfg.CacheCfg().ReplicationConns,
+			stop:      make(chan struct{}),
+		}
+		if r.interval > 0 {
+			r.wg.Add(1)
+			// start the replication loop. on Set/Remove, the entity with the method to be called will be added to r.pending field
+			go r.replicationLoop()
+		}
+		for instance := range tCache {
+			if !cfg.CacheCfg().Partitions[instance].Replicate ||
+				instance == utils.CacheCapsEvents {
+				continue
+			}
+			tCache[instance].Replicate = make(chan *ltcache.CacheEntity)
+			go func() {
+				for {
+					entityUUID := utils.GenUUID()
+					ce := <-tCache[instance].Replicate
+					rce := &ReplicationCacheEntity{
+						UUID:          entityUUID,
+						CacheInstance: instance,
+						CacheEntity:   ce,
+					}
+					c.ruMux.Lock()
+					c.replicationUUIDs[entityUUID] = struct{}{}
+					c.ruMux.Unlock()
+					go func() { // dont wait for replicate to finish so we dont block cache from sending another <-tCache[instance].Replicate
+						// if interval is > 0 this will add the entity to pending field instead of instantly replicating.
+						if err := r.replicate(utils.CacheEntity, instance, utils.CacheSv1ReplicateEntity, rce, &config.ItemOpt{Replicate: true}); err != nil {
+							utils.Logger.Warning(fmt.Sprintf("<CacheS> failed to replicate Entity <%v> from Instance <%v> with error <%v>", utils.ToJSON(ce), instance, err))
+						}
+					}()
+				}
+			}()
+		}
+	}
+
+	if _, has := tCache[utils.CacheCapsEvents]; has && cpS != nil {
+		tCache[utils.CacheCapsEvents].OnEvicted = []func(itmID string, value interface{}){
+			cpS.OnEvict,
+		}
+	}
+	c.tCache = ltcache.NewTransCache(tCache)
+	for cacheID := range cfg.CacheCfg().Partitions {
+		c.pcItems[cacheID] = make(chan struct{})
+	}
+	return
+}
+
 // CacheS deals with cache preload and other cache related tasks/APIs
 type CacheS struct {
 	cfg     *config.CGRConfig
 	dm      *DataManager
 	pcItems map[string]chan struct{} // signal precaching
 	tCache  *ltcache.TransCache
+
+	replicationUUIDs map[string]struct{} // used to stop replication on self engine. (struct{} value isnt used)
+	ruMux            sync.RWMutex
 }
 
 // Set is an exported method from TransCache
@@ -244,7 +323,8 @@ type CacheS struct {
 func (chS *CacheS) Set(chID, itmID string, value any,
 	groupIDs []string, commit bool, transID string) (err error) {
 	chS.tCache.Set(chID, itmID, value, groupIDs, commit, transID)
-	return chS.ReplicateSet(chID, itmID, value)
+	return
+	// return chS.ReplicateSet(chID, itmID, value)
 }
 
 // ReplicateSet replicates an item to ReplicationConns
@@ -607,6 +687,31 @@ func (chS *CacheS) ReplicateRemove(chID, itmID string) (err error) {
 // V1ReplicateRemove replicate an item
 func (chS *CacheS) V1ReplicateRemove(ctx *context.Context, args *utils.ArgCacheReplicateRemove, reply *string) (err error) {
 	chS.tCache.Remove(args.CacheID, args.ItemID, true, utils.EmptyString)
+	*reply = utils.OK
+	return
+}
+
+// V1ReplicateEntity receives a CacheEntity to set or remove from cache
+func (chS *CacheS) V1ReplicateEntity(ctx *context.Context, args *ReplicationCacheEntity, reply *string) (err error) {
+	if chS.replicationUUIDs != nil {
+		chS.ruMux.RLock()
+		if _, has := chS.replicationUUIDs[args.UUID]; has {
+			utils.Logger.Warning("<CacheS> Replication not possible for the same engine")
+			chS.ruMux.RUnlock()
+			return
+		}
+		chS.ruMux.RUnlock()
+	}
+
+	if cmp, canCast := args.CacheEntity.Value.(utils.Compiler); canCast {
+		if err = cmp.Compile(); err != nil {
+			return
+		}
+	}
+	chS.tCache.ReplicateEntity(args.CacheInstance, args.CacheEntity)
+	chS.ruMux.Lock()
+	delete(chS.replicationUUIDs, args.UUID)
+	chS.ruMux.Unlock()
 	*reply = utils.OK
 	return
 }
