@@ -284,12 +284,12 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *Cache
 					c.ruMux.Lock()
 					c.replicationUUIDs[entityUUID] = struct{}{}
 					c.ruMux.Unlock()
-					go func() { // dont wait for replicate to finish so we dont block cache from sending another <-tCache[instance].Replicate
-						// if interval is > 0 this will add the entity to pending field instead of instantly replicating.
-						if err := r.replicate(utils.CacheEntity, instance, utils.CacheSv1ReplicateEntity, rce, &config.ItemOpt{Replicate: true}); err != nil {
-							utils.Logger.Warning(fmt.Sprintf("<CacheS> failed to replicate Entity <%v> from Instance <%v> with error <%v>", utils.ToJSON(ce), instance, err))
-						}
-					}()
+					// go func() { // dont wait for replicate to finish so we dont block cache from sending another <-tCache[instance].Replicate
+					// if interval is > 0 this will add the entity to pending field instead of instantly replicating.
+					if err := r.replicate(utils.CacheEntity, instance, utils.CacheSv1ReplicateEntity, rce, &config.ItemOpt{Replicate: true}); err != nil {
+						utils.Logger.Warning(fmt.Sprintf("<CacheS> failed to replicate Entity <%v> from Instance <%v> with error <%v>", utils.ToJSON(ce), instance, err))
+					}
+					// }()
 				}
 			}()
 		}
