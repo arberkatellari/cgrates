@@ -193,6 +193,11 @@ func (aS *ActionSv1) ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 	return aS.acts.V1ScheduleActions(ctx, args, rpl)
 }
 
+// GetScheduledActions will be called to display all scheduled actions matching the arguments
+func (aS *ActionSv1) GetScheduledActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
+	return aS.acts.V1GetScheduledActions(ctx, args, rpl)
+}
+
 // ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
 func (aS *ActionSv1) ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	return aS.acts.V1ExecuteActions(ctx, args, rpl)

@@ -74,6 +74,28 @@ type scheduledActs struct {
 	cch *ltcache.TransCache // cache data between actions here
 }
 
+type CronActionDetails struct {
+	Tenant          string
+	ActionProfileId string
+	TargetType      string
+	TargetID        string
+	Schedule        string
+}
+
+// asCronActionDetails converts scheduledActs to CronActionDetails to later display the scheduled action detais
+func (s *scheduledActs) asCronActionDetails() *CronActionDetails {
+	if s == nil {
+		return nil
+	}
+	return &CronActionDetails{
+		Tenant:          s.tenant,
+		ActionProfileId: s.apID,
+		TargetType:      s.trgTyp,
+		TargetID:        s.trgID,
+		Schedule:        s.schedule,
+	}
+}
+
 // Execute notifies possible errors on execution
 func (s *scheduledActs) Execute(ctx *context.Context) (err error) {
 	var partExec bool

@@ -61,3 +61,10 @@ func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.CGREvent, 
 	*rpl = utils.OK
 	return
 }
+
+// V1GetScheduledActions will be called to display all scheduled actions matching the arguments
+func (aS *ActionS) V1GetScheduledActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
+	aS.getScheduledActions()
+	*rpl = utils.OK
+	return
+}

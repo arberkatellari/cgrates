@@ -20,12 +20,13 @@ import (
 // NewActionS instantiates the ActionS
 func NewActionS(cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.FilterS, dm *engine.DataManager, connMgr *engine.ConnManager) (aS *ActionS) {
 	aS = &ActionS{
-		cfg:     cfg,
-		cache:   cache,
-		connMgr: connMgr,
-		fltrS:   fltrS,
-		dm:      dm,
-		crnLk:   new(sync.RWMutex),
+		cfg:        cfg,
+		cache:      cache,
+		connMgr:    connMgr,
+		fltrS:      fltrS,
+		dm:         dm,
+		crnActions: make(map[cron.EntryID][]*CronActionDetails),
+		crnLk:      new(sync.RWMutex),
 	}
 	aS.schedInit() // initialize cron and schedule actions
 	return aS
@@ -33,13 +34,14 @@ func NewActionS(cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.Filte
 
 // ActionS manages exection of Actions
 type ActionS struct {
-	cfg     *config.CGRConfig
-	cache   *engine.CacheS
-	connMgr *engine.ConnManager
-	fltrS   *engine.FilterS
-	dm      *engine.DataManager
-	crn     *cron.Cron
-	crnLk   *sync.RWMutex
+	cfg        *config.CGRConfig
+	cache      *engine.CacheS
+	connMgr    *engine.ConnManager
+	fltrS      *engine.FilterS
+	dm         *engine.DataManager
+	crnActions map[cron.EntryID][]*CronActionDetails // holds action profiles that is ran per cron EntryID
+	crn        *cron.Cron
+	crnLk      *sync.RWMutex
 }
 
 // Shutdown is called to shutdown the service
@@ -75,6 +77,9 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 	defer aS.crnLk.Unlock()
 	crn := aS.crn
 	if crnReset {
+		if len(aS.crnActions) != 0 { // clear the map, it will be populated again in this same function
+			aS.crnActions = make(map[cron.EntryID][]*CronActionDetails)
+		}
 		crn = cron.New()
 	}
 	var partExec bool
@@ -101,12 +106,17 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 		}
 		for _, apID := range cronOrder {
 			units := cronGroups[apID]
-			if _, err = crn.AddFunc(units[0].schedule, func() { aS.cronExecuteActions(units) }); err != nil {
+			var entryID cron.EntryID
+			if entryID, err = crn.AddFunc(units[0].schedule, func() { aS.cronExecuteActions(units) }); err != nil {
 				utils.Logger.Warning(fmt.Sprintf(
 					"<%s> scheduling ActionProfile with id: <%s:%s>, error: <%s>",
 					utils.ActionS, units[0].tenant, units[0].apID, err))
 				partExec = true
 				continue
+			}
+			aS.crnActions[entryID] = make([]*CronActionDetails, 0)
+			for _, unit := range units {
+				aS.crnActions[entryID] = append(aS.crnActions[entryID], unit.asCronActionDetails())
 			}
 		}
 	}
@@ -290,5 +300,16 @@ func (aS *ActionS) cronExecuteActions(units []*scheduledActs) {
 		utils.Logger.Warning(fmt.Sprintf(
 			"<%s> executing scheduled ActionProfile <%s:%s>, error: <%s>",
 			utils.ActionS, first.tenant, first.apID, err))
+	}
+}
+
+// getScheduledActions gets all scheduled actions matching the arguments
+func (aS *ActionS) getScheduledActions() {
+	aS.crnLk.RLock()
+	crnEntries := aS.crn.Entries()
+	aS.crnLk.RUnlock()
+	for i, cE := range crnEntries {
+		utils.Logger.Debug(fmt.Sprintf("ce <%v> cE.Schedule <%#v>, cE.ID<%#v>, cE.Job<%T>, cE.Next<%#v>, cE.Prev<%#v>", i, cE.Schedule, cE.ID, cE.Job, cE.Next, cE.Prev))
+		utils.Logger.Debug(fmt.Sprintf("ce <%v>, aS.crnActions[cE.ID]<%v>", i, utils.ToJSON(aS.crnActions[cE.ID])))
 	}
 }
