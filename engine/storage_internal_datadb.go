@@ -39,7 +39,7 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB b
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
-			Clone:     true, // cloning is mandatory for databases
+			Clone:     false, // cloning is mandatory for databases
 		}
 	}
 	if transCacheOpts != nil && transCacheOpts.DumpInterval == 0 && transCacheOpts.RewriteInterval == 0 {
