@@ -28,6 +28,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		return
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, agReq.Opts)
+	utils.Logger.Debug(fmt.Sprintf("cgrEv <%v>", utils.ToJSON(cgrEv)))
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuthorize,

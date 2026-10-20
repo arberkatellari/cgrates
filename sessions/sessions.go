@@ -52,7 +52,8 @@ func (sS *SessionS) PopulateCtx(ctx *context.Context) {
 
 // OnBiJSONConnect handles new client connections.
 func (sS *SessionS) OnBiJSONConnect(c birpc.ClientConnector) {
-	sS.sBiRPCClients.OnBiJSONConnect(c, sS.cgrCfg.SessionSCfg().ClientProtocol)
+	sS.sBiRPCClients.OnBiJSONConnect(c, sS.cgrCfg.SessionSCfg().ClientProtocol,
+		sS.cgrCfg.GeneralCfg().NodeID)
 }
 
 // OnBiJSONDisconnect handles client disconnects.
@@ -1622,6 +1623,7 @@ func (sS *SessionS) restoreSessions(sessions []*Session) {
 			sS.initSessionDebitLoops(s)
 			sS.registerSession(s, false)
 			if ev, has := s.EventStart[utils.RequestType]; has && ev.(string) == utils.MetaSy {
+				utils.Logger.Debug("restoreSessions " + utils.MetaSy + utils.Underline + s.EventStart[utils.OriginID].(string))
 				var rply string // will always reply with OK
 				if err := sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
 					utils.ThresholdSv1StoreClientConnID,
@@ -4329,6 +4331,7 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(ctx *context.Context,
 // BiRPCv1RegisterInternalBiJSONConn will register the client for a bidirectional comunication
 func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(ctx *context.Context,
 	connID string, reply *string) error {
+	utils.Logger.Debug("BiRPCv1RegisterInternalBiJSONConn connID " + connID)
 	sS.sBiRPCClients.RegisterIntBiJConn(ctx.Client,
 		utils.FirstNonEmpty(connID, sS.cgrCfg.GeneralCfg().NodeID),
 		sS.cgrCfg.SessionSCfg().ClientProtocol)
@@ -4921,7 +4924,7 @@ func (sS *SessionS) storeSessions() (sessStored int, err error) {
 
 // BiRPCv1BackupActiveSessions will store all active sessions in dataDB and reply with the amount of sessions it stored
 func (sS *SessionS) BiRPCv1BackupActiveSessions(ctx *context.Context,
-	args string, reply *int) error {
+	_ string, reply *int) error {
 	if sessCount, err := sS.storeSessions(); err != nil {
 		return err
 	} else {
@@ -4937,20 +4940,21 @@ func (sS *SessionS) BiRPCv1ThresholdNotify(ctx *context.Context,
 	ssMp := sS.aSessions // reference it so we don't overwrite the new map without protection
 	ssMux.RLock()
 	defer ssMux.RUnlock()
-	if s, hasCGRID := ssMp[cgrID]; hasCGRID {
-		clnt := sS.sBiRPCClients.BiJClnt(s.ClientConnID) // get client from Session ClientConnID
-		if clnt == nil {
-			return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-				utils.AgentV1SpendingStatusNotification, s.ClientConnID)
-		}
-		var rply string
-		if err = clnt.Conn().Call(ctx, utils.AgentV1SpendingStatusNotification, s.asCGREvents()[0], &rply); err != nil {
-			return
-		}
-	} else {
+	s, hasCGRID := ssMp[cgrID]
+	if !hasCGRID {
 		utils.Logger.Warning(fmt.Sprintf("<SessionS> ThresholdNotify could not find session with CGRID <%s>", cgrID))
 		return utils.ErrNotFound
 	}
-	*rply = utils.OK
-	return
+	// get client from Session ClientConnID
+	if clnt := sS.sBiRPCClients.BiJClnt(s.ClientConnID); clnt != nil {
+		utils.Logger.Debug("s.ClientConnID " + s.ClientConnID)
+		return clnt.Conn().Call(ctx, utils.AgentV1SpendingStatusNotification, s.asCGREvents()[0], rply)
+	}
+	// try to get client from engine NodeID if failed from ClientConnID (happens when restoring sessions)
+	if clnt := sS.sBiRPCClients.BiJClnt(sS.cgrCfg.GeneralCfg().NodeID); clnt != nil {
+		utils.Logger.Debug("engine NodeID " + sS.cgrCfg.GeneralCfg().NodeID)
+		return clnt.Conn().Call(ctx, utils.AgentV1SpendingStatusNotification, s.asCGREvents()[0], rply)
+	}
+	return fmt.Errorf("couldn't find BiRPC client with connID %s to call <%s>, error <%v>",
+		s.ClientConnID, utils.AgentV1SpendingStatusNotification, err)
 }

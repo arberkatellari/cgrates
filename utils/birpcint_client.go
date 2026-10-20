@@ -55,12 +55,23 @@ func (b *BiJClient) Conn() birpc.ClientConnector {
 }
 
 // OnBiJSONConnect handles new client connections.
-func (s *ServiceBiRPCClients) OnBiJSONConnect(c birpc.ClientConnector, clientProtocol float64) {
-	nodeID := UUIDSha1Prefix() // connection identifier, should be later updated as login procedure
+func (s *ServiceBiRPCClients) OnBiJSONConnect(c birpc.ClientConnector, clientProtocol float64, nodeID string) {
+	hashID := UUIDSha1Prefix() // connection identifier, should be later updated as login procedure
+	Logger.Debug("start OnBiJSONConnect nodeID " + hashID)
 	s.biJMux.Lock()
-	s.biJClnts[c] = nodeID
-	s.biJIDs[nodeID] = &BiJClient{conn: c, proto: clientProtocol}
+	s.biJClnts[c] = hashID
+	s.biJIDs[hashID] = &BiJClient{conn: c, proto: clientProtocol}
+	if nodeID != EmptyString {
+		if _, has := s.biJIDs[nodeID]; has {
+			Logger.Debug("OOOOOOOOOOOOOOOOOOO has client for Node ID " + nodeID)
+			s.biJIDs[nodeID] = &BiJClient{conn: c, proto: clientProtocol}
+		} else {
+			Logger.Debug("XXXXXXXXXXXXXXXXXXX doesnt have client for Node ID " + nodeID + " adding it")
+			s.biJIDs[nodeID] = &BiJClient{conn: c, proto: clientProtocol}
+		}
+	}
 	s.biJMux.Unlock()
+	Logger.Debug("finish putting nodeid to OnBiJSONConnect map " + hashID)
 }
 
 // OnBiJSONDisconnect handles client disconnects.

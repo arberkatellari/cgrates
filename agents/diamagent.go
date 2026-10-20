@@ -623,6 +623,7 @@ func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
 				utils.DiameterAgent, remoteAddr))
 			continue
 		}
+		utils.Logger.Debug(fmt.Sprintf("handling conn localAddr <%v>, remoteAddr <%v>, meta.OriginHost <%v>, meta.OriginRealm <%v>", localAddr, remoteAddr, meta.OriginHost, meta.OriginRealm))
 		da.peersLck.Lock()
 		da.peers[remoteAddr] = c
 		da.peersLck.Unlock()
@@ -778,7 +779,8 @@ func (*DiameterAgent) V1WarnDisconnect(*context.Context, map[string]any, *string
 }
 
 // V1SpendingStatusNotification creates and sends SNR to diameter agent
-func (da *DiameterAgent) V1SpendingStatusNotification(ctx *context.Context, cgrEv *utils.CGREvent, reply *string) (err error) {
+func (da *DiameterAgent) V1SpendingStatusNotification(_ *context.Context, cgrEv *utils.CGREvent, reply *string) (err error) {
+	utils.Logger.Debug(fmt.Sprintf("cgrEv.Event <%v>", cgrEv.Event))
 	ssID, has := cgrEv.Event[utils.OriginID]
 	if !has {
 		utils.Logger.Info(
@@ -786,19 +788,63 @@ func (da *DiameterAgent) V1SpendingStatusNotification(ctx *context.Context, cgrE
 				utils.DiameterAgent, utils.ToJSON(cgrEv.Event)))
 		return utils.NewErrMandatoryIeMissing(utils.OriginID)
 	}
-	return da.sendSNR(ssID.(string), reply)
+	originHost, has := cgrEv.Event[utils.OriginHost]
+	if !has {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> cannot send SNR, missing OriginHost in event: %s",
+				utils.DiameterAgent, utils.ToJSON(cgrEv.Event)))
+		return utils.NewErrMandatoryIeMissing(utils.OriginHost)
+	}
+	originRealm, has := cgrEv.Event[utils.OriginRealm]
+	if !has {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> cannot send SNR, missing OriginRealm in event: %s",
+				utils.DiameterAgent, utils.ToJSON(cgrEv.Event)))
+		return utils.NewErrMandatoryIeMissing(utils.OriginRealm)
+	}
+	return da.sendSNR(ssID.(string), originHost.(string), originRealm.(string), reply)
 }
 
 // sendSNR will get the diameter PCRF data from cache and send the Spending Status Notification Request to it based on *snr template
-func (da *DiameterAgent) sendSNR(originID string, reply *string) (err error) {
+func (da *DiameterAgent) sendSNR(originID, originHost, originRealm string, reply *string) (err error) {
+	var conn diam.Conn // the first connection matching OriginHost and OriginRealm
 	msg, has := engine.Cache.Get(utils.CacheDiameterMessages, utils.MetaSNR+originID)
 	if !has {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> cannot retrieve message from cache with OriginID: <%s>",
-				utils.DiameterAgent, originID))
-		return utils.ErrMandatoryIeMissing
+		// if not found in cache, try to get the conection from registered peers using OriginHost and OriginRealm
+		da.peersLck.Lock()
+		for _, c := range da.peers {
+			meta, ok := smpeer.FromContext(c.Context()) // this will get the OriginHost and OriginRealm that were used to create the client connection
+			if ok &&
+				string(meta.OriginHost) == originHost &&
+				string(meta.OriginRealm) == originRealm {
+				conn = c
+				break
+			}
+		}
+		da.peersLck.Unlock()
+		if conn == nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> could't retrieve a peer conection from OriginID <%s>, OriginHost <%v> and OriginRealm <%v>",
+					utils.DiameterAgent, originID, originHost, originRealm))
+			return utils.ErrMandatoryIeMissing
+		}
 	}
-	dmd := msg.(*diamMsgData)
+	dmd := &diamMsgData{
+		c: conn,
+		m: &diam.Message{}, // supply the message with the mandatory fields of *snr, able to be taken from the session event
+		vars: &utils.DataNode{
+			Type: utils.NMMapType,
+			Map: map[string]*utils.DataNode{
+				utils.OriginHost:  utils.NewLeafNode(da.cgrCfg.DiameterAgentCfg().OriginHost), // used in templates
+				utils.OriginRealm: utils.NewLeafNode(da.cgrCfg.DiameterAgentCfg().OriginRealm),
+				utils.ProductName: utils.NewLeafNode(da.cgrCfg.DiameterAgentCfg().ProductName),
+				utils.RemoteHost:  utils.NewLeafNode(conn.RemoteAddr().String()),
+			},
+		},
+	} // use the peer connection if original message wasnt found in cache
+	if msg != nil {
+		dmd = msg.(*diamMsgData)
+	}
 	if notifier, ok := dmd.c.(diam.CloseNotifier); ok {
 		go func() {
 			<-notifier.CloseNotify()

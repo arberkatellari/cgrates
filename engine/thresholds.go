@@ -373,7 +373,7 @@ func (tS *ThresholdService) Shutdown() {
 
 // OnBiJSONConnect handles new client connections.
 func (tS *ThresholdService) OnBiJSONConnect(c birpc.ClientConnector) {
-	tS.sBiRPCClients.OnBiJSONConnect(c, 0) // clientProtocol is not used for thresholds cases
+	tS.sBiRPCClients.OnBiJSONConnect(c, 0, utils.EmptyString) // clientProtocol is not used for thresholds cases
 }
 
 // OnBiJSONDisconnect handles client disconnects

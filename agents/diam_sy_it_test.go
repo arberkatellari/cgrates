@@ -47,7 +47,7 @@ cgrates.org,data,itsyscom,,RP_1001,`,
 			utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
 RP_1001,DR_DATA,*any,10`,
 		},
-		// LogBuffer: &bytes.Buffer{},
+		LogBuffer: &bytes.Buffer{},
 	}
 	switch *utils.DBType {
 	case utils.MetaInternal:
@@ -69,13 +69,13 @@ RP_1001,DR_DATA,*any,10`,
 	default:
 		t.Fatal("unsupported dbtype value")
 	}
-	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+	t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	client, cfg := ng.Run(t)
 
 	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 
 	// Start monitoring SL
-	diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+	diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -182,7 +182,8 @@ RP_1001,DR_DATA,*any,10`,
 		t.Errorf("expected <%v>\nreceived\n<%v>", utils.ToJSON(expTp), utils.ToJSON(tp))
 	}
 
-	diamClientRo, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+	// CCR
+	diamClientRo, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -411,6 +412,7 @@ RP_1001,DR_DATA,*any,10`,
 		close(snaSent)
 	}()
 
+	// CCR-U
 	ccrU := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccrU.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(ccrOriginID))
 	ccrU.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
@@ -612,6 +614,7 @@ RP_1001,DR_DATA,*any,10`,
 		t.Errorf("expected <%v>\nreceived\n<%v>", utils.ToJSON(expTp), utils.ToJSON(tp))
 	}
 
+	// CCR-T
 	ccrT := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccrT.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(ccrOriginID))
 	ccrT.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
@@ -784,7 +787,7 @@ cgrates.org,data,itsyscom,,RP_1001,`,
 			utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
 RP_1001,DR_DATA,*any,10`,
 		},
-		// LogBuffer: &bytes.Buffer{},
+		LogBuffer: &bytes.Buffer{},
 	}
 	switch *utils.DBType {
 	case utils.MetaInternal:
@@ -806,13 +809,14 @@ RP_1001,DR_DATA,*any,10`,
 	default:
 		t.Fatal("unsupported dbtype value")
 	}
-	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	client, cfg := ng.Run(t)
-
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	engine.WaitForService(t, ctx, client, utils.SessionSv1)
 	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 
 	// Start monitoring SL
-	diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+	diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -922,14 +926,17 @@ RP_1001,DR_DATA,*any,10`,
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
+	fmt.Println(ng.LogBuffer)
+	ng.LogBuffer = &bytes.Buffer{}
+	t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	ng.PreserveDataDB = true
 	client, cfg = ng.Run(t)
-	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
-	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	ctx, cancel = context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 	engine.WaitForService(t, ctx, client, utils.SessionSv1)
+	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service since its waiting on sessions
 
-	diamClientRo, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+	diamClientRo, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -1131,31 +1138,31 @@ RP_1001,DR_DATA,*any,10`,
 
 	// receive SNR
 	// unfinished , SNR cant recover from engine shutdown
-	// 	reply = diamClientSy.ReceivedMessage(2 * time.Second)
-	// 	if reply == nil {
-	// 		t.Fatal("Received empty reply")
-	// 	} else {
-	// 		expected := fmt.Sprintf(`Spending-Status-Notification-Request (SNR)
-	// %s
-	// 	Session-Id {Code:263,Flags:0x40,Length:16,VendorId:0,Value:UTF8String{%s},Padding:1}
-	// 	Origin-Host {Code:264,Flags:0x40,Length:16,VendorId:0,Value:DiameterIdentity{CGR-DA},Padding:2}
-	// 	Origin-Realm {Code:296,Flags:0x40,Length:20,VendorId:0,Value:DiameterIdentity{cgrates.org},Padding:1}
-	// 	Destination-Realm {Code:283,Flags:0x40,Length:24,VendorId:0,Value:DiameterIdentity{dr-cgrates.org},Padding:2}
-	// 	Destination-Host {Code:293,Flags:0x40,Length:20,VendorId:0,Value:DiameterIdentity{CGR-DA-DH},Padding:3}
-	// 	Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{16777302}}
-	// 	Policy-Counter-Status-Report {Code:2903,Flags:0xc0,Length:96,VendorId:10415,Value:Grouped{
-	// 		Policy-Counter-Identifier {Code:2901,Flags:0xc0,Length:20,VendorId:10415,Value:UTF8String{Monthly},Padding:1},
-	// 		Policy-Counter-Status {Code:2902,Flags:0xc0,Length:20,VendorId:10415,Value:UTF8String{512KBPS},Padding:1},
-	// 		Pending-Policy-Counter-Information {Code:2905,Flags:0xc0,Length:44,VendorId:10415,Value:Grouped{
-	// 			Policy-Counter-Status {Code:2902,Flags:0xc0,Length:16,VendorId:10415,Value:UTF8String{30GB},Padding:0},
-	// 			Pending-Policy-Counter-Change-Time {Code:2906,Flags:0xc0,Length:16,VendorId:10415,Value:Time{%v}},
-	// 		}}
-	// 	}}
-	// `, reply.Header, syOriginID, time.Time(reply.AVP[6].Data.(*diam.GroupedAVP).AVP[2].Data.(*diam.GroupedAVP).AVP[1].Data.(datatype.Time)))
-	// 		if expected != reply.String() {
-	// 			t.Errorf("expected \n<%v>, \nreceived \n<%v>", expected, reply.String())
-	// 		}
-	// 	}
+	reply = diamClientSy.ReceivedMessage(2 * time.Second)
+	if reply == nil {
+		t.Fatal("Received empty reply")
+	} else {
+		expected := fmt.Sprintf(`Spending-Status-Notification-Request (SNR)
+	%s
+		Session-Id {Code:263,Flags:0x40,Length:16,VendorId:0,Value:UTF8String{%s},Padding:1}
+		Origin-Host {Code:264,Flags:0x40,Length:16,VendorId:0,Value:DiameterIdentity{CGR-DA},Padding:2}
+		Origin-Realm {Code:296,Flags:0x40,Length:20,VendorId:0,Value:DiameterIdentity{cgrates.org},Padding:1}
+		Destination-Realm {Code:283,Flags:0x40,Length:24,VendorId:0,Value:DiameterIdentity{dr-cgrates.org},Padding:2}
+		Destination-Host {Code:293,Flags:0x40,Length:20,VendorId:0,Value:DiameterIdentity{CGR-DA-DH},Padding:3}
+		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{16777302}}
+		Policy-Counter-Status-Report {Code:2903,Flags:0xc0,Length:96,VendorId:10415,Value:Grouped{
+			Policy-Counter-Identifier {Code:2901,Flags:0xc0,Length:20,VendorId:10415,Value:UTF8String{Monthly},Padding:1},
+			Policy-Counter-Status {Code:2902,Flags:0xc0,Length:20,VendorId:10415,Value:UTF8String{512KBPS},Padding:1},
+			Pending-Policy-Counter-Information {Code:2905,Flags:0xc0,Length:44,VendorId:10415,Value:Grouped{
+				Policy-Counter-Status {Code:2902,Flags:0xc0,Length:16,VendorId:10415,Value:UTF8String{30GB},Padding:0},
+				Pending-Policy-Counter-Change-Time {Code:2906,Flags:0xc0,Length:16,VendorId:10415,Value:Time{%v}},
+			}}
+		}}
+	`, reply.Header, syOriginID, time.Time(reply.AVP[6].Data.(*diam.GroupedAVP).AVP[2].Data.(*diam.GroupedAVP).AVP[1].Data.(datatype.Time)))
+		if expected != reply.String() {
+			t.Errorf("expected \n<%v>, \nreceived \n<%v>", expected, reply.String())
+		}
+	}
 
 	// Change session policy subscription
 	slri := diam.NewRequest(diam.SpendingLimit, 16777302, nil)
@@ -1178,7 +1185,7 @@ RP_1001,DR_DATA,*any,10`,
 		}})
 	// t.Log("sendingg msg: ", slri.PrettyDump())
 	// reopen connection with client after we shutdown engine
-	diamClientSy, err = NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+	diamClientSy, err = NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -1260,15 +1267,15 @@ RP_1001,DR_DATA,*any,10`,
 
 	// Send SNA
 	// unfinished
-	// sna := diam.NewRequest(SSN, 16777302, nil)
-	// sna.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(syOriginID))
-	// sna.NewAVP(avp.ResultCode, avp.Mbit, 0, datatype.Unsigned32(2001))
-	// sna.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
-	// sna.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
-	// // t.Log("sendingg msg: ", sna.PrettyDump())
-	// if err := diamClientSy.SendMessage(sna); err != nil {
-	// 	t.Errorf("failed to send diameter message: %v", err)
-	// }
+	sna := diam.NewRequest(SSN, 16777302, nil)
+	sna.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(syOriginID))
+	sna.NewAVP(avp.ResultCode, avp.Mbit, 0, datatype.Unsigned32(2001))
+	sna.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	sna.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	// t.Log("sendingg msg: ", sna.PrettyDump())
+	if err := diamClientSy.SendMessage(sna); err != nil {
+		t.Errorf("failed to send diameter message: %v", err)
+	}
 
 	ccrT := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccrT.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(ccrOriginID))
@@ -1457,7 +1464,7 @@ RP_1001,DR_DATA,*any,10`,
 	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 
 	// Start monitoring SL
-	diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+	diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -1654,7 +1661,7 @@ RP_1001,DR_DATA,*any,10`,
 
 		time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 		// Start start proper SL session
-		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 			cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 			cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 			cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -1847,7 +1854,7 @@ RP_1001,DR_DATA,*any,10`,
 
 		time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 		// Start SL intermediate session that will error with DIAMETER_UNKNOWN_SESSION_ID
-		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 			cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 			cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 			cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -1940,7 +1947,7 @@ RP_1001,DR_DATA,*any,10`,
 
 		time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 		// Start SL intermediate session that will error with DIAMETER_UNKNOWN_SESSION_ID
-		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 			cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 			cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 			cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -2017,7 +2024,7 @@ RP_1001,DR_DATA,*any,10`,
 
 	// 	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 	// 	// Start start proper SL session
-	// 	diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+	// 	diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 	// 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 	// 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 	// 		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -2092,7 +2099,7 @@ RP_1001,DR_DATA,*any,10`,
 
 		time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 		// Start start proper SL session
-		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 			cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 			cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 			cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -2163,7 +2170,7 @@ RP_1001,DR_DATA,*any,10`,
 }
 
 // test is used to make sure engine doesnt crash on restart when no sessions are backed up
-func TestDiamSyRestartNoSessionsBackup(t *testing.T) {
+func TestDiamSyNoSessionsBackupRestart(t *testing.T) {
 	ng := engine.TestEngine{
 		ConfigJSON: `{
   "general": {
@@ -2434,7 +2441,7 @@ RP_1001,DR_DATA,*any,10`,
 	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 
 	// Start monitoring SL
-	diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+	diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
@@ -2552,7 +2559,7 @@ RP_1001,DR_DATA,*any,10`,
 	defer cancel()
 	engine.WaitForService(t, ctx, client, utils.SessionSv1)
 
-	diamClientRo, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+	diamClientRo, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
 		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
