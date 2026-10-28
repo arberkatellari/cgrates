@@ -3070,7 +3070,16 @@ func syPublish(ub *Account, _ *Action, _ Actions, _ *FilterS, extraData any, _ S
 	if !canCast {
 		return fmt.Errorf("Couldn't cast <extraData> of type <%T> to <thresholdSyConn>", extraData)
 	}
+
 	var rply string
+	if err = thresholdSyConn.thresholdClient.Conn().Call(context.TODO(), utils.SessionSv1Ping,
+		&utils.CGREvent{}, &rply); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf(
+				"<ThresholdS> Call to ping failed with error <%s>", err))
+	}
+	utils.Logger.Debug(fmt.Sprintf("reply from ping <%+v>", rply))
+
 	if err = thresholdSyConn.thresholdClient.Conn().Call(context.TODO(), utils.SessionSv1ThresholdNotify,
 		thresholdSyConn.syConnIDs.CGRID, &rply); err != nil {
 		utils.Logger.Warning(

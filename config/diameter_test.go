@@ -136,7 +136,11 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
 	"diameter_agent": {
 		"enabled": false,											
-		"listen": "127.0.0.1:3868",									
+		"listeners": [
+			{
+				"address": "127.0.0.1:3868"
+			}
+		],
 		"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	
 		"ce_applications": [
 			"Base",

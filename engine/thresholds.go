@@ -373,7 +373,7 @@ func (tS *ThresholdService) Shutdown() {
 
 // OnBiJSONConnect handles new client connections.
 func (tS *ThresholdService) OnBiJSONConnect(c birpc.ClientConnector) {
-	tS.sBiRPCClients.OnBiJSONConnect(c, 0, utils.EmptyString) // clientProtocol is not used for thresholds cases
+	tS.sBiRPCClients.OnBiJSONConnect(c, 0, utils.ThresholdS, tS.cgrcfg.GeneralCfg().NodeID) // clientProtocol is not used for thresholds cases
 }
 
 // OnBiJSONDisconnect handles client disconnects
@@ -568,6 +568,7 @@ func (tS *ThresholdService) getThresholdSyConn(thresholdProfileID string) (*thre
 	defer tS.ccidMux.RUnlock()
 	if syIds, has := tS.clientConnID[thresholdProfileID]; has {
 		clnt := tS.sBiRPCClients.BiJClnt(syIds.ClientConnID)
+		utils.Logger.Debug(fmt.Sprintf("getThresholdSyConn syIds.ClientConnID <%v>", syIds.ClientConnID))
 		if clnt == nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
@@ -798,9 +799,11 @@ func (tS *ThresholdService) BiRPCv1StoreClientConnID(ctx *context.Context,
 	args *utils.SyConnIDs, reply *string) error {
 	time.Sleep(100 * time.Millisecond) // unfinished , OnBijsonConnect finishes putting the clientID in the map after this function is ran
 	tS.ccidMux.Lock()
+	ccID := tS.sBiRPCClients.BiJClntID(ctx.Client)
+	utils.Logger.Debug(fmt.Sprintf(" ccID: <%v>", ccID))
 	tS.clientConnID[args.ThresholdProfileID] = &utils.SyConnIDs{
 		CGRID:        args.CGRID,
-		ClientConnID: tS.sBiRPCClients.BiJClntID(ctx.Client),
+		ClientConnID: ccID,
 	}
 	tS.ccidMux.Unlock()
 	*reply = utils.OK

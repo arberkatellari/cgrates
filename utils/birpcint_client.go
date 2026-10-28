@@ -55,23 +55,14 @@ func (b *BiJClient) Conn() birpc.ClientConnector {
 }
 
 // OnBiJSONConnect handles new client connections.
-func (s *ServiceBiRPCClients) OnBiJSONConnect(c birpc.ClientConnector, clientProtocol float64, nodeID string) {
-	hashID := UUIDSha1Prefix() // connection identifier, should be later updated as login procedure
-	Logger.Debug("start OnBiJSONConnect nodeID " + hashID)
+func (s *ServiceBiRPCClients) OnBiJSONConnect(c birpc.ClientConnector, clientProtocol float64, service, nodeID string) {
+	// hashID := UUIDSha1Prefix() // connection identifier, should be later updated as login procedure
+	Logger.Debug("start OnBiJSONConnect nodeID " + ConcatenatedKey(service, nodeID))
 	s.biJMux.Lock()
-	s.biJClnts[c] = hashID
-	s.biJIDs[hashID] = &BiJClient{conn: c, proto: clientProtocol}
-	if nodeID != EmptyString {
-		if _, has := s.biJIDs[nodeID]; has {
-			Logger.Debug("OOOOOOOOOOOOOOOOOOO has client for Node ID " + nodeID)
-			s.biJIDs[nodeID] = &BiJClient{conn: c, proto: clientProtocol}
-		} else {
-			Logger.Debug("XXXXXXXXXXXXXXXXXXX doesnt have client for Node ID " + nodeID + " adding it")
-			s.biJIDs[nodeID] = &BiJClient{conn: c, proto: clientProtocol}
-		}
-	}
+	s.biJClnts[c] = ConcatenatedKey(service, nodeID)
+	s.biJIDs[ConcatenatedKey(service, nodeID)] = &BiJClient{conn: c, proto: clientProtocol}
 	s.biJMux.Unlock()
-	Logger.Debug("finish putting nodeid to OnBiJSONConnect map " + hashID)
+	Logger.Debug("finish putting nodeid to OnBiJSONConnect map " + ConcatenatedKey(service, nodeID))
 }
 
 // OnBiJSONDisconnect handles client disconnects.
@@ -94,6 +85,7 @@ func (s *ServiceBiRPCClients) RegisterIntBiJConn(c birpc.ClientConnector, nodeID
 
 // biJClnt returns a bidirectional JSON client based on connection ID
 func (s *ServiceBiRPCClients) BiJClnt(connID string) (clnt *BiJClient) {
+	Logger.Debug("getting client for connID: " + connID)
 	if connID == "" {
 		return
 	}
@@ -110,6 +102,7 @@ func (s *ServiceBiRPCClients) BiJClntID(c birpc.ClientConnector) (clntConnID str
 	}
 	s.biJMux.RLock()
 	clntConnID = s.biJClnts[c]
+	Logger.Debug("getting BiJClntID: " + clntConnID)
 	s.biJMux.RUnlock()
 	return
 }

@@ -57,7 +57,11 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	if err != nil {
 		return nil, err
 	}
+	utils.Logger.Debug("======1")
+	utils.Logger.Debug(fmt.Sprintf("srv Diameter <%v>", utils.ToJSON(srv.Methods)))
 	da.ctx = context.WithClient(context.TODO(), srv)
+	utils.Logger.Debug("======2")
+
 	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
 	if len(dictsPath) != 0 {
 		if !cgrCfg.DiameterAgentCfg().DictionariesAppendDefaults {
@@ -115,7 +119,9 @@ type DiameterAgent struct {
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
 func (da *DiameterAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
+	utils.Logger.Debug("======3.1")
 	dSM := da.handlers()
+	utils.Logger.Debug("======3.2")
 	errChan := make(chan error, len(da.cgrCfg.DiameterAgentCfg().Listeners))
 	var activeListeners []net.Listener
 	for _, lstnrCfg := range da.cgrCfg.DiameterAgentCfg().Listeners {
@@ -130,6 +136,7 @@ func (da *DiameterAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 			utils.FirstNonEmpty(srv.Network, utils.TCP),
 			utils.FirstNonEmpty(srv.Addr, ":3868"),
 		)
+		utils.Logger.Debug("======3.3")
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed to bind listener %s: %v", utils.DiameterAgent, lstnrCfg.Address, err))
 			for _, l := range activeListeners {
@@ -138,12 +145,17 @@ func (da *DiameterAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 			return err
 		}
 		activeListeners = append(activeListeners, lsn)
+		utils.Logger.Debug("======3.4")
 		go func(s *diam.Server, l net.Listener) {
+			utils.Logger.Debug("======3.5")
 			errChan <- s.Serve(l)
+			utils.Logger.Debug("======3.6")
 		}(srv, lsn)
 	}
 
+	utils.Logger.Debug("======3.7")
 	go da.handleConns(dSM.HandshakeNotify())
+	utils.Logger.Debug("======3.8")
 
 	go func() {
 		errCh := dSM.ErrorReports()
@@ -614,6 +626,7 @@ func (da *DiameterAgent) sendConnStatusReport(metadata *smpeer.Metadata, status,
 
 // handleConns handles all connections to the agent and registers them for DPR support.
 func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
+	utils.Logger.Debug("======3.7.1")
 	for c := range peers {
 		localAddr, remoteAddr := c.LocalAddr().String(), c.RemoteAddr().String()
 		meta, ok := smpeer.FromContext(c.Context())
@@ -781,57 +794,83 @@ func (*DiameterAgent) V1WarnDisconnect(*context.Context, map[string]any, *string
 // V1SpendingStatusNotification creates and sends SNR to diameter agent
 func (da *DiameterAgent) V1SpendingStatusNotification(_ *context.Context, cgrEv *utils.CGREvent, reply *string) (err error) {
 	utils.Logger.Debug(fmt.Sprintf("cgrEv.Event <%v>", cgrEv.Event))
-	ssID, has := cgrEv.Event[utils.OriginID]
-	if !has {
+	ssID, err := cgrEv.FieldAsString(utils.OriginID)
+	if err != nil {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> cannot send SNR, missing OriginID in event: %s",
 				utils.DiameterAgent, utils.ToJSON(cgrEv.Event)))
 		return utils.NewErrMandatoryIeMissing(utils.OriginID)
 	}
-	originHost, has := cgrEv.Event[utils.OriginHost]
-	if !has {
+	// try to get the diameter client data from cache and send the Spending Status Notification Request to it based on *snr template
+	// msg, has := engine.Cache.Get(utils.CacheDiameterMessages, utils.MetaSNR+ssID)
+	var conn diam.Conn // the first connection matching OriginHost and OriginRealm
+	var dmd *diamMsgData
+	// if !has {
+	// if not found in cache, try to get the conection from registered peers using OriginHost and OriginRealm
+	originHost, err := cgrEv.FieldAsString(utils.OriginHost)
+	if err != nil {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> cannot send SNR, missing OriginHost in event: %s",
 				utils.DiameterAgent, utils.ToJSON(cgrEv.Event)))
 		return utils.NewErrMandatoryIeMissing(utils.OriginHost)
 	}
-	originRealm, has := cgrEv.Event[utils.OriginRealm]
-	if !has {
+	originRealm, err := cgrEv.FieldAsString(utils.OriginRealm)
+	if err != nil {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> cannot send SNR, missing OriginRealm in event: %s",
 				utils.DiameterAgent, utils.ToJSON(cgrEv.Event)))
 		return utils.NewErrMandatoryIeMissing(utils.OriginRealm)
 	}
-	return da.sendSNR(ssID.(string), originHost.(string), originRealm.(string), reply)
-}
+	da.peersLck.Lock()
+	for _, c := range da.peers {
+		meta, ok := smpeer.FromContext(c.Context()) // this will get the OriginHost and OriginRealm that were used to create the client connection
+		utils.Logger.Debug(fmt.Sprintf("GET handling conn localAddr <%v>, remoteAddr <%v>, meta.OriginHost <%v>, meta.OriginRealm <%v>", c.LocalAddr(), c.RemoteAddr(), meta.OriginHost, meta.OriginRealm))
 
-// sendSNR will get the diameter PCRF data from cache and send the Spending Status Notification Request to it based on *snr template
-func (da *DiameterAgent) sendSNR(originID, originHost, originRealm string, reply *string) (err error) {
-	var conn diam.Conn // the first connection matching OriginHost and OriginRealm
-	msg, has := engine.Cache.Get(utils.CacheDiameterMessages, utils.MetaSNR+originID)
-	if !has {
-		// if not found in cache, try to get the conection from registered peers using OriginHost and OriginRealm
-		da.peersLck.Lock()
-		for _, c := range da.peers {
-			meta, ok := smpeer.FromContext(c.Context()) // this will get the OriginHost and OriginRealm that were used to create the client connection
-			if ok &&
-				string(meta.OriginHost) == originHost &&
-				string(meta.OriginRealm) == originRealm {
-				conn = c
-				break
-			}
-		}
-		da.peersLck.Unlock()
-		if conn == nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> could't retrieve a peer conection from OriginID <%s>, OriginHost <%v> and OriginRealm <%v>",
-					utils.DiameterAgent, originID, originHost, originRealm))
-			return utils.ErrMandatoryIeMissing
+		if ok &&
+			string(meta.OriginHost) == originHost &&
+			string(meta.OriginRealm) == originRealm {
+			conn = c
+			break
 		}
 	}
-	dmd := &diamMsgData{
+	da.peersLck.Unlock()
+	if conn == nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> could't retrieve a peer conection from OriginID <%s>, OriginHost <%v> and OriginRealm <%v>",
+				utils.DiameterAgent, ssID, originHost, originRealm))
+		return utils.ErrMandatoryIeMissing
+	}
+
+	appID, err := cgrEv.FieldAsInt32("AuthApplicationId")
+	if err != nil {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> cannot send SNR, missing AuthApplicationId in event: %s",
+				utils.DiameterAgent, utils.ToJSON(cgrEv.Event)))
+		return utils.ErrMandatoryIeMissing
+	}
+	destinationRealm, err := cgrEv.FieldAsString("DestinationRealm")
+	if err != nil {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> cannot send SNR, missing DestinationRealm in event: %s",
+				utils.DiameterAgent, utils.ToJSON(cgrEv.Event)))
+		return utils.ErrMandatoryIeMissing
+	}
+	destinationHost, err := cgrEv.FieldAsString("DestinationHost")
+	if err != nil {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> cannot send SNR, missing DestinationHost in event: %s",
+				utils.DiameterAgent, utils.ToJSON(cgrEv.Event)))
+		return utils.ErrMandatoryIeMissing
+	}
+	sessionMessage := diam.NewRequest(SSN, uint32(appID), da.dictionary)
+	sessionMessage.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(ssID))
+	sessionMessage.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity(originHost))
+	sessionMessage.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity(originRealm))
+	sessionMessage.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity(destinationHost))
+	sessionMessage.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity(destinationRealm))
+	dmd = &diamMsgData{ // use the peer connection if original message wasnt found in cache
 		c: conn,
-		m: &diam.Message{}, // supply the message with the mandatory fields of *snr, able to be taken from the session event
+		m: sessionMessage, // supply the message with the mandatory fields of *snr, able to be taken from the session event
 		vars: &utils.DataNode{
 			Type: utils.NMMapType,
 			Map: map[string]*utils.DataNode{
@@ -839,17 +878,14 @@ func (da *DiameterAgent) sendSNR(originID, originHost, originRealm string, reply
 				utils.OriginRealm: utils.NewLeafNode(da.cgrCfg.DiameterAgentCfg().OriginRealm),
 				utils.ProductName: utils.NewLeafNode(da.cgrCfg.DiameterAgentCfg().ProductName),
 				utils.RemoteHost:  utils.NewLeafNode(conn.RemoteAddr().String()),
+				utils.MetaAppID:   utils.NewLeafNode(uint32(sessionMessage.Header.ApplicationID)),
 			},
 		},
-	} // use the peer connection if original message wasnt found in cache
-	if msg != nil {
-		dmd = msg.(*diamMsgData)
 	}
-	if notifier, ok := dmd.c.(diam.CloseNotifier); ok {
-		go func() {
-			<-notifier.CloseNotify()
-		}()
-	}
+	// }
+	// if msg != nil { // if the message was found in cache, use it to send the SNR
+	// 	dmd = msg.(*diamMsgData)
+	// }
 	aReq := NewAgentRequest(
 		newDADataProvider(dmd.c, dmd.m),
 		dmd.vars, nil, nil, nil, nil,
@@ -858,7 +894,7 @@ func (da *DiameterAgent) sendSNR(originID, originHost, originRealm string, reply
 	if err = aReq.SetFields(da.cgrCfg.TemplatesCfg()[da.cgrCfg.DiameterAgentCfg().SNRTemplate]); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot send SNR with OriginID: <%s>, err: %s",
-				utils.DiameterAgent, originID, err.Error()))
+				utils.DiameterAgent, ssID, err.Error()))
 		return utils.ErrServerError
 	}
 	m := diam.NewRequest(SSN, // SSN is Spending Status Notification command code
@@ -869,41 +905,45 @@ func (da *DiameterAgent) sendSNR(originID, originHost, originRealm string, reply
 		da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot send SNR session with OriginID: <%s>, err: %s",
-				utils.DiameterAgent, originID, err.Error()))
+				utils.DiameterAgent, ssID, err.Error()))
 		return utils.ErrServerError
 	}
 
 	da.sySNRMux.Lock()
-	if _, has := da.sySNR[originID]; !has {
-		da.sySNR[originID] = make(chan struct{}, 1)
-		da.sySNR[originID] <- struct{}{}
+	if _, has := da.sySNR[ssID]; !has {
+		// if this is the first SNR for this session, create the channel so we block other SNRs from being sent until the first one is answered
+		da.sySNR[ssID] = make(chan struct{}, 1)
+		da.sySNR[ssID] <- struct{}{}
 	}
 	da.sySNRMux.Unlock()
 	da.sySNRMux.RLock()
-	<-da.sySNR[originID]
+	<-da.sySNR[ssID] // block until the previous SNR for this session is answered, contune if no other SNR is being sent for this session
 	da.sySNRMux.RUnlock()
 
 	da.sySNAMux.RLock()
-	da.sySNA[originID] = make(chan struct{})
+	da.sySNA[ssID] = make(chan struct{}) // create channel to wait for the SNA to be received for this session
 	da.sySNAMux.RUnlock()
-	if err = writeOnConn(dmd.c, m); err != nil {
+	utils.Logger.Debug(fmt.Sprintf("dmd.c <%v>", dmd.c.RemoteAddr()))
+	utils.Logger.Debug(fmt.Sprintf("m <%v>", m.PrettyDump()))
+	if err = writeOnConn(dmd.c, m); err != nil { // send SNR to the diameter client
 		return utils.ErrServerError
 	}
-
+	utils.Logger.Debug(fmt.Sprintln("after wrote on conn ", ssID))
 	select {
-	case <-da.sySNA[originID]:
+	case <-da.sySNA[ssID]: // wait for the SNA to be received,
+		utils.Logger.Debug(fmt.Sprintln("Got SNA ", ssID))
 		da.sySNRMux.RLock()
-		da.sySNR[originID] <- struct{}{}
+		da.sySNR[ssID] <- struct{}{}
 		da.sySNRMux.RUnlock()
 		*reply = utils.OK
 		return
-	case <-time.After(da.cgrCfg.GeneralCfg().ReplyTimeout):
+	case <-time.After(da.cgrCfg.GeneralCfg().ReplyTimeout): // timeout of not anwered SNA, release the channel and return timeout error
 		da.sySNAMux.Lock()
-		delete(da.sySNA, originID)
+		delete(da.sySNA, ssID)
 		da.sySNAMux.Unlock()
 		utils.Logger.Warning(
-			fmt.Sprintf("<%s> Failed to receive SNA with OriginID: <%s>. Timed out after 15 minutes",
-				utils.DiameterAgent, originID))
+			fmt.Sprintf("<%s> Failed to receive SNA with OriginID: <%s>. Timed out after %v",
+				utils.DiameterAgent, ssID, da.cgrCfg.GeneralCfg().ReplyTimeout))
 		return utils.ErrTimedOut
 	}
 }

@@ -4,6 +4,7 @@
 package services
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -72,6 +73,8 @@ func (smg *SessionService) Start() error {
 	if err != nil {
 		return err
 	}
+	utils.Logger.Debug(fmt.Sprintf("srv sessions <%v>", utils.ToJSON(srv.Methods)))
+
 	smg.sm.PopulateCtx(context.WithClient(context.TODO(), srv))
 	// Restore previuos sessions backup and start backup looping
 	if smg.cfg.SessionSCfg().BackupInterval != 0 {
@@ -85,7 +88,6 @@ func (smg *SessionService) Start() error {
 	smg.connChan <- smg.anz.GetInternalCodec(srv, utils.SessionS)
 	if !smg.cfg.DispatcherSCfg().Enabled {
 		smg.server.RpcRegister(srv)
-
 		// maintain backwards compatibility
 		legacySrv, err := engine.NewService(v1.NewSMGenericV1(smg.sm))
 		if err != nil {

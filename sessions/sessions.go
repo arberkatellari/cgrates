@@ -53,7 +53,7 @@ func (sS *SessionS) PopulateCtx(ctx *context.Context) {
 // OnBiJSONConnect handles new client connections.
 func (sS *SessionS) OnBiJSONConnect(c birpc.ClientConnector) {
 	sS.sBiRPCClients.OnBiJSONConnect(c, sS.cgrCfg.SessionSCfg().ClientProtocol,
-		sS.cgrCfg.GeneralCfg().NodeID)
+		utils.SessionS, sS.cgrCfg.GeneralCfg().NodeID)
 }
 
 // OnBiJSONDisconnect handles client disconnects.
@@ -2593,6 +2593,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			sS.bkpSessionIDsMux.Unlock()
 		}
 
+		utils.Logger.Debug("========B1")
 		timeNow := time.Now()
 		var result string
 		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
@@ -2614,6 +2615,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			sS.terminateSession(s, nil, nil, nil, false)
 			return err
 		}
+		utils.Logger.Debug("========B2")
+
 		var rply string // will always reply with OK
 		if err = sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
 			utils.ThresholdSv1StoreClientConnID,
@@ -2624,6 +2627,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			&rply); err != nil {
 			return utils.NewErrThresholdS(err)
 		}
+		utils.Logger.Debug("========B3")
+
 	} else if args.InitSession {
 		var err error
 		opts := engine.MapEvent(args.APIOpts)
@@ -4945,16 +4950,17 @@ func (sS *SessionS) BiRPCv1ThresholdNotify(ctx *context.Context,
 		utils.Logger.Warning(fmt.Sprintf("<SessionS> ThresholdNotify could not find session with CGRID <%s>", cgrID))
 		return utils.ErrNotFound
 	}
-	// get client from Session ClientConnID
+	utils.Logger.Debug(fmt.Sprintf("all clients <%v>", utils.ToJSON(sS.sBiRPCClients.BiJClientsMap())))
+	// // get client from Session ClientConnID
 	if clnt := sS.sBiRPCClients.BiJClnt(s.ClientConnID); clnt != nil {
 		utils.Logger.Debug("s.ClientConnID " + s.ClientConnID)
 		return clnt.Conn().Call(ctx, utils.AgentV1SpendingStatusNotification, s.asCGREvents()[0], rply)
 	}
 	// try to get client from engine NodeID if failed from ClientConnID (happens when restoring sessions)
-	if clnt := sS.sBiRPCClients.BiJClnt(sS.cgrCfg.GeneralCfg().NodeID); clnt != nil {
-		utils.Logger.Debug("engine NodeID " + sS.cgrCfg.GeneralCfg().NodeID)
+	if clnt := sS.sBiRPCClients.BiJClnt(utils.ConcatenatedKey(utils.SessionS, sS.cgrCfg.GeneralCfg().NodeID)); clnt != nil {
+		utils.Logger.Debug("engine NodeID " + utils.ConcatenatedKey(utils.SessionS, sS.cgrCfg.GeneralCfg().NodeID))
 		return clnt.Conn().Call(ctx, utils.AgentV1SpendingStatusNotification, s.asCGREvents()[0], rply)
 	}
-	return fmt.Errorf("couldn't find BiRPC client with connID %s to call <%s>, error <%v>",
-		s.ClientConnID, utils.AgentV1SpendingStatusNotification, err)
+	return fmt.Errorf("couldn't find BiRPC client with connID %s to call <%s>",
+		s.ClientConnID, utils.AgentV1SpendingStatusNotification)
 }

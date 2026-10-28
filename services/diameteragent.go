@@ -67,7 +67,9 @@ func (da *DiameterAgent) start(filterS *engine.FilterS, caps *engine.Caps) error
 	}
 	da.stopChan = make(chan struct{})
 	go func(d *agents.DiameterAgent) {
+		utils.Logger.Debug("======3")
 		lnsErr := d.ListenAndServe(da.stopChan)
+		utils.Logger.Debug("======4")
 		if lnsErr != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s",
 				utils.DiameterAgent, lnsErr))

@@ -62,6 +62,8 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 				agentName, logPrefix, reqProcessor.ID, utils.ToIJSON(cgrEv)))
 	}
 
+	utils.Logger.Debug("======A1 " + agentName)
+
 	replyState := utils.OK
 	switch reqType {
 	default:
@@ -200,6 +202,8 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		agReq.setCGRReply(rply, err)
 	case utils.MetaCDRs: // allow CDR processing
 	}
+
+	utils.Logger.Debug("======A2 " + agentName)
 
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&

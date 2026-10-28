@@ -77,6 +77,8 @@ func (thrs *ThresholdService) Start() error {
 	if err != nil {
 		return err
 	}
+	utils.Logger.Debug(fmt.Sprintf("srv thresholds <%v>", utils.ToJSON(srv.Methods)))
+
 	if !thrs.cfg.DispatcherSCfg().Enabled {
 		thrs.server.RpcRegister(srv)
 	}
